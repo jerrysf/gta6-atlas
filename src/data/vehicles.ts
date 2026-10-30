@@ -1,9 +1,306 @@
 import type { Vehicle } from "@/lib/types";
 
-// No vehicle names have been officially confirmed for GTA VI as of the
-// second trailer. Entries must only be added once they are confirmed by
-// official materials or verified in-game after release.
-export const vehicles: Vehicle[] = [];
+// Vehicles below were spotted in official GTA VI footage (trailers,
+// Extended Look, launch trailer, screenshots). Unless noted, in-game
+// names are community identifications based on returning GTA
+// manufacturers — every entry is marked `community_reported` until
+// verified in the release build. Performance stats are omitted entirely
+// because none have been published.
+const TRAILER_2 = {
+  label: "Rockstar Games — GTA VI Trailer 2 (May 2025)",
+  url: "https://www.rockstargames.com/VI",
+};
+const OFFICIAL_FOOTAGE = {
+  label: "Rockstar Games — official GTA VI footage & screenshots",
+  url: "https://www.rockstargames.com/VI",
+};
+
+export const vehicles: Vehicle[] = [
+  {
+    id: "veh-caracara",
+    slug: "vapid-caracara",
+    name: "Vapid Caracara",
+    category: "cars",
+    manufacturer: "Vapid",
+    description:
+      "Brian Heder's pickup, seen when he visits Jason in the Leonida Keys at the start of Trailer 2. A heavy-duty 4x4 in the style of a Ford Raptor — the community-identified name carries over from GTA Online.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-penumbra",
+    slug: "maibatsu-penumbra",
+    name: "Maibatsu Penumbra",
+    category: "cars",
+    manufacturer: "Maibatsu",
+    description:
+      "Two-door coupe spotted curbside as Jason drives through his neighborhood in Trailer 2 — Eclipse-style compact sports styling. Name is community-identified from the returning GTA model.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-coquette",
+    slug: "invetero-coquette",
+    name: "Invetero Coquette",
+    category: "cars",
+    manufacturer: "Invetero",
+    description:
+      "Blue Corvette-style sports car seen on the highway in Trailer 2. Widely identified by the community as the returning Coquette; in-game name unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-banshee",
+    slug: "bravado-banshee",
+    name: "Bravado Banshee",
+    category: "cars",
+    manufacturer: "Bravado",
+    description:
+      "Viper-style sports car visible in the downtown Vice City traffic shots of Trailer 2. Community-identified as the returning Banshee nameplate.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-vectre",
+    slug: "emperor-vectre",
+    name: "Emperor Vectre",
+    category: "cars",
+    manufacturer: "Emperor",
+    description:
+      "Lexus RC F-style coupe seen among the street scenes in Trailer 2. Community identification pending in-game verification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-growler",
+    slug: "pfister-growler",
+    name: "Pfister Growler",
+    category: "cars",
+    manufacturer: "Pfister",
+    description:
+      "Porsche Cayman-style sports car spotted in Trailer 2's Vice City sequences. Name carried over from the GTA Online model by community consensus.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-phoenix",
+    slug: "imponte-phoenix",
+    name: "Imponte Phoenix",
+    category: "cars",
+    manufacturer: "Imponte",
+    description:
+      "Second-generation Firebird-style muscle car identified in Trailer 2 footage. Returning nameplate unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-gauntlet-hellfire",
+    slug: "bravado-gauntlet-hellfire",
+    name: "Bravado Gauntlet Hellfire",
+    category: "cars",
+    manufacturer: "Bravado",
+    description:
+      "Modern muscle car visible in Trailer 2 street scenes — identified by the community as the widebody Gauntlet variant from GTA Online.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-buffalo-stx",
+    slug: "bravado-buffalo-stx",
+    name: "Bravado Buffalo STX",
+    category: "cars",
+    manufacturer: "Bravado",
+    description:
+      "Charger-style pursuit sedan seen as a police interceptor in Trailer 2's chase footage. Community-identified name; final model name unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-landstalker-xl",
+    slug: "dundreary-landstalker-xl",
+    name: "Dundreary Landstalker XL",
+    category: "cars",
+    manufacturer: "Dundreary",
+    description:
+      "Full-size Navigator-style SUV spotted in Trailer 2. Community-applied name from the returning GTA Online model.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-astron",
+    slug: "pfister-astron",
+    name: "Pfister Astron",
+    category: "cars",
+    manufacturer: "Pfister",
+    description:
+      "Macan-style compact SUV seen in official footage. Community identification pending in-game verification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-police-riot",
+    slug: "brute-police-riot",
+    name: "Brute Police Riot",
+    category: "other",
+    manufacturer: "Brute",
+    description:
+      "Armored SWAT truck rammed into by an explosion-launched sedan during the Trailer 2 pursuit sequence — Leonida law enforcement's heavy response unit.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-packer",
+    slug: "mtl-packer",
+    name: "MTL Packer",
+    category: "other",
+    manufacturer: "MTL",
+    description:
+      "Cab-over semi truck seen hauling through Leonida in official footage. Community-identified returning nameplate.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-avarus",
+    slug: "lcc-avarus",
+    name: "LCC Avarus",
+    category: "motorcycles",
+    manufacturer: "LCC",
+    description:
+      "Red chopper Jason rides past a seaplane in Trailer 2's Keys footage. Community-identified as the returning Avarus nameplate.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-zombie-chopper",
+    slug: "western-zombie-chopper",
+    name: "Western Zombie Chopper",
+    category: "motorcycles",
+    manufacturer: "Western",
+    description:
+      "Harley-style cruiser spotted in official footage. Community-applied name from the returning GTA Online model.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-sanchez",
+    slug: "maibatsu-sanchez",
+    name: "Maibatsu Sanchez",
+    category: "motorcycles",
+    manufacturer: "Maibatsu",
+    description:
+      "Dirt bike seen in backcountry and off-road footage around Mount Kalaga. Community identification; name unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-seashark",
+    slug: "speedophile-seashark",
+    name: "Speedophile Seashark",
+    category: "boats",
+    manufacturer: "Speedophile",
+    description:
+      "Jet ski ridden past yachts off the Leonida coast in Trailer 2 — the returning personal watercraft nameplate by community identification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-marquis",
+    slug: "dinka-marquis",
+    name: "Dinka Marquis",
+    category: "boats",
+    manufacturer: "Dinka",
+    description:
+      "Sailing yacht visible in marina and offshore shots of official footage. Community-identified returning name.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-dinghy",
+    slug: "nagasaki-dinghy",
+    name: "Nagasaki Dinghy",
+    category: "boats",
+    manufacturer: "Nagasaki",
+    description:
+      "Rigid inflatable boat spotted in Keys water footage. Community identification pending in-game verification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-airboat",
+    slug: "airboat",
+    name: "Airboat",
+    category: "boats",
+    description:
+      "Flat-bottomed fan boat skimmed through the Grassrivers wetlands in Trailer 2 — the signature way to cross Leonida's swamps. Model name unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-buzzard",
+    slug: "nagasaki-buzzard",
+    name: "Nagasaki Buzzard Attack Chopper",
+    category: "aircraft",
+    manufacturer: "Nagasaki",
+    description:
+      "Light attack helicopter seen over the Grassrivers in Trailer 2 — the returning Buzzard nameplate by community identification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-police-maverick",
+    slug: "police-maverick",
+    name: "Police Maverick",
+    category: "aircraft",
+    description:
+      "Law-enforcement helicopter visible in pursuit footage across Vice City. Community-identified returning name.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-dodo",
+    slug: "dodo",
+    name: "Dodo",
+    category: "aircraft",
+    description:
+      "Seaplane parked at Brian's Boat Works & Marina and flown over the Leonida Keys in Trailer 2 — a nod to the GTA III-era nameplate by community identification.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "veh-jet",
+    slug: "jet",
+    name: "Jet",
+    category: "aircraft",
+    description:
+      "Commercial airliner seen low over the highway gantries of Vice City in Trailer 2 — FlyUS livery. Model name unconfirmed.",
+    verificationStatus: "community_reported",
+    sourceReferences: [TRAILER_2],
+    lastVerifiedAt: "2026-10-31",
+  },
+];
 
 export const vehicleCategories = [
   { slug: "cars", label: "Cars" },

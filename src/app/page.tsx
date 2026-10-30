@@ -62,6 +62,18 @@ const tools = [
   },
 ];
 
+const tickerItems = [
+  "VICE CITY",
+  "LEONIDA KEYS",
+  "GRASSRIVERS",
+  "PORT GELLHORN",
+  "AMBROSIA",
+  "MOUNT KALAGA",
+  "NOV 19 2026",
+  "LUCIA CAMINOS",
+  "JASON DUVAL",
+];
+
 const databaseLinks = [
   { label: "Vehicles", href: "/vehicles", icon: Wrench, note: "Cars, bikes, boats & aircraft" },
   { label: "Weapons", href: "/weapons", icon: Crosshair, note: "Stats & unlock methods" },
@@ -109,7 +121,7 @@ export default async function HomePage() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <JsonLd data={videoGameJsonLd()} />
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card my-8">
+      <section className="clip-notch relative my-8 overflow-hidden rounded-2xl border border-border bg-card">
         <div
           aria-hidden
           className="absolute inset-0"
@@ -126,11 +138,17 @@ export default async function HomePage() {
               "repeating-linear-gradient(0deg, transparent 0 39px, #35c7d9 39px 40px), repeating-linear-gradient(90deg, transparent 0 39px, #35c7d9 39px 40px)",
           }}
         />
+        <p
+          aria-hidden
+          className="text-outline pointer-events-none absolute -right-8 top-0 select-none font-display text-[22vw] leading-none opacity-40 sm:text-[16vw] lg:text-[13rem]"
+        >
+          VI
+        </p>
         <div className="relative px-6 py-16 sm:px-12 sm:py-24 lg:px-16">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 font-mono text-[11px] font-semibold tracking-[0.2em] text-brand">
             GRAND THEFT AUTO VI · LEONIDA
           </p>
-          <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="max-w-3xl font-display text-5xl uppercase leading-[0.95] tracking-wide sm:text-6xl lg:text-7xl">
             Your Ultimate Guide to{" "}
             <span className="text-brand">Grand Theft Auto VI</span>
           </h1>
@@ -149,15 +167,30 @@ export default async function HomePage() {
             </Button>
           </div>
         </div>
+        <div
+          aria-hidden
+          className="relative border-t border-border/60 bg-background/40 py-3"
+        >
+          <div className="overflow-hidden">
+            <div className="animate-ticker flex w-max gap-8 whitespace-nowrap font-mono text-xs tracking-[0.25em] text-muted-foreground">
+              {[...tickerItems, ...tickerItems].map((item, i) => (
+                <span key={i} className="flex items-center gap-8">
+                  <span>{item}</span>
+                  <span className="text-brand">◆</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Featured tools */}
       <section aria-labelledby="tools-heading" className="py-8">
-        <SectionHeader title="Featured Tools" />
+        <SectionHeader title="Featured Tools" index={1} />
         <div className="grid gap-4 md:grid-cols-3">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="group">
-              <Card className="h-full transition-colors group-hover:border-brand/40">
+              <Card className="lift clip-notch h-full group-hover:border-brand/40">
                 <CardHeader>
                   <span className="flex size-11 items-center justify-center rounded-lg bg-surface-2 text-brand">
                     <tool.icon className="size-5" />
@@ -187,6 +220,7 @@ export default async function HomePage() {
             title="Latest Guides"
             href="/guides"
             linkLabel="All guides"
+            index={2}
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {latest.map((g) => (
@@ -202,6 +236,7 @@ export default async function HomePage() {
           title="Featured Walkthroughs"
           href="/walkthrough"
           linkLabel="Walkthrough hub"
+          index={3}
         />
         <PendingBanner title="Walkthroughs begin at launch — November 19, 2026">
           Full step-by-step mission walkthroughs will be published and verified
@@ -216,11 +251,11 @@ export default async function HomePage() {
 
       {/* Database */}
       <section aria-labelledby="database" className="py-8">
-        <SectionHeader title="Explore the Database" />
+        <SectionHeader title="Explore the Database" index={4} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {databaseLinks.map((d) => (
             <Link key={d.href} href={d.href} className="group">
-              <Card className="h-full transition-colors group-hover:border-brand-cyan/40">
+              <Card className="lift h-full group-hover:border-brand-cyan/40">
                 <CardContent className="flex items-center gap-4 py-5">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-brand-cyan">
                     <d.icon className="size-5" />
@@ -242,7 +277,7 @@ export default async function HomePage() {
       {/* Popular guides */}
       {popular.length > 0 && (
         <section aria-labelledby="popular-guides" className="py-8">
-          <SectionHeader title="Popular Game Guides" href="/guides" />
+          <SectionHeader title="Popular Game Guides" href="/guides" index={5} />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {popular.map((g) => (
               <GuideCard key={g.slug} guide={g} />
@@ -254,7 +289,7 @@ export default async function HomePage() {
       {/* Latest news */}
       {news.length > 0 && (
         <section aria-labelledby="latest-news" className="py-8">
-          <SectionHeader title="Latest News" href="/guides" />
+          <SectionHeader title="Latest News" href="/guides" index={6} />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {news.map((g) => (
               <GuideCard key={g.slug} guide={g} />

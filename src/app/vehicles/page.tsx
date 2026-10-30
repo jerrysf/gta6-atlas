@@ -34,11 +34,11 @@ export default async function VehiclesPage() {
         description="Every car, motorcycle, boat and aircraft in Grand Theft Auto VI — catalogued with performance stats, locations and acquisition methods."
         breadcrumbs={[{ name: "Vehicles", href: "/vehicles" }]}
       />
-      <PendingBanner>
-        No vehicle names or specs have been officially confirmed for GTA VI
-        yet. Trailers show dozens of vehicles, but we won&apos;t list them until
-        they&apos;re officially named or verified in-game. Entries will populate
-        here after release — check back after November 19, 2026.
+      <PendingBanner title="Trailer sightings — names unconfirmed">
+        These vehicles were spotted in official GTA VI footage. In-game names
+        are community identifications based on returning models — none have
+        been officially confirmed, and no performance stats exist yet. Every
+        entry upgrades to verified status after the November 19, 2026 release.
       </PendingBanner>
       <EntityBrowser
         items={items}

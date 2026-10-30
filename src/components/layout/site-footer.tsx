@@ -25,11 +25,11 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2 font-black">
+            <Link href="/" className="flex items-center gap-2 font-display text-lg tracking-wide">
               <span className="flex size-7 items-center justify-center rounded-md bg-brand text-background">
                 <Map className="size-4" strokeWidth={2.5} />
               </span>
-              GTA6 <span className="text-brand">Atlas</span>
+              GTA6 <span className="text-brand">ATLAS</span>
             </Link>
             <p className="text-sm text-muted-foreground">{siteConfig.tagline}</p>
             <div className="flex gap-3 pt-1">

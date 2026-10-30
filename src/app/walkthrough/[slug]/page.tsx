@@ -74,7 +74,7 @@ export default async function MissionPage({
         <article>
           <EntityCover name={m.name} className="rounded-lg border border-border" />
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
               {m.name}
             </h1>
             <VerificationBadge status={m.verificationStatus} />

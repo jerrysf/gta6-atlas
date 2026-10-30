@@ -36,11 +36,12 @@ export default async function WeaponsPage() {
         description="Every confirmed weapon in Grand Theft Auto VI — stats, categories and acquisition methods."
         breadcrumbs={[{ name: "Weapons", href: "/weapons" }]}
       />
-      <PendingBanner>
-        Rockstar hasn&apos;t published official weapon names or stats for GTA VI
-        yet. Once weapons are confirmed — through official materials or in-game
-        verification after launch — they&apos;ll be catalogued here with full
-        stats.
+      <PendingBanner title="Named in official footage — stats pending">
+        Weapons marked <strong>Officially Confirmed</strong> were named
+        on-screen in Rockstar&apos;s Extended Look, trailers or screenshots.
+        Those marked <strong>Community Reported</strong> are visible in footage
+        but unnamed. Damage, accuracy and fire-rate stats will be verified
+        in-game after launch.
       </PendingBanner>
       <EntityBrowser
         items={items}

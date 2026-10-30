@@ -23,7 +23,7 @@ export function guideCategoryLabel(category: Guide["category"]) {
 export function GuideCard({ guide }: { guide: Guide }) {
   return (
     <Link href={`/guides/${guide.slug}`} className="group block h-full">
-      <Card className="h-full transition-colors group-hover:border-brand/40">
+      <Card className="lift h-full group-hover:border-brand/40">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-[11px]">

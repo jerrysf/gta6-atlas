@@ -35,7 +35,7 @@ export function EntityDetail({
         <article>
           <EntityCover name={name} className="rounded-lg border border-border" />
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
               {name}
             </h1>
             <VerificationBadge status={verificationStatus} />

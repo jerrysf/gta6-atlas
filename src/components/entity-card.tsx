@@ -19,7 +19,7 @@ export function EntityCard({
 }) {
   return (
     <Link href={href} className="group block">
-      <Card className="h-full overflow-hidden transition-colors group-hover:border-brand/40">
+      <Card className="lift h-full overflow-hidden group-hover:border-brand/40">
         <EntityCover name={name} />
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">

@@ -37,7 +37,7 @@ export function EntityCover({
         }}
       />
       {icon ?? (
-        <span className="relative text-3xl font-black tracking-tight text-muted-foreground/40">
+        <span className="relative font-display text-5xl tracking-wide text-muted-foreground/40">
           {initials || <MapPin className="size-8" />}
         </span>
       )}

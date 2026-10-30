@@ -75,7 +75,7 @@ export default async function GuidePage({
             </Badge>
             <VerificationBadge status={guide.verificationStatus} />
           </div>
-          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+          <h1 className="mt-4 font-display text-3xl tracking-wide sm:text-5xl">
             {guide.title}
           </h1>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
