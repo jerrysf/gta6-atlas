@@ -1,0 +1,134 @@
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { EntityCover } from "@/components/entity-cover";
+import { PageBreadcrumbs } from "@/components/breadcrumbs";
+import { VerificationBadge } from "@/components/verification-badge";
+import { VERIFICATION_META } from "@/lib/verification";
+import type { SourceReference, VerificationStatus } from "@/lib/types";
+
+export function EntityDetail({
+  breadcrumbs,
+  name,
+  role,
+  description,
+  verificationStatus,
+  facts = [],
+  sources = [],
+  related = [],
+  children,
+}: {
+  breadcrumbs: { name: string; href: string }[];
+  name: string;
+  role?: string;
+  description: string;
+  verificationStatus: VerificationStatus;
+  facts?: { label: string; value: React.ReactNode }[];
+  sources?: SourceReference[];
+  related?: { name: string; href: string; description?: string }[];
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <PageBreadcrumbs items={breadcrumbs} />
+      <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
+        <article>
+          <EntityCover name={name} className="rounded-lg border border-border" />
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+              {name}
+            </h1>
+            <VerificationBadge status={verificationStatus} />
+          </div>
+          {role && (
+            <p className="mt-1 text-sm font-medium text-brand-cyan">{role}</p>
+          )}
+          <p className="mt-4 text-lg leading-relaxed text-foreground/90">
+            {description}
+          </p>
+          {children}
+          {sources.length > 0 && (
+            <section className="mt-10" aria-label="Sources">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Sources
+              </h2>
+              <ul className="space-y-1">
+                {sources.map((s) => (
+                  <li key={s.url}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-brand-cyan underline underline-offset-4"
+                    >
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </article>
+        <aside className="space-y-6">
+          {facts.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                  Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {facts.map((f) => (
+                  <div key={f.label}>
+                    <p className="text-xs text-muted-foreground">{f.label}</p>
+                    <div className="text-sm font-medium">{f.value}</div>
+                  </div>
+                ))}
+                <Separator />
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Verification status
+                  </p>
+                  <p className="text-sm font-medium">
+                    {VERIFICATION_META[verificationStatus].label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {VERIFICATION_META[verificationStatus].description}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {related.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
+                  Related
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {related.map((r) => (
+                    <li key={r.href}>
+                      <Link
+                        href={r.href}
+                        className="text-sm font-medium text-foreground hover:text-brand"
+                      >
+                        {r.name}
+                      </Link>
+                      {r.description && (
+                        <p className="text-xs text-muted-foreground">
+                          {r.description}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}
