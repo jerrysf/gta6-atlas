@@ -4,6 +4,8 @@ export interface OfficialVideo {
   publishedAt: string;
   duration: string;
   note: string;
+  /** YouTube blocks age-restricted videos from playing in embeds. */
+  ageRestricted?: boolean;
 }
 
 /** Official Rockstar Games uploads — linked out to YouTube. */
@@ -21,6 +23,7 @@ export const officialVideos: OfficialVideo[] = [
     publishedAt: "Aug 27, 2026",
     duration: "26:48",
     note: "26 minutes of in-game footage — character swapping, activities, combat and Leonida in detail.",
+    ageRestricted: true,
   },
   {
     youtubeId: "VQRLujxTm3c",

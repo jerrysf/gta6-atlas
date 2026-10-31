@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Play, X } from "lucide-react";
+import { ExternalLink, Play, ShieldAlert, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OfficialVideo } from "@/data/videos";
 
@@ -104,18 +104,57 @@ export function VideoGrid({ videos }: { videos: OfficialVideo[] }) {
               </button>
             </div>
             <div className="aspect-video w-full bg-black">
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${active.youtubeId}?autoplay=1&rel=0`}
-                title={active.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="size-full"
-              />
+              {active.ageRestricted ? (
+                <div className="relative flex size-full flex-col items-center justify-center gap-4 overflow-hidden px-6 text-center">
+                  <Image
+                    src={`https://i.ytimg.com/vi/${active.youtubeId}/hqdefault.jpg`}
+                    alt=""
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 896px"
+                    className="-z-10 object-cover opacity-20 blur-sm"
+                  />
+                  <ShieldAlert className="size-10 text-brand" />
+                  <div>
+                    <p className="font-semibold text-foreground">
+                      Age-restricted on YouTube
+                    </p>
+                    <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                      Rockstar set an age gate on this video, so YouTube only
+                      allows it to play on youtube.com — it can&apos;t be
+                      embedded on other sites.
+                    </p>
+                  </div>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${active.youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-black transition-transform hover:scale-[1.02]"
+                  >
+                    Watch on YouTube <ExternalLink className="size-4" />
+                  </a>
+                </div>
+              ) : (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${active.youtubeId}?autoplay=1&rel=0`}
+                  title={active.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="size-full"
+                />
+              )}
             </div>
-            <div className="border-t border-border px-4 py-2.5">
-              <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-2.5">
+              <p className="min-w-0 truncate text-xs text-muted-foreground">
                 {active.note} · Official upload by Rockstar Games
               </p>
+              <a
+                href={`https://www.youtube.com/watch?v=${active.youtubeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-cyan hover:underline"
+              >
+                YouTube <ExternalLink className="size-3" />
+              </a>
             </div>
           </div>
         </div>

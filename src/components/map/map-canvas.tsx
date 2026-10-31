@@ -164,7 +164,9 @@ export default function MapCanvas({
     const slug = new URLSearchParams(window.location.search).get("focus");
     if (!slug) return;
     const p = points.find((x) => x.slug === slug);
-    if (p) selectPoint(p);
+    if (!p) return;
+    const id = setTimeout(() => selectPoint(p), 0);
+    return () => clearTimeout(id);
   }, [ready, points, selectPoint]);
 
   useEffect(() => {
