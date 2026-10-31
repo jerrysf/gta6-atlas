@@ -5,6 +5,7 @@ import { CalendarDays, Clock, User } from "lucide-react";
 import { getAllGuides, getGuide, getGuideSlugs } from "@/lib/mdx";
 import { MdxRenderer } from "@/components/mdx-renderer";
 import { PageBreadcrumbs } from "@/components/breadcrumbs";
+import { ReadingProgress } from "@/components/reading-progress";
 import { TableOfContents } from "@/components/toc";
 import { FaqSection } from "@/components/faq";
 import { VerificationBadge } from "@/components/verification-badge";
@@ -61,6 +62,7 @@ export default async function GuidePage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <ReadingProgress />
       <JsonLd
         data={articleJsonLd({
           title: guide.title,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { BackToTop } from "@/components/back-to-top";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Analytics } from "@/components/analytics";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </main>
           <SiteFooter />
+          <BackToTop />
         </TooltipProvider>
         <Analytics />
       </body>

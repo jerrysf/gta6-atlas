@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Expand, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import type { MediaItem, MediaSubject } from "@/data/media";
 import { mediaSubjects } from "@/data/media";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 export function MediaGallery({ items }: { items: MediaItem[] }) {
   const [subject, setSubject] = useState<MediaSubject | "all">("all");
   const [auth, setAuth] = useState<"all" | "official" | "reference">("all");
-  const [active, setActive] = useState<MediaItem | null>(null);
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const counts = useMemo(() => {
     const map = new Map<MediaSubject, number>();
@@ -25,10 +26,35 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
       (auth === "all" || i.authenticity === auth),
   );
 
+  const active = activeIdx === null ? null : filtered[activeIdx] ?? null;
+
+  const applySubject = (s: MediaSubject | "all") => {
+    setSubject(s);
+    setActiveIdx(null);
+  };
+  const applyAuth = (a: "all" | "official" | "reference") => {
+    setAuth(a);
+    setActiveIdx(null);
+  };
+
+  const step = useCallback(
+    (dir: 1 | -1) =>
+      setActiveIdx((i) =>
+        i === null || filtered.length === 0
+          ? i
+          : (i + dir + filtered.length) % filtered.length,
+      ),
+    [filtered.length],
+  );
+
+  const open = activeIdx !== null;
   useEffect(() => {
-    if (!active) return;
+    if (!open) return;
+    dialogRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActive(null);
+      if (e.key === "Escape") setActiveIdx(null);
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "ArrowRight") step(1);
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -36,7 +62,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [active]);
+  }, [open, step]);
 
   const pill = (on: boolean) =>
     cn(
@@ -51,7 +77,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => setSubject("all")}
+          onClick={() => applySubject("all")}
           className={pill(subject === "all")}
         >
           All <span className="ml-1 font-mono text-xs">{items.length}</span>
@@ -60,7 +86,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
           <button
             key={s.slug}
             type="button"
-            onClick={() => setSubject(s.slug)}
+            onClick={() => applySubject(s.slug)}
             className={pill(subject === s.slug)}
           >
             {s.label}{" "}
@@ -70,21 +96,21 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
         <span className="mx-1 hidden h-5 w-px bg-border sm:block" />
         <button
           type="button"
-          onClick={() => setAuth("all")}
+          onClick={() => applyAuth("all")}
           className={pill(auth === "all")}
         >
           Any source
         </button>
         <button
           type="button"
-          onClick={() => setAuth("official")}
+          onClick={() => applyAuth("official")}
           className={pill(auth === "official")}
         >
           GTA VI media
         </button>
         <button
           type="button"
-          onClick={() => setAuth("reference")}
+          onClick={() => applyAuth("reference")}
           className={pill(auth === "reference")}
         >
           Reference renders
@@ -96,11 +122,11 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
       </p>
 
       <div className="stagger mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((item) => (
+        {filtered.map((item, idx) => (
           <button
             key={item.id}
             type="button"
-            onClick={() => setActive(item)}
+            onClick={() => setActiveIdx(idx)}
             className="group relative aspect-video overflow-hidden rounded-lg border border-border bg-card text-left transition-colors hover:border-brand-cyan/50"
             aria-label={`View ${item.title}`}
           >
@@ -129,12 +155,40 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
 
       {active && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={active.title}
-          className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
-          onClick={() => setActive(null)}
+          tabIndex={-1}
+          className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4 outline-none backdrop-blur-sm"
+          onClick={() => setActiveIdx(null)}
         >
+          {filtered.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  step(-1);
+                }}
+                aria-label="Previous image"
+                className="absolute left-3 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground transition-colors hover:border-brand hover:text-brand sm:left-6"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  step(1);
+                }}
+                aria-label="Next image"
+                className="absolute right-3 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground transition-colors hover:border-brand hover:text-brand sm:right-6"
+              >
+                <ChevronRight className="size-5" />
+              </button>
+            </>
+          )}
           <figure
             className="w-full max-w-5xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl"
             onClick={(e) => e.stopPropagation()}
@@ -143,9 +197,12 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               <p className="truncate font-display text-lg tracking-wide">
                 {active.title}
               </p>
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                {(activeIdx ?? 0) + 1} / {filtered.length}
+              </span>
               <button
                 type="button"
-                onClick={() => setActive(null)}
+                onClick={() => setActiveIdx(null)}
                 aria-label="Close viewer"
                 className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
               >
