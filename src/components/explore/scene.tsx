@@ -419,8 +419,67 @@ function Stash({
 /* ---------- airboat & camera ---------- */
 
 const SPAWN = { x: 30, z: 150, heading: Math.PI };
+const WALK_SPAWN = { x: 60, z: -10, yaw: Math.PI };
+
+interface DiscoveryRefs {
+  foundRef: RefObject<Set<string>>;
+  ringsRef: RefObject<Set<string>>;
+  stashesRef: RefObject<Set<string>>;
+}
+interface DiscoveryCbs {
+  onDiscover: (slug: string) => void;
+  onRing: (id: string) => void;
+  onStash: (id: string) => void;
+}
+
+function runDiscovery(
+  x: number,
+  z: number,
+  y: number,
+  refs: DiscoveryRefs,
+  cbs: DiscoveryCbs
+) {
+  const found = refs.foundRef.current;
+  if (found) {
+    for (const p of explorePois) {
+      if (found.has(p.slug)) continue;
+      const dx = x - p.x;
+      const dz = z - p.z;
+      if (dx * dx + dz * dz < 42 * 42) {
+        found.add(p.slug);
+        cbs.onDiscover(p.slug);
+      }
+    }
+  }
+  const rings = refs.ringsRef.current;
+  if (rings) {
+    for (const r of exploreRings) {
+      if (rings.has(r.id)) continue;
+      const dx = x - r.x;
+      const dz = z - r.z;
+      const dy = y - r.y;
+      if (dx * dx + dz * dz + dy * dy < 12 * 12) {
+        rings.add(r.id);
+        cbs.onRing(r.id);
+      }
+    }
+  }
+  const stashes = refs.stashesRef.current;
+  if (stashes) {
+    for (const sh of exploreStashes) {
+      if (stashes.has(sh.id)) continue;
+      const dx = x - sh.x;
+      const dz = z - sh.z;
+      if (dx * dx + dz * dz < 26 * 26) {
+        stashes.add(sh.id);
+        cbs.onStash(sh.id);
+      }
+    }
+  }
+}
 
 function Airboat({
+  active,
   keysRef,
   foundRef,
   ringsRef,
@@ -432,6 +491,7 @@ function Airboat({
   onRing,
   onStash,
 }: {
+  active: boolean;
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
   ringsRef: RefObject<Set<string>>;
@@ -465,7 +525,7 @@ function Airboat({
     const dt = Math.min(rawDt, 0.05);
     const st = s.current;
     const k = keysRef.current ?? {};
-    if (pausedRef.current) return;
+    if (pausedRef.current || !active) return;
 
     if (k["KeyR"]) {
       st.x = SPAWN.x;
@@ -551,44 +611,13 @@ function Airboat({
       camera.lookAt(st.x + fx * 16, st.y + 2, st.z + fz * 16);
     }
 
-    // discovery
-    const found = foundRef.current;
-    if (found) {
-      for (const p of explorePois) {
-        if (found.has(p.slug)) continue;
-        const dx = st.x - p.x;
-        const dz = st.z - p.z;
-        if (dx * dx + dz * dz < 42 * 42) {
-          found.add(p.slug);
-          onDiscover(p.slug);
-        }
-      }
-    }
-    const rings = ringsRef.current;
-    if (rings) {
-      for (const r of exploreRings) {
-        if (rings.has(r.id)) continue;
-        const dx = st.x - r.x;
-        const dz = st.z - r.z;
-        const dy = st.y - r.y;
-        if (dx * dx + dz * dz + dy * dy < 12 * 12) {
-          rings.add(r.id);
-          onRing(r.id);
-        }
-      }
-    }
-    const stashes = stashesRef.current;
-    if (stashes) {
-      for (const sh of exploreStashes) {
-        if (stashes.has(sh.id)) continue;
-        const dx = st.x - sh.x;
-        const dz = st.z - sh.z;
-        if (dx * dx + dz * dz < 26 * 26) {
-          stashes.add(sh.id);
-          onStash(sh.id);
-        }
-      }
-    }
+    runDiscovery(
+      st.x,
+      st.z,
+      st.y,
+      { foundRef, ringsRef, stashesRef },
+      { onDiscover, onRing, onStash }
+    );
   });
 
   return (
@@ -642,9 +671,183 @@ function Airboat({
   );
 }
 
+/* ---------- first-person street roam ---------- */
+
+function WalkRig({
+  active,
+  keysRef,
+  foundRef,
+  ringsRef,
+  stashesRef,
+  pausedRef,
+  posRef,
+  onDiscover,
+  onRing,
+  onStash,
+}: {
+  active: boolean;
+  keysRef: RefObject<Record<string, boolean>>;
+  foundRef: RefObject<Set<string>>;
+  ringsRef: RefObject<Set<string>>;
+  stashesRef: RefObject<Set<string>>;
+  pausedRef: RefObject<boolean>;
+  posRef: RefObject<{
+    x: number;
+    z: number;
+    heading: number;
+    speed: number;
+    alt: number;
+  }>;
+  onDiscover: (slug: string) => void;
+  onRing: (id: string) => void;
+  onStash: (id: string) => void;
+}) {
+  const st = useRef({
+    x: WALK_SPAWN.x,
+    z: WALK_SPAWN.z,
+    y: 0,
+    yaw: WALK_SPAWN.yaw,
+    pitch: 0,
+    lift: 0,
+    speed: 0,
+  });
+  const drag = useRef<{ x: number; y: number } | null>(null);
+  const lamp = useRef<THREE.PointLight>(null);
+  useEffect(() => {
+    const cvs = document.querySelector("canvas");
+    if (!cvs) return;
+    const down = (e: PointerEvent) => {
+      drag.current = { x: e.clientX, y: e.clientY };
+      cvs.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      const d = drag.current;
+      if (!d || !active) return;
+      st.current.yaw -= (e.clientX - d.x) * 0.0052;
+      st.current.pitch = THREE.MathUtils.clamp(
+        st.current.pitch - (e.clientY - d.y) * 0.0038,
+        -1.25,
+        1.25
+      );
+      d.x = e.clientX;
+      d.y = e.clientY;
+    };
+    const up = () => {
+      drag.current = null;
+    };
+    cvs.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    return () => {
+      cvs.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+  }, [active]);
+
+  useFrame(({ camera }, rawDt) => {
+    if (!active || pausedRef.current) return;
+    const dt = Math.min(rawDt, 0.05);
+    const w = st.current;
+    const k = keysRef.current ?? {};
+
+    if (k["KeyR"]) {
+      w.x = WALK_SPAWN.x;
+      w.z = WALK_SPAWN.z;
+      w.yaw = WALK_SPAWN.yaw;
+      w.pitch = 0;
+      w.lift = 0;
+      k["KeyR"] = false;
+    }
+
+    // altitude — Space lifts into "aerial view", Shift brings you back down
+    if (k["Space"]) w.lift = Math.min(60, w.lift + dt * 34);
+    else if (k["ShiftLeft"] || k["ShiftRight"])
+      w.lift = Math.max(0, w.lift - dt * 48);
+
+    const flying = w.lift > 0.5;
+    const onWater = terrainHeight(w.x, w.z) < 0.6;
+    const SPEED = flying ? 46 : onWater ? 5.5 : 20;
+
+    const f = { x: Math.sin(w.yaw), z: Math.cos(w.yaw) };
+    const r = { x: Math.sin(w.yaw + Math.PI / 2), z: Math.cos(w.yaw + Math.PI / 2) };
+    let mx = 0;
+    let mz = 0;
+    if (k["KeyW"]) {
+      mx += f.x;
+      mz += f.z;
+    }
+    if (k["KeyS"]) {
+      mx -= f.x;
+      mz -= f.z;
+    }
+    if (k["KeyA"]) {
+      mx += r.x;
+      mz += r.z;
+    }
+    if (k["KeyD"]) {
+      mx -= r.x;
+      mz -= r.z;
+    }
+    const len = Math.hypot(mx, mz);
+    w.speed = len > 0 ? SPEED : 0;
+    if (len > 0) {
+      w.x += (mx / len) * SPEED * dt;
+      w.z += (mz / len) * SPEED * dt;
+      w.x = THREE.MathUtils.clamp(w.x, -480, 480);
+      w.z = THREE.MathUtils.clamp(w.z, -480, 480);
+    }
+
+    const eyeY = terrainHeight(w.x, w.z) + 2.4 + w.lift;
+    w.y += (eyeY - w.y) * Math.min(1, dt * 8);
+
+    camera.position.set(w.x, w.y, w.z);
+    camera.rotation.order = "YXZ";
+    camera.rotation.y = w.yaw + Math.PI;
+    camera.rotation.x = w.pitch;
+    camera.rotation.z = 0;
+
+    if (posRef.current) {
+      posRef.current.x = w.x;
+      posRef.current.z = w.z;
+      posRef.current.heading = w.yaw;
+      posRef.current.speed = w.speed;
+      posRef.current.alt = w.y;
+    }
+
+    // headlamp — keeps street-level view readable at night
+    if (lamp.current) {
+      lamp.current.position.set(
+        w.x + f.x * 4,
+        w.y + 1,
+        w.z + f.z * 4
+      );
+    }
+
+    runDiscovery(
+      w.x,
+      w.z,
+      w.y,
+      { foundRef, ringsRef, stashesRef },
+      { onDiscover, onRing, onStash }
+    );
+  });
+
+  return (
+    <pointLight
+      ref={lamp}
+      color="#cfe6ff"
+      intensity={active ? 60 : 0}
+      distance={70}
+      decay={1.6}
+    />
+  );
+}
+
 /* ---------- exported scene ---------- */
 
 export function ExploreScene({
+  mode,
   found,
   ringsFound,
   stashesFound,
@@ -659,6 +862,7 @@ export function ExploreScene({
   onRing,
   onStash,
 }: {
+  mode: "boat" | "walk";
   found: Set<string>;
   ringsFound: Set<string>;
   keysRef: RefObject<Record<string, boolean>>;
@@ -706,7 +910,20 @@ export function ExploreScene({
       {exploreStashes.map((sh) => (
         <Stash key={sh.id} stash={sh} collected={stashesFound.has(sh.id)} />
       ))}
+      <WalkRig
+        active={mode === "walk"}
+        keysRef={keysRef}
+        foundRef={foundRef}
+        ringsRef={ringsRef}
+        stashesRef={stashesRef}
+        pausedRef={pausedRef}
+        posRef={posRef}
+        onDiscover={onDiscover}
+        onRing={onRing}
+        onStash={onStash}
+      />
       <Airboat
+        active={mode === "boat"}
         keysRef={keysRef}
         foundRef={foundRef}
         ringsRef={ringsRef}

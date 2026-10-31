@@ -289,7 +289,9 @@ const KEY_ROWS: { keys: string; action: string }[] = [
   { keys: "Space", action: "Climb — fly over terrain" },
   { keys: "Shift", action: "Descend" },
   { keys: "R", action: "Reset position" },
+  { keys: "V", action: "Switch fan boat / street roam" },
   { keys: "C", action: "Camera — near / far / survey" },
+  { keys: "Drag", action: "Look around (street roam)" },
   { keys: "M", action: "Engine sound on/off" },
   { keys: "Esc", action: "Pause menu" },
 ];
@@ -302,6 +304,7 @@ export function ExploreGame() {
   const [stashesFound, setStashesFound] = useState<Set<string>>(saved.stashes);
   const [paused, setPaused] = useState(false);
   const [camMode, setCamMode] = useState(0);
+  const [roamMode, setRoamMode] = useState<"boat" | "walk">("boat");
   const [muted, setMuted] = useState(false);
   const [nextTarget, setNextTarget] = useState<{ name: string; dist: number } | null>(null);
   const [splash, setSplash] = useState<{
@@ -356,6 +359,10 @@ export function ExploreGame() {
       }
       if (e.code === "KeyM") {
         setMuted((m) => !m);
+        return;
+      }
+      if (e.code === "KeyV") {
+        setRoamMode((m) => (m === "boat" ? "walk" : "boat"));
         return;
       }
       keysRef.current[e.code] = true;
@@ -508,6 +515,7 @@ export function ExploreGame() {
     <div className="relative h-[calc(100vh-4rem)] min-h-[540px] w-full overflow-hidden bg-[#070d18]">
       {webglOk ? (
         <ExploreScene
+          mode={roamMode}
           found={found}
           ringsFound={ringsFound}
           stashesFound={stashesFound}
@@ -552,7 +560,10 @@ export function ExploreGame() {
             <CompassStrip posRef={posRef} />
           </div>
           <p className="pointer-events-none absolute left-1/2 top-14 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.3em] text-slate-500">
-            {["Chase cam", "Wide cam", "Survey cam"][camMode]} · C
+            {roamMode === "boat"
+              ? `${["Chase cam", "Wide cam", "Survey cam"][camMode]} · C`
+              : "Street roam · drag to look"}
+            {"  ·  V to switch"}
           </p>
 
           {/* top-left mission widget */}
@@ -668,6 +679,12 @@ export function ExploreGame() {
               Reset
             </button>
           </div>
+
+          {roamMode === "walk" && (
+            <div className="pointer-events-none absolute left-1/2 top-20 -translate-x-1/2 rounded bg-black/50 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-cyan-300 backdrop-blur">
+              Street view — drag to look · WASD walk · Space fly
+            </div>
+          )}
 
           {/* center reticle */}
           <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -925,13 +942,28 @@ export function ExploreGame() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => setStarted(true)}
-                className="group mt-6 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 font-display text-xl tracking-widest text-background transition-all hover:shadow-[0_0_35px_-5px_rgba(182,243,74,0.7)]"
-              >
-                <Play className="size-5 fill-current" />
-                START ENGINE
-              </button>
+              <div className="mt-6 grid gap-2 sm:grid-cols-2">
+                <button
+                  onClick={() => {
+                    setRoamMode("boat");
+                    setStarted(true);
+                  }}
+                  className="group flex items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 font-display text-lg tracking-widest text-background transition-all hover:shadow-[0_0_35px_-5px_rgba(182,243,74,0.7)]"
+                >
+                  <Play className="size-5 fill-current" />
+                  FAN BOAT
+                </button>
+                <button
+                  onClick={() => {
+                    setRoamMode("walk");
+                    setStarted(true);
+                  }}
+                  className="group flex items-center justify-center gap-3 rounded-md border border-cyan-400/50 bg-cyan-400/10 px-4 py-3.5 font-display text-lg tracking-widest text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-400/20"
+                >
+                  <Compass className="size-5" />
+                  STREET ROAM
+                </button>
+              </div>
               <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-widest text-slate-500">
                 Fan-made diorama — stylized, not to scale · progress saves
                 locally
