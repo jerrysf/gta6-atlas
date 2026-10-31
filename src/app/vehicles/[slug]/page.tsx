@@ -67,7 +67,11 @@ export default async function VehiclePage({
   const related = vehicles
     .filter((x) => x.category === v.category && x.slug !== v.slug)
     .slice(0, 5)
-    .map((x) => ({ name: x.name, href: `/vehicles/${x.slug}` }));
+    .map((x) => ({
+      name: x.name,
+      href: `/vehicles/${x.slug}`,
+      description: x.basedOn,
+    }));
 
   return (
     <EntityDetail

@@ -24,6 +24,12 @@ export default async function VehiclesPage() {
     href: `/vehicles/${v.slug}`,
     meta: [v.manufacturer, v.basedOn].filter(Boolean).join(" · "),
     category: v.category,
+    tag:
+      v.debut === "new"
+        ? "New in VI"
+        : v.debut === "returning"
+          ? "Returning"
+          : undefined,
     verificationStatus: v.verificationStatus,
   }));
 

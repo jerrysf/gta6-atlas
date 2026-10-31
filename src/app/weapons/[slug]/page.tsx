@@ -45,7 +45,11 @@ export default async function WeaponPage({
   const related = weapons
     .filter((x) => x.category === w.category && x.slug !== w.slug)
     .slice(0, 5)
-    .map((x) => ({ name: x.name, href: `/weapons/${x.slug}` }));
+    .map((x) => ({
+      name: x.name,
+      href: `/weapons/${x.slug}`,
+      description: x.basedOn,
+    }));
 
   return (
     <EntityDetail

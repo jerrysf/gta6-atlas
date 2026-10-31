@@ -10,12 +10,14 @@ export function EntityCard({
   description,
   href,
   meta,
+  tag,
   verificationStatus,
 }: {
   name: string;
   description: string;
   href: string;
   meta?: string;
+  tag?: string;
   verificationStatus?: VerificationStatus;
 }) {
   const slug = href.split("/").pop();
@@ -23,7 +25,14 @@ export function EntityCard({
   return (
     <Link href={href} className="group block">
       <Card className="lift h-full overflow-hidden group-hover:border-brand/40">
-        <EntityCover name={name} image={image} />
+        <div className="relative">
+          <EntityCover name={name} image={image} />
+          {tag && (
+            <span className="absolute right-2 top-2 rounded-sm bg-background/80 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-brand-cyan backdrop-blur">
+              {tag}
+            </span>
+          )}
+        </div>
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-base group-hover:text-brand">

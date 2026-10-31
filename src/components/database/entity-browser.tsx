@@ -22,6 +22,7 @@ export interface BrowserItem {
   href: string;
   meta?: string;
   category?: string;
+  tag?: string;
   verificationStatus?: VerificationStatus;
 }
 
@@ -144,6 +145,7 @@ export function EntityBrowser({
               description={item.description}
               href={item.href}
               meta={item.meta}
+              tag={item.tag}
               verificationStatus={item.verificationStatus}
             />
           ))}
