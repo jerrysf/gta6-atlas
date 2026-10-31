@@ -391,7 +391,13 @@ function Airboat({
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
   ringsRef: RefObject<Set<string>>;
-  posRef: RefObject<{ x: number; z: number; heading: number }>;
+  posRef: RefObject<{
+    x: number;
+    z: number;
+    heading: number;
+    speed: number;
+    alt: number;
+  }>;
   onDiscover: (slug: string) => void;
   onRing: (id: string) => void;
 }) {
@@ -469,6 +475,8 @@ function Airboat({
       posRef.current.x = st.x;
       posRef.current.z = st.z;
       posRef.current.heading = st.heading;
+      posRef.current.speed = st.speed;
+      posRef.current.alt = st.y;
     }
 
     // chase camera
@@ -576,7 +584,13 @@ export function ExploreScene({
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
   ringsRef: RefObject<Set<string>>;
-  posRef: RefObject<{ x: number; z: number; heading: number }>;
+  posRef: RefObject<{
+    x: number;
+    z: number;
+    heading: number;
+    speed: number;
+    alt: number;
+  }>;
   onDiscover: (slug: string) => void;
   onRing: (id: string) => void;
 }) {
