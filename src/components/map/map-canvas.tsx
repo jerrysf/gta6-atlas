@@ -6,6 +6,7 @@ import {
   Marker,
   NavigationControl,
   Popup,
+  setWorkerUrl,
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -90,6 +91,10 @@ export default function MapCanvas({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    // Turbopack can't resolve the worker via import.meta.url — serve the
+    // bundled worker from /public instead.
+    setWorkerUrl("/maplibre-gl-worker.mjs");
 
     const style: StyleSpecification = {
       version: 8,
