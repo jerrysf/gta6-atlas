@@ -19,6 +19,7 @@ const sections = [
     links: [
       { label: "Home", href: "/" },
       { label: "Interactive Map", href: "/map" },
+      { label: "3D Explorer", href: "/explore" },
       { label: "Completion Tracker", href: "/completion" },
       { label: "Launch Timeline", href: "/timeline" },
       { label: "By the Numbers", href: "/facts" },

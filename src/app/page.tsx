@@ -13,6 +13,7 @@ import {
   MapPin,
   Music,
   PawPrint,
+  Gamepad2,
   Users,
   Wrench,
 } from "lucide-react";
@@ -85,6 +86,16 @@ const tools = [
     image: entityImages["bravado-banshee"].url,
     imageAlt: "Bravado Banshee in GTA VI Trailer 2",
     objectPosition: "50% 50%",
+  },
+  {
+    title: "Leonida 3D Explorer",
+    description:
+      "Pilot a fan boat across a stylized 3D diorama — discover 16 real locations from Vice City to the Keys.",
+    href: "/explore",
+    icon: Gamepad2,
+    image: "/explore-preview.png",
+    imageAlt: "Leonida 3D Explorer — fan boat over the Vice City diorama",
+    objectPosition: "50% 75%",
   },
 ];
 
@@ -283,7 +294,7 @@ export default async function HomePage() {
       {/* Featured tools */}
       <section aria-labelledby="tools-heading" className="py-8">
         <SectionHeader title="Featured Tools" index={1} />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="group">
               <Card className="lift clip-notch h-full pt-0 group-hover:border-brand/40">
