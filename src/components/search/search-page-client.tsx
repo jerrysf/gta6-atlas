@@ -69,6 +69,73 @@ export function SearchPageClient({
           : "Type a query to search the site."}
       </p>
 
+      {!query.trim() && (
+        <div className="mt-8 space-y-6">
+          <div>
+            <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Popular searches
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "file size",
+                "price",
+                "Lucia",
+                "Banshee",
+                "Vice City",
+                "alligator",
+                "system requirements",
+                "trailer 2",
+                "Jason",
+                "collectibles",
+              ].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setQuery(s)}
+                  className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Or browse a section
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                { label: "Interactive Map", href: "/map", desc: "47 catalogued points of interest" },
+                { label: "Guides", href: "/guides", desc: "29 editorial guides" },
+                { label: "Vehicle Database", href: "/vehicles", desc: "44 confirmed vehicles" },
+                { label: "Characters", href: "/characters", desc: "9 main characters" },
+                { label: "Media Gallery", href: "/media", desc: "105+ curated images" },
+                { label: "Official Videos", href: "/watch", desc: "4 Rockstar releases" },
+              ].map((s) => (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  className="rounded-lg border border-border bg-card p-3 transition-colors hover:border-brand/40"
+                >
+                  <span className="block text-sm font-medium">{s.label}</span>
+                  <span className="block text-xs text-muted-foreground">{s.desc}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {query.trim() && results.length === 0 && (
+        <div className="mt-8 rounded-lg border border-border bg-card p-6 text-center">
+          <p className="text-sm font-medium">No results for “{query}”</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try a broader term — vehicle names, character names, or topics like
+            “price”, “map” or “release”.
+          </p>
+        </div>
+      )}
+
       <ul className="mt-4 space-y-2">
         {results.map((doc) => (
           <li key={doc.id}>

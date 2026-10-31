@@ -3,8 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { CheckSquare, Map, Menu } from "lucide-react";
-import { siteConfig } from "@/lib/site";
+import {
+  BookOpen,
+  Car,
+  CheckSquare,
+  Clapperboard,
+  Crosshair,
+  Flag,
+  Gem,
+  Home,
+  Image,
+  ListOrdered,
+  Map,
+  MapPin,
+  Menu,
+  Music,
+  PawPrint,
+  Scroll,
+  Search,
+  Timer,
+  Users,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -13,11 +32,46 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const extraLinks = [
-  { label: "Locations", href: "/locations" },
-  { label: "Secrets", href: "/secrets" },
-  { label: "Completion Tracker", href: "/completion", icon: CheckSquare },
+const groups: {
+  label: string;
+  items: { label: string; href: string; icon: typeof Map }[];
+}[] = [
+  {
+    label: "Explore",
+    items: [
+      { label: "Home", href: "/", icon: Home },
+      { label: "Interactive Map", href: "/map", icon: Map },
+      { label: "Walkthroughs", href: "/walkthrough", icon: Scroll },
+      { label: "Completion Tracker", href: "/completion", icon: CheckSquare },
+      { label: "Launch Timeline", href: "/timeline", icon: Timer },
+      { label: "By the Numbers", href: "/facts", icon: Flag },
+    ],
+  },
+  {
+    label: "Database",
+    items: [
+      { label: "Vehicles", href: "/vehicles", icon: Car },
+      { label: "Weapons", href: "/weapons", icon: Crosshair },
+      { label: "Characters", href: "/characters", icon: Users },
+      { label: "Locations", href: "/locations", icon: MapPin },
+      { label: "Collectibles", href: "/collectibles", icon: Gem },
+      { label: "Secrets", href: "/secrets", icon: Gem },
+      { label: "Music & Soundtrack", href: "/music", icon: Music },
+      { label: "Wildlife", href: "/wildlife", icon: PawPrint },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { label: "Guides", href: "/guides", icon: BookOpen },
+      { label: "Media Gallery", href: "/media", icon: Image },
+      { label: "Official Videos", href: "/watch", icon: Clapperboard },
+      { label: "Changelog", href: "/changelog", icon: ListOrdered },
+      { label: "Search", href: "/search", icon: Search },
+    ],
+  },
 ];
 
 export function MobileNav() {
@@ -38,7 +92,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-80 bg-card"
+        className="w-80 overflow-y-auto bg-card"
         aria-label="Site navigation"
       >
         <SheetHeader>
@@ -49,27 +103,50 @@ export function MobileNav() {
             GTA6 Atlas
           </SheetTitle>
         </SheetHeader>
-        <nav aria-label="Mobile" className="mt-6 flex flex-col gap-1">
-          {[...siteConfig.nav, ...extraLinks].map((item) => {
-            const active =
-              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-surface-2 text-brand"
-                    : "text-foreground/80 hover:bg-surface-2 hover:text-foreground"
-                }`}
-                aria-current={active ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav aria-label="Mobile" className="mt-5 space-y-5 pb-8">
+          {groups.map((group) => (
+            <div key={group.label}>
+              <p className="mb-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+                {group.label}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const active =
+                    item.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                        active
+                          ? "bg-surface-2 text-brand"
+                          : "text-foreground/80 hover:bg-surface-2 hover:text-foreground",
+                      )}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <item.icon
+                        className={cn(
+                          "size-4 shrink-0",
+                          active ? "text-brand" : "text-muted-foreground",
+                        )}
+                      />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
+        <div className="border-t border-border px-3 pt-4 pb-2">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/60">
+            GTA VI launches Nov 19, 2026 · Independent fan site
+          </p>
+        </div>
       </SheetContent>
     </Sheet>
   );

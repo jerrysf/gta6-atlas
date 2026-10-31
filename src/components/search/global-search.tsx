@@ -125,7 +125,7 @@ export function GlobalSearch() {
           <DialogDescription className="sr-only">
             Search guides, database entries, and pages.
           </DialogDescription>
-          <div className="flex items-center gap-2 border-b border-border px-4">
+          <div className="flex items-center gap-2 border-b border-border px-4 pr-10">
             <Search className="size-4 shrink-0 text-muted-foreground" />
             <Input
               autoFocus
@@ -161,11 +161,26 @@ export function GlobalSearch() {
             )}
             {!query && (
               <li className="p-4 text-sm text-muted-foreground">
-                Type to search across guides, database entries and pages. Use{" "}
-                <kbd className="rounded border border-border bg-surface-2 px-1 text-[10px]">
-                  Ctrl/⌘ K
-                </kbd>{" "}
-                anywhere to open search.
+                <p>
+                  Type to search guides, database entries and pages.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {["Lucia", "Banshee", "Trailer 2", "file size", "Vice City", "alligator"].map(
+                    (s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setQuery(s);
+                          setActive(0);
+                        }}
+                        className="rounded-full border border-border bg-surface-2/60 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-brand/40 hover:text-brand"
+                      >
+                        {s}
+                      </button>
+                    ),
+                  )}
+                </div>
               </li>
             )}
             {results.map((doc, i) => (
