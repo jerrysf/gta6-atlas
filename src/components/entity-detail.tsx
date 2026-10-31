@@ -122,7 +122,7 @@ export function EntityDetail({
             </div>
           )}
           {role && (
-            <p className="mt-1 text-sm font-medium text-brand-cyan">{role}</p>
+            <p className="mt-1 text-sm font-medium capitalize text-brand-cyan">{role}</p>
           )}
           <p className="mt-4 text-lg leading-relaxed text-foreground/90">
             {description}

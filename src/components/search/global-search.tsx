@@ -116,9 +116,22 @@ export function GlobalSearch() {
         size="icon"
         aria-label="Search (Ctrl+K)"
         onClick={() => setOpen(true)}
+        className="sm:hidden"
       >
         <Search className="size-5" />
       </Button>
+      <button
+        type="button"
+        aria-label="Search (Ctrl+K)"
+        onClick={() => setOpen(true)}
+        className="hidden h-9 items-center gap-2 rounded-md border border-border bg-surface-2/50 px-3 text-sm text-muted-foreground transition-colors hover:border-brand/40 hover:text-foreground sm:flex"
+      >
+        <Search className="size-4" />
+        <span className="hidden md:inline">Search…</span>
+        <kbd className="ml-1 hidden rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground lg:inline">
+          ⌘K
+        </kbd>
+      </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="top-[15%] max-w-xl translate-y-0 gap-0 overflow-hidden p-0 sm:top-[20%]">
           <DialogTitle className="sr-only">Search GTA6 Atlas</DialogTitle>

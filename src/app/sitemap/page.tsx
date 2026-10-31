@@ -20,7 +20,19 @@ const sections = [
       { label: "Home", href: "/" },
       { label: "Interactive Map", href: "/map" },
       { label: "Completion Tracker", href: "/completion" },
+      { label: "Launch Timeline", href: "/timeline" },
+      { label: "By the Numbers", href: "/facts" },
+      { label: "Changelog", href: "/changelog" },
       { label: "Search", href: "/search" },
+    ],
+  },
+  {
+    title: "Content",
+    links: [
+      { label: "Guides", href: "/guides" },
+      { label: "Media Gallery", href: "/media" },
+      { label: "Official Videos", href: "/watch" },
+      { label: "RSS Feed", href: "/feed.xml" },
     ],
   },
   {
@@ -40,6 +52,8 @@ const sections = [
       { label: "Locations", href: "/locations" },
       { label: "Collectibles", href: "/collectibles" },
       { label: "Secrets", href: "/secrets" },
+      { label: "Music & Soundtrack", href: "/music" },
+      { label: "Wildlife", href: "/wildlife" },
     ],
   },
   {
