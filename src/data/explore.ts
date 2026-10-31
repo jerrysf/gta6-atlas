@@ -75,6 +75,24 @@ export const exploreRings: ExploreRing[] = [
   { id: "r8", x: -30, z: -140, y: 16, hint: "North bay" },
 ];
 
+export interface ExploreStash {
+  id: string;
+  x: number;
+  z: number;
+  label: string;
+}
+
+/** Hidden supply stashes — deliberately NOT shown on the minimap or with
+ * beacons. You have to actually explore to find them. */
+export const exploreStashes: ExploreStash[] = [
+  { id: "s1", x: -190, z: -435, label: "Kalaga backcountry" },
+  { id: "s2", x: -160, z: 295, label: "Keys backwater" },
+  { id: "s3", x: -150, z: 258, label: "Grassrivers deep swamp" },
+  { id: "s4", x: -318, z: -215, label: "Port Gellhorn docks" },
+  { id: "s5", x: 92, z: -18, label: "Vice City rooftops" },
+  { id: "s6", x: -220, z: -105, label: "Raceway infield" },
+];
+
 /** Terrain height at a world position — islands get their flat top plus a
  * soft coastal falloff; Mount Kalaga rises into a peak. Water is 0. */
 export function terrainHeight(x: number, z: number): number {

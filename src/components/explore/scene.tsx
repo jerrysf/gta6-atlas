@@ -10,6 +10,7 @@ import {
   exploreIslands,
   explorePois,
   exploreRings,
+  exploreStashes,
   terrainHeight,
 } from "@/data/explore";
 
@@ -376,6 +377,45 @@ function GoldenRing({
   );
 }
 
+/* ---------- hidden stashes ---------- */
+
+function Stash({
+  stash,
+  collected,
+}: {
+  stash: { id: string; x: number; z: number; label: string };
+  collected: boolean;
+}) {
+  const g = useRef<THREE.Group>(null);
+  const y = terrainHeight(stash.x, stash.z);
+  useFrame(({ clock }) => {
+    const m = g.current;
+    if (!m) return;
+    const t = clock.getElapsedTime();
+    m.rotation.y = t * 1.4;
+    m.position.y = y + 1.6 + Math.sin(t * 2.2) * 0.35;
+  });
+  if (collected) return null;
+  return (
+    <group ref={g} position={[stash.x, y + 1.6, stash.z]}>
+      <mesh>
+        <boxGeometry args={[2.2, 2.2, 2.2]} />
+        <meshBasicMaterial color="#5adfff" fog={false} toneMapped={false} />
+      </mesh>
+      <mesh>
+        <boxGeometry args={[2.8, 2.8, 2.8]} />
+        <meshBasicMaterial
+          color="#5adfff"
+          transparent
+          opacity={0.18}
+          depthWrite={false}
+        />
+      </mesh>
+      <pointLight color="#5adfff" intensity={16} distance={36} />
+    </group>
+  );
+}
+
 /* ---------- airboat & camera ---------- */
 
 const SPAWN = { x: 30, z: 150, heading: Math.PI };
@@ -384,13 +424,20 @@ function Airboat({
   keysRef,
   foundRef,
   ringsRef,
+  stashesRef,
+  camModeRef,
+  pausedRef,
   posRef,
   onDiscover,
   onRing,
+  onStash,
 }: {
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
   ringsRef: RefObject<Set<string>>;
+  stashesRef: RefObject<Set<string>>;
+  camModeRef: RefObject<number>;
+  pausedRef: RefObject<boolean>;
   posRef: RefObject<{
     x: number;
     z: number;
@@ -400,6 +447,7 @@ function Airboat({
   }>;
   onDiscover: (slug: string) => void;
   onRing: (id: string) => void;
+  onStash: (id: string) => void;
 }) {
   const boat = useRef<THREE.Group>(null);
   const fan = useRef<THREE.Mesh>(null);
@@ -417,6 +465,7 @@ function Airboat({
     const dt = Math.min(rawDt, 0.05);
     const st = s.current;
     const k = keysRef.current ?? {};
+    if (pausedRef.current) return;
 
     if (k["KeyR"]) {
       st.x = SPAWN.x;
@@ -479,14 +528,28 @@ function Airboat({
       posRef.current.alt = st.y;
     }
 
-    // chase camera
+    // chase camera — modes: 0 near, 1 far, 2 top-down survey
     const fx = Math.sin(st.heading);
     const fz = Math.cos(st.heading);
-    const camX = st.x - fx * 34;
-    const camZ = st.z - fz * 34;
-    const camY = st.y + 14 + Math.abs(st.speed) * 0.05;
-    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 1 - Math.exp(-dt * 3.2));
-    camera.lookAt(st.x + fx * 16, st.y + 2, st.z + fz * 16);
+    const mode = camModeRef.current ?? 0;
+    if (mode === 2) {
+      camera.position.lerp(
+        new THREE.Vector3(st.x - fx * 4, st.y + 95, st.z - fz * 4),
+        1 - Math.exp(-dt * 3)
+      );
+      camera.lookAt(st.x, st.y, st.z);
+    } else {
+      const dist = mode === 1 ? 52 : 34;
+      const height = mode === 1 ? 22 : 14;
+      const camX = st.x - fx * dist;
+      const camZ = st.z - fz * dist;
+      const camY = st.y + height + Math.abs(st.speed) * 0.05;
+      camera.position.lerp(
+        new THREE.Vector3(camX, camY, camZ),
+        1 - Math.exp(-dt * 3.2)
+      );
+      camera.lookAt(st.x + fx * 16, st.y + 2, st.z + fz * 16);
+    }
 
     // discovery
     const found = foundRef.current;
@@ -511,6 +574,18 @@ function Airboat({
         if (dx * dx + dz * dz + dy * dy < 12 * 12) {
           rings.add(r.id);
           onRing(r.id);
+        }
+      }
+    }
+    const stashes = stashesRef.current;
+    if (stashes) {
+      for (const sh of exploreStashes) {
+        if (stashes.has(sh.id)) continue;
+        const dx = st.x - sh.x;
+        const dz = st.z - sh.z;
+        if (dx * dx + dz * dz < 26 * 26) {
+          stashes.add(sh.id);
+          onStash(sh.id);
         }
       }
     }
@@ -572,12 +647,17 @@ function Airboat({
 export function ExploreScene({
   found,
   ringsFound,
+  stashesFound,
   keysRef,
   foundRef,
   ringsRef,
+  stashesRef,
+  camModeRef,
+  pausedRef,
   posRef,
   onDiscover,
   onRing,
+  onStash,
 }: {
   found: Set<string>;
   ringsFound: Set<string>;
@@ -591,14 +671,19 @@ export function ExploreScene({
     speed: number;
     alt: number;
   }>;
+  camModeRef: RefObject<number>;
+  pausedRef: RefObject<boolean>;
+  stashesRef: RefObject<Set<string>>;
+  stashesFound: Set<string>;
   onDiscover: (slug: string) => void;
   onRing: (id: string) => void;
+  onStash: (id: string) => void;
 }) {
   return (
     <Canvas
       dpr={[1, 1.75]}
       camera={{ fov: 62, position: [30, 30, 200] }}
-      gl={{ antialias: true }}
+      gl={{ antialias: true, preserveDrawingBuffer: true }}
       onCreated={({ gl }) => gl.setClearColor("#070d18")}
     >
       <fog attach="fog" args={["#0a1524", 140, 780]} />
@@ -618,13 +703,20 @@ export function ExploreScene({
       {exploreRings.map((r) => (
         <GoldenRing key={r.id} ring={r} collected={ringsFound.has(r.id)} />
       ))}
+      {exploreStashes.map((sh) => (
+        <Stash key={sh.id} stash={sh} collected={stashesFound.has(sh.id)} />
+      ))}
       <Airboat
         keysRef={keysRef}
         foundRef={foundRef}
         ringsRef={ringsRef}
+        stashesRef={stashesRef}
+        camModeRef={camModeRef}
+        pausedRef={pausedRef}
         posRef={posRef}
         onDiscover={onDiscover}
         onRing={onRing}
+        onStash={onStash}
       />
     </Canvas>
   );

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Camera,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -10,11 +11,19 @@ import {
   Circle,
   Compass,
   List,
+  Pause,
   Play,
   RotateCcw,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
-import { exploreIslands, explorePois, exploreRings } from "@/data/explore";
+import {
+  exploreIslands,
+  explorePois,
+  exploreRings,
+  exploreStashes,
+} from "@/data/explore";
 import { ExploreScene } from "@/components/explore/scene";
 import { cn } from "@/lib/utils";
 
@@ -28,14 +37,26 @@ interface BoatPos {
   alt: number;
 }
 
-function loadProgress(): { pois: Set<string>; rings: Set<string> } {
+function loadProgress(): {
+  pois: Set<string>;
+  rings: Set<string>;
+  stashes: Set<string>;
+} {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { pois: new Set(), rings: new Set() };
-    const d = JSON.parse(raw) as { pois?: string[]; rings?: string[] };
-    return { pois: new Set(d.pois ?? []), rings: new Set(d.rings ?? []) };
+    if (!raw) return { pois: new Set(), rings: new Set(), stashes: new Set() };
+    const d = JSON.parse(raw) as {
+      pois?: string[];
+      rings?: string[];
+      stashes?: string[];
+    };
+    return {
+      pois: new Set(d.pois ?? []),
+      rings: new Set(d.rings ?? []),
+      stashes: new Set(d.stashes ?? []),
+    };
   } catch {
-    return { pois: new Set(), rings: new Set() };
+    return { pois: new Set(), rings: new Set(), stashes: new Set() };
   }
 }
 
@@ -268,6 +289,9 @@ const KEY_ROWS: { keys: string; action: string }[] = [
   { keys: "Space", action: "Climb — fly over terrain" },
   { keys: "Shift", action: "Descend" },
   { keys: "R", action: "Reset position" },
+  { keys: "C", action: "Camera — near / far / survey" },
+  { keys: "M", action: "Engine sound on/off" },
+  { keys: "Esc", action: "Pause menu" },
 ];
 
 export function ExploreGame() {
@@ -275,10 +299,15 @@ export function ExploreGame() {
   const [saved] = useState(loadProgress);
   const [found, setFound] = useState<Set<string>>(saved.pois);
   const [ringsFound, setRingsFound] = useState<Set<string>>(saved.rings);
+  const [stashesFound, setStashesFound] = useState<Set<string>>(saved.stashes);
+  const [paused, setPaused] = useState(false);
+  const [camMode, setCamMode] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [nextTarget, setNextTarget] = useState<{ name: string; dist: number } | null>(null);
   const [splash, setSplash] = useState<{
     name: string;
     blurb: string;
-    kind: "poi" | "ring";
+    kind: "poi" | "ring" | "stash";
   } | null>(null);
   const [showList, setShowList] = useState(false);
   const [webglOk] = useState(() => {
@@ -292,6 +321,9 @@ export function ExploreGame() {
   const keysRef = useRef<Record<string, boolean>>({});
   const foundRef = useRef<Set<string>>(saved.pois);
   const ringsRef = useRef<Set<string>>(saved.rings);
+  const stashesRef = useRef<Set<string>>(saved.stashes);
+  const camModeRef = useRef(0);
+  const pausedRef = useRef(false);
   const posRef = useRef<BoatPos>({ x: 30, z: 150, heading: Math.PI, speed: 0, alt: 0 });
   const splashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isTouch] = useState(
@@ -307,6 +339,25 @@ export function ExploreGame() {
         e.target instanceof HTMLTextAreaElement
       )
         return;
+      if (e.code === "Escape") {
+        setPaused((v) => {
+          pausedRef.current = !v;
+          return !v;
+        });
+        return;
+      }
+      if (e.code === "KeyC") {
+        setCamMode((m) => {
+          const n = (m + 1) % 3;
+          camModeRef.current = n;
+          return n;
+        });
+        return;
+      }
+      if (e.code === "KeyM") {
+        setMuted((m) => !m);
+        return;
+      }
       keysRef.current[e.code] = true;
       if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
     };
@@ -328,6 +379,7 @@ export function ExploreGame() {
         JSON.stringify({
           pois: [...foundRef.current],
           rings: [...ringsRef.current],
+          stashes: [...stashesRef.current],
         })
       );
     } catch {
@@ -336,7 +388,7 @@ export function ExploreGame() {
   }, []);
 
   const showSplash = useCallback(
-    (name: string, blurb: string, kind: "poi" | "ring") => {
+    (name: string, blurb: string, kind: "poi" | "ring" | "stash") => {
       setSplash({ name, blurb, kind });
       if (splashTimer.current) clearTimeout(splashTimer.current);
       splashTimer.current = setTimeout(() => setSplash(null), 3800);
@@ -365,10 +417,90 @@ export function ExploreGame() {
     [persist, showSplash]
   );
 
+  const onStash = useCallback(
+    (id: string) => {
+      const stash = exploreStashes.find((x) => x.id === id);
+      setStashesFound(new Set(stashesRef.current));
+      persist();
+      showSplash("Hidden Stash", stash ? stash.label : "Secret found", "stash");
+    },
+    [persist, showSplash]
+  );
+
+  // fan boat engine hum — WebAudio, no assets
+  const audioRef = useRef<{ ctx: AudioContext; osc: OscillatorNode; gain: GainNode } | null>(null);
+  useEffect(() => {
+    if (!started || muted || !webglOk) {
+      if (audioRef.current) {
+        audioRef.current.osc.stop();
+        audioRef.current.ctx.close().catch(() => {});
+        audioRef.current = null;
+      }
+      return;
+    }
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.value = 48;
+      gain.gain.value = 0.0;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      audioRef.current = { ctx, osc, gain };
+      let raf = 0;
+      const pump = () => {
+        raf = requestAnimationFrame(pump);
+        const spd = Math.abs(posRef.current?.speed ?? 0);
+        const n = Math.min(1, spd / 58);
+        gain.gain.value = 0.018 + n * 0.05;
+        osc.frequency.value = 48 + n * 110 + (posRef.current?.alt ?? 0) * 0.6;
+      };
+      raf = requestAnimationFrame(pump);
+      return () => {
+        cancelAnimationFrame(raf);
+        osc.stop();
+        ctx.close().catch(() => {});
+        audioRef.current = null;
+      };
+    } catch {
+      /* audio unavailable */
+    }
+  }, [started, muted, webglOk]);
+
+  // nearest undiscovered POI — mission guidance like the yellow pillar
+  useEffect(() => {
+    if (!started) return;
+    const t = setInterval(() => {
+      const pos = posRef.current;
+      let best: { name: string; dist: number } | null = null;
+      for (const p of explorePois) {
+        if (foundRef.current.has(p.slug)) continue;
+        const d = Math.hypot(pos.x - p.x, pos.z - p.z);
+        if (!best || d < best.dist) best = { name: p.name, dist: d };
+      }
+      setNextTarget(best);
+    }, 600);
+    return () => clearInterval(t);
+  }, [started]);
+
+  const takePhoto = useCallback(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>("canvas");
+    if (!canvas) return;
+    try {
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = "leonida-3d-explorer.png";
+      a.click();
+    } catch {
+      /* capture unavailable */
+    }
+  }, []);
+
   const allFound = found.size === explorePois.length;
   const totalPct = Math.round(
-    ((found.size + ringsFound.size) /
-      (explorePois.length + exploreRings.length)) *
+    ((found.size + ringsFound.size + stashesFound.size) /
+      (explorePois.length + exploreRings.length + exploreStashes.length)) *
       100
   );
 
@@ -378,12 +510,17 @@ export function ExploreGame() {
         <ExploreScene
           found={found}
           ringsFound={ringsFound}
+          stashesFound={stashesFound}
           keysRef={keysRef}
           foundRef={foundRef}
           ringsRef={ringsRef}
+          stashesRef={stashesRef}
+          camModeRef={camModeRef}
+          pausedRef={pausedRef}
           posRef={posRef}
           onDiscover={onDiscover}
           onRing={onRing}
+          onStash={onStash}
         />
       ) : (
         <div className="flex h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -414,6 +551,9 @@ export function ExploreGame() {
           <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-md border border-border/60 bg-black/50 px-2 backdrop-blur">
             <CompassStrip posRef={posRef} />
           </div>
+          <p className="pointer-events-none absolute left-1/2 top-14 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.3em] text-slate-500">
+            {["Chase cam", "Wide cam", "Survey cam"][camMode]} · C
+          </p>
 
           {/* top-left mission widget */}
           <div className="pointer-events-none absolute left-4 top-4 space-y-2">
@@ -434,7 +574,9 @@ export function ExploreGame() {
                   </p>
                   <p>
                     <span className="text-amber-300">{ringsFound.size}</span>/
-                    {exploreRings.length} rings
+                    {exploreRings.length} rings ·{" "}
+                    <span className="text-cyan-300">{stashesFound.size}</span>/
+                    {exploreStashes.length} hidden
                   </p>
                 </div>
               </div>
@@ -444,6 +586,11 @@ export function ExploreGame() {
                   style={{ width: `${totalPct}%` }}
                 />
               </div>
+              {nextTarget && (
+                <p className="mt-2 font-mono text-[9px] uppercase tracking-wider text-fuchsia-300/90">
+                  ▸ Next: {nextTarget.name} · {Math.round(nextTarget.dist)}m
+                </p>
+              )}
             </div>
             <p className="max-w-[240px] rounded bg-black/40 px-2 py-1 font-mono text-[9px] leading-relaxed text-slate-400 backdrop-blur">
               Fan-made stylized diorama — not the official map.
@@ -476,6 +623,34 @@ export function ExploreGame() {
 
           {/* action buttons top-right */}
           <div className="absolute right-4 top-4 flex gap-2">
+            <button
+              onClick={takePhoto}
+              aria-label="Save screenshot"
+              title="Save screenshot"
+              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
+            >
+              <Camera className="size-4" />
+            </button>
+            <button
+              onClick={() => setMuted((m) => !m)}
+              aria-label={muted ? "Unmute engine" : "Mute engine"}
+              title={muted ? "Unmute engine" : "Mute engine"}
+              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
+            >
+              {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+            </button>
+            <button
+              onClick={() => {
+                setPaused((v) => {
+                  pausedRef.current = !v;
+                  return !v;
+                });
+              }}
+              aria-label="Pause"
+              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
+            >
+              <Pause className="size-4" />
+            </button>
             <button
               onClick={() => setShowList((v) => !v)}
               className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
@@ -510,11 +685,19 @@ export function ExploreGame() {
           <p
             className={cn(
               "font-mono text-[10px] uppercase tracking-[0.35em]",
-              splash.kind === "ring" ? "text-amber-300" : "text-brand"
+              splash.kind === "ring"
+                ? "text-amber-300"
+                : splash.kind === "stash"
+                  ? "text-cyan-300"
+                  : "text-brand"
             )}
             style={{ animation: "fadeIn 0.3s ease-out" }}
           >
-            {splash.kind === "ring" ? "Ring collected" : "Location discovered"}
+            {splash.kind === "ring"
+              ? "Ring collected"
+              : splash.kind === "stash"
+                ? "Secret stash found"
+                : "Location discovered"}
           </p>
           <p
             className="mt-1 font-display text-5xl tracking-wide text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
@@ -525,6 +708,41 @@ export function ExploreGame() {
           <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
             {splash.blurb}
           </p>
+        </div>
+      )}
+
+      {/* paused */}
+      {paused && started && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-64 rounded-lg border border-lime-300/30 bg-[#070d16]/95 p-6 text-center">
+            <p className="font-display text-3xl tracking-widest text-white">
+              PAUSED
+            </p>
+            <div className="mt-5 space-y-2">
+              <button
+                onClick={() => {
+                  setPaused(false);
+                  pausedRef.current = false;
+                }}
+                className="w-full rounded-md bg-brand px-4 py-2.5 font-display text-base tracking-widest text-background hover:bg-brand/90"
+              >
+                RESUME
+              </button>
+              <button
+                onClick={() => {
+                  keysRef.current["KeyR"] = true;
+                  setPaused(false);
+                  pausedRef.current = false;
+                }}
+                className="w-full rounded-md border border-border px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-slate-300 hover:border-lime-300/50 hover:text-brand"
+              >
+                Restart position
+              </button>
+            </div>
+            <p className="mt-4 font-mono text-[9px] uppercase tracking-widest text-slate-500">
+              ESC to resume
+            </p>
+          </div>
         </div>
       )}
 
@@ -677,10 +895,11 @@ export function ExploreGame() {
                 {explorePois.length} real locations — and hunt{" "}
                 {exploreRings.length} golden rings while you’re at it.
               </p>
-              <div className="mt-5 grid grid-cols-3 gap-2">
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[
                   { n: explorePois.length, l: "locations" },
                   { n: exploreRings.length, l: "golden rings" },
+                  { n: exploreStashes.length, l: "hidden stashes" },
                   { n: "1", l: "fan boat" },
                 ].map((s) => (
                   <div
