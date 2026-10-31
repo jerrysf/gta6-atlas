@@ -22,6 +22,7 @@ const sections = [
       { label: "Completion Tracker", href: "/completion" },
       { label: "Launch Timeline", href: "/timeline" },
       { label: "By the Numbers", href: "/facts" },
+      { label: "Trivia & Fun Facts", href: "/trivia" },
       { label: "Changelog", href: "/changelog" },
       { label: "Search", href: "/search" },
     ],

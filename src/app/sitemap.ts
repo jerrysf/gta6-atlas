@@ -30,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/watch",
     "/timeline",
     "/facts",
+    "/trivia",
     "/changelog",
     "/guides",
     "/search",

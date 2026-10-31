@@ -23,6 +23,7 @@ const resourceLinks = [
   { label: "Official Videos", href: "/watch" },
   { label: "Launch Timeline", href: "/timeline" },
   { label: "By the Numbers", href: "/facts" },
+  { label: "Trivia", href: "/trivia" },
   { label: "Guides", href: "/guides" },
   { label: "Changelog", href: "/changelog" },
   { label: "Search", href: "/search" },

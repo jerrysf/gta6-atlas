@@ -1,4 +1,5 @@
 import type { VerificationStatus } from "@/lib/types";
+import { trivia } from "@/data/trivia";
 
 export interface SearchDoc {
   id: string;
@@ -66,11 +67,14 @@ export function buildSearchDocs(input: {
     { id: "page-timeline", title: "Road to Launch Timeline", description: "Every confirmed GTA 6 event from leak to launch day.", href: "/timeline", type: "page" },
     { id: "page-changelog", title: "Site Changelog", description: "What's new on GTA6 Atlas — every update logged.", href: "/changelog", type: "page" },
     { id: "page-facts", title: "GTA 6 by the Numbers", description: "Records, stats and confirmed figures.", href: "/facts", type: "page" },
+    { id: "page-trivia", title: "Trivia & Fun Facts", description: "Community stories, records and GTA 6 lore.", href: "/trivia", type: "page" },
   );
   for (const t of input.tracks ?? [])
     docs.push({ id: `trk-${t.slug}`, title: `${t.name} — ${t.artist}`, description: t.description, href: `/music/${t.slug}`, type: "music", verificationStatus: t.verificationStatus });
   for (const a of input.animals ?? [])
     docs.push({ id: `anm-${a.slug}`, title: a.name, description: a.description, href: `/wildlife/${a.slug}`, type: "wildlife", verificationStatus: a.verificationStatus });
+  for (const t of trivia)
+    docs.push({ id: `trv-${t.slug}`, title: t.title, description: t.body, href: `/trivia#${t.slug}`, type: "page", verificationStatus: t.verificationStatus });
   return docs;
 }
 

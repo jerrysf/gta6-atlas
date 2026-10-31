@@ -21,6 +21,7 @@ import {
   PawPrint,
   Scroll,
   Search,
+  Sparkles,
   Timer,
   Users,
 } from "lucide-react";
@@ -69,6 +70,7 @@ const groups: {
       { label: "Media Gallery", href: "/media", icon: Image },
       { label: "Official Videos", href: "/watch", icon: Clapperboard },
       { label: "Changelog", href: "/changelog", icon: ListOrdered },
+      { label: "Trivia & Fun Facts", href: "/trivia", icon: Sparkles },
       { label: "Search", href: "/search", icon: Search },
     ],
   },
