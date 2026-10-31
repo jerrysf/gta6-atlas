@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  Check,
   CheckCircle2,
   Download,
   RotateCcw,
+  Share2,
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,7 @@ interface PersistedState {
 
 export function CompletionTracker({ data }: { data: CompletionData }) {
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [copiedShare, setCopiedShare] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -180,6 +183,30 @@ export function CompletionTracker({ data }: { data: CompletionData }) {
                   e.target.value = "";
                 }}
               />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hydrated || done === 0}
+                onClick={() => {
+                  const url = `${window.location.origin}/completion`;
+                  const text = `I'm ${percent}% through my GTA 6 launch checklist on GTA6 Atlas (${done}/${total} items) — ${url}`;
+                  navigator.clipboard.writeText(text).then(() => {
+                    setCopiedShare(true);
+                    setTimeout(() => setCopiedShare(false), 2000);
+                  });
+                  trackEvent("share_progress", { percent });
+                }}
+              >
+                {copiedShare ? (
+                  <>
+                    <Check className="size-4" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="size-4" /> Share
+                  </>
+                )}
+              </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" disabled={!hydrated || done === 0}>

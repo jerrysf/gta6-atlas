@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Car } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
@@ -75,7 +76,8 @@ export default async function VehiclesPage() {
           },
         ]}
       />
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={vehicleCategories.map((c) => ({
           value: c.slug,
@@ -90,6 +92,7 @@ export default async function VehiclesPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

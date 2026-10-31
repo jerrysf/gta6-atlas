@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -55,7 +56,8 @@ export default async function LocationsPage() {
           <MapPin className="size-4" /> Open Interactive Map
         </Link>
       </PageHeader>
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={categories}
         searchPlaceholder="Search locations..."
@@ -67,6 +69,7 @@ export default async function LocationsPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

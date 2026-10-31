@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Disc3, Music } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
@@ -80,7 +81,8 @@ export default function MusicPage() {
           { label: "score composer", value: "Justice" },
         ]}
       />
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={trackContexts.map((c) => ({
           value: c.slug,
@@ -95,6 +97,7 @@ export default function MusicPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

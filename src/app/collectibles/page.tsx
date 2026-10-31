@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Gem } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
@@ -43,7 +44,8 @@ export default async function CollectiblesPage() {
         with coordinates on the interactive map — nothing gets published
         unverified.
       </PendingBanner>
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={categories}
         searchPlaceholder="Search collectibles..."
@@ -55,6 +57,7 @@ export default async function CollectiblesPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

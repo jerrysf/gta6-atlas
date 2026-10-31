@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Crosshair } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
@@ -77,7 +78,8 @@ export default async function WeaponsPage() {
           },
         ]}
       />
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={categories}
         searchPlaceholder="Search weapons..."
@@ -89,6 +91,7 @@ export default async function WeaponsPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

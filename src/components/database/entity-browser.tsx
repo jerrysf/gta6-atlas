@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,10 +42,35 @@ export function EntityBrowser({
   portrait?: boolean;
   emptyState?: React.ReactNode;
 }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") ?? "all";
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [category, setCategory] = useState(
+    initialCategory === "all" ||
+      categoryOptions.some((o) => o.value === initialCategory)
+      ? initialCategory
+      : "all",
+  );
   const [sort, setSort] = useState("name-asc");
   const [page, setPage] = useState(1);
+
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("q", query.trim());
+      if (category !== "all") params.set("category", category);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [query, category, pathname, router]);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: items.length };

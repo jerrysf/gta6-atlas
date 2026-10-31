@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Users } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
@@ -58,7 +59,8 @@ export default async function CharactersPage() {
           },
         ]}
       />
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         searchPlaceholder="Search characters..."
         portrait
@@ -70,6 +72,7 @@ export default async function CharactersPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ArrowRight, MapPin, PanelLeft, Search, X } from "lucide-react";
+import { ArrowRight, Check, Link2, MapPin, PanelLeft, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -81,6 +81,7 @@ export default function MapCanvas({
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<MapPoint | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [query, setQuery] = useState("");
   const [enabled, setEnabled] = useState<Set<MapCategory>>(
     () => new Set(categories.map((c) => c.id)),
@@ -168,6 +169,20 @@ export default function MapCanvas({
     const id = setTimeout(() => selectPoint(p), 0);
     return () => clearTimeout(id);
   }, [ready, points, selectPoint]);
+
+  // Keep the URL in sync so the current selection is shareable. Don't
+  // strip a deep-link ?focus= before the initial selection resolves.
+  const touchedRef = useRef(false);
+  useEffect(() => {
+    if (selected) touchedRef.current = true;
+    const url = new URL(window.location.href);
+    if (selected?.slug) {
+      url.searchParams.set("focus", selected.slug);
+    } else if (touchedRef.current) {
+      url.searchParams.delete("focus");
+    }
+    window.history.replaceState(null, "", url);
+  }, [selected]);
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
@@ -315,6 +330,29 @@ export default function MapCanvas({
                   >
                     View full details <ArrowRight className="size-3" />
                   </Link>
+                )}
+                {selected.slug && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${window.location.origin}/map?focus=${selected.slug}`;
+                      navigator.clipboard.writeText(url).then(() => {
+                        setCopiedLink(true);
+                        setTimeout(() => setCopiedLink(false), 2000);
+                      });
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-brand"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="size-3 text-brand" /> Link copied
+                      </>
+                    ) : (
+                      <>
+                        <Link2 className="size-3" /> Copy map link
+                      </>
+                    )}
+                  </button>
                 )}
                 {selected.sources && selected.sources.length > 0 && (
                   <p className="border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">

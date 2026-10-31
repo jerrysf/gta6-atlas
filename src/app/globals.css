@@ -238,7 +238,16 @@
     @apply text-foreground font-semibold;
   }
   .prose-guide blockquote {
-    @apply my-4 border-l-2 border-brand pl-4 text-muted-foreground italic;
+    @apply my-4 rounded-r-md border-l-2 border-brand bg-brand/5 px-4 py-3 text-foreground/80;
+  }
+  .prose-guide blockquote p {
+    @apply my-0;
+  }
+  .prose-guide blockquote p + p {
+    @apply mt-2;
+  }
+  .prose-guide blockquote strong {
+    @apply text-brand;
   }
   .prose-guide table {
     @apply my-6 w-full text-sm;

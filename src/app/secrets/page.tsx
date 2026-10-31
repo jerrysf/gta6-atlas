@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Eye } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
@@ -43,7 +44,8 @@ export default async function SecretsPage() {
         verified in-game. Deeper secrets will be catalogued after the
         November 19, 2026 release.
       </PendingBanner>
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={categories}
         searchPlaceholder="Search secrets..."
@@ -55,6 +57,7 @@ export default async function SecretsPage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }

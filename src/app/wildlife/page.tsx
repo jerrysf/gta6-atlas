@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PawPrint } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
@@ -67,7 +68,8 @@ export default function WildlifePage() {
           },
         ]}
       />
-      <EntityBrowser
+      <Suspense>
+        <EntityBrowser
         items={items}
         categoryOptions={animalClasses.map((c) => ({
           value: c.slug,
@@ -82,6 +84,7 @@ export default function WildlifePage() {
           />
         }
       />
+        </Suspense>
     </div>
   );
 }
