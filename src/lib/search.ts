@@ -62,6 +62,9 @@ export function buildSearchDocs(input: {
     { id: "page-music", title: "Music & Soundtrack", description: "Every confirmed GTA 6 song and The Album.", href: "/music", type: "page" },
     { id: "page-wildlife", title: "Animals & Wildlife", description: "Every creature spotted in Leonida.", href: "/wildlife", type: "page" },
     { id: "page-media", title: "Screenshots & Media", description: "Official GTA VI screenshots and images gallery.", href: "/media", type: "page" },
+    { id: "page-watch", title: "Official Videos", description: "Watch every official GTA 6 trailer and the Extended Look.", href: "/watch", type: "page" },
+    { id: "page-timeline", title: "Road to Launch Timeline", description: "Every confirmed GTA 6 event from leak to launch day.", href: "/timeline", type: "page" },
+    { id: "page-changelog", title: "Site Changelog", description: "What's new on GTA6 Atlas — every update logged.", href: "/changelog", type: "page" },
   );
   for (const t of input.tracks ?? [])
     docs.push({ id: `trk-${t.slug}`, title: `${t.name} — ${t.artist}`, description: t.description, href: `/music/${t.slug}`, type: "music", verificationStatus: t.verificationStatus });

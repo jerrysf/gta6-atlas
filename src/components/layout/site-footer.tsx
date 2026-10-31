@@ -20,7 +20,10 @@ const resourceLinks = [
   { label: "Interactive Map", href: "/map" },
   { label: "Walkthroughs", href: "/walkthrough" },
   { label: "Completion Tracker", href: "/completion" },
+  { label: "Official Videos", href: "/watch" },
+  { label: "Launch Timeline", href: "/timeline" },
   { label: "Guides", href: "/guides" },
+  { label: "Changelog", href: "/changelog" },
   { label: "Search", href: "/search" },
 ];
 
