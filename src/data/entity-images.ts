@@ -386,10 +386,32 @@ export const entityImages: Record<string, EntityImage> = {
     caption: "Reference render of a bicycle in GTA San Andreas — the GTA VI version may look different",
   },
 
+  /* ------------------------- Additional vehicles ------------------------- */
+  "airboat": {
+    url: `${W}/c/ce/UnnamedPantherAirboat-GTAVI-Trailer1.png/revision/latest/scale-to-width-down/800?cb=20250112065831`,
+    caption: `${VI} — Trailer 1 screenshot of the fan boat`,
+  },
+  "reatta-style-convertible": {
+    url: `${W}/7/79/UnnamedBuickReattaConvertible-GTAVI-Trailer2.png/revision/latest/scale-to-width-down/800?cb=20250523103142`,
+    caption: `${VI} — Trailer 2 screenshot`,
+  },
+  "cle-style-convertible": {
+    url: `${W}/2/21/UnnamedConvertible-GTAVI-Trailer2.png/revision/latest/scale-to-width-down/800?cb=20250811110436`,
+    caption: `${VI} — Trailer 2 screenshot of the drop-top Bae-Luxe leans on`,
+  },
+
   /* ------------------------- Additional weapons -------------------------- */
   "morgan-revolver": {
     url: `${W}/7/7e/DoubleActionRevolver-GTAOee.png/revision/latest/scale-to-width-down/800?cb=20250619123623`,
     caption: "Reference render of the Double-Action Revolver in GTA Online — the engraved Morgan pair may look different",
+  },
+  "hawk-little-morgan": {
+    url: `${W}/8/88/HeavyRevolver-GTAOee.png/revision/latest/scale-to-width-down/800?cb=20250619123631`,
+    caption: "Reference render of the Heavy Revolver in GTA Online — the engraved Morgan pair may look different",
+  },
+  "moreland-850": {
+    url: `${W}/8/8f/PumpShotgun-GTAVee.png/revision/latest/scale-to-width-down/800?cb=20250619221552`,
+    caption: "Reference render of the Pump Shotgun in GTA V — the GTA VI version may look different",
   },
 
   /* ------------------------- Additional locations ------------------------ */
@@ -490,5 +512,57 @@ export const entityImages: Record<string, EntityImage> = {
   "hot-together": {
     url: "https://i.ytimg.com/vi/VQRLujxTm3c/maxresdefault.jpg",
     caption: `${VI} — Trailer 2 thumbnail (the track debuted in this video)`,
+  },
+  "thats-it": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "rhyno": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "sexy-magic": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "last-thing-you-need": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "macacoa-2000": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "bright-lights-big-city": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "dont-chart": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+  "suzuki": {
+    url: `${W}/d/d1/GTAVI-The-Album.jpg/revision/latest/scale-to-width-down/800?cb=20260917132223`,
+    caption: `${VI} — GTA VI: The Album cover artwork`,
+  },
+
+  /* ------------------------- Additional locations ------------------------ */
+  "ocean-beach": {
+    url: `${W}/1/19/OceanBeach-GTAVI-Trailer1.png/revision/latest/scale-to-width-down/800?cb=20250323155637`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "nine1nine-club": {
+    url: `${W}/3/31/NINE1NINE-GTAVI-Trailer2-Exterior.png/revision/latest/scale-to-width-down/800?cb=20250813085632`,
+    caption: `${VI} — Trailer 2 screenshot of the NINE1NINE exterior`,
+  },
+  "gellhorn-international-raceway": {
+    url: `${W}/a/a7/GellhornInternationalRaceway-GTAVI-Trailer2-Shirt.png/revision/latest/scale-to-width-down/800?cb=20250515064821`,
+    caption: `${VI} — raceway logo seen on a Trailer 2 shirt`,
+  },
+
+  /* ------------------------- Additional wildlife ------------------------- */
+  "shark": {
+    url: `${W}/6/61/Tiger_shark-GTAV.png/revision/latest/scale-to-width-down/800?cb=20191127214544`,
+    caption: "Reference render of a tiger shark in GTA V — the GTA VI version may look different",
   },
 };
