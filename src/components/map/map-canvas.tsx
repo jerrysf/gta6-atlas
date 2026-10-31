@@ -56,48 +56,127 @@ function gridGeoJSON(): GeoJSON.FeatureCollection {
 }
 
 /**
- * Stylized Leonida silhouette — a fictional schematic landmass drawn to
- * loosely echo the peninsula + keys geography hinted at in official media.
- * Purely illustrative; not extracted from or resembling real cartography.
+ * Stylized Leonida geography — a fictional schematic world map with
+ * terrain zones, a central lake, the Keys island chain and a road
+ * network, drawn to echo the peninsula geography hinted at in official
+ * media. Purely illustrative; not extracted from or resembling any
+ * real or official cartography.
  */
-function landGeoJSON(): GeoJSON.FeatureCollection {
-  const poly = (ring: [number, number][]): GeoJSON.Feature => ({
+type TerrainKind =
+  | "land"
+  | "park"
+  | "wetland"
+  | "farmland"
+  | "urban"
+  | "sand"
+  | "lake"
+  | "island";
+
+function terrainGeoJSON(): GeoJSON.FeatureCollection {
+  const poly = (
+    kind: TerrainKind,
+    ring: [number, number][],
+  ): GeoJSON.Feature => ({
     type: "Feature",
     geometry: { type: "Polygon", coordinates: [[...ring, ring[0]]] },
+    properties: { kind },
+  });
+  return {
+    type: "FeatureCollection",
+    features: [
+      // Mainland — irregular coast, panhandle north tapering south-east
+      poly("land", [
+        [-46, 36], [-44, 24], [-41, 14], [-37, 7], [-34, 1], [-30, -3],
+        [-26, -7], [-20, -9], [-14, -9], [-8, -11], [-2, -15], [2, -20],
+        [6, -26], [10, -31], [16, -34], [22, -34], [28, -32], [34, -30],
+        [39, -27], [43, -22], [46, -16], [47, -8], [48, 0], [47, 8],
+        [45, 16], [42, 24], [38, 32], [32, 38], [24, 42], [14, 45],
+        [4, 47], [-6, 47], [-16, 46], [-26, 45], [-34, 44], [-41, 42],
+      ]),
+      // Central lake
+      poly("lake", [
+        [6, 10], [10, 18], [14, 22], [18, 20], [20, 14], [16, 9], [10, 8],
+      ]),
+      // Mount Kalaga National Park — northern highlands
+      poly("park", [
+        [-34, 31], [-30, 37], [-25, 42], [-18, 45], [-10, 44], [-3, 41],
+        [1, 36], [-2, 32], [-8, 31], [-16, 29], [-25, 28], [-31, 28],
+      ]),
+      // Grassrivers — southern wetlands
+      poly("wetland", [
+        [-2, -14], [6, -16], [12, -20], [14, -26], [10, -30], [4, -28],
+        [0, -22],
+      ]),
+      // Ambrosia — central farmland belt
+      poly("farmland", [
+        [-16, 6], [-10, 16], [-4, 18], [2, 14], [0, 6], [-6, 4], [-12, 4],
+      ]),
+      // Vice City — eastern urban mass
+      poly("urban", [
+        [24, -8], [34, -8], [40, -11], [42, -16], [40, -21], [36, -23],
+        [30, -21], [25, -16],
+      ]),
+      // Port Gellhorn — west-coast urban pocket
+      poly("urban", [
+        [-31, -2], [-27, -1], [-26, -4], [-28, -7], [-31, -6],
+      ]),
+      // Vice Beach barrier islands
+      poly("sand", [
+        [45, -9], [49, -10], [51, -13], [50, -16], [46, -15], [44, -12],
+      ]),
+      poly("sand", [
+        [44, -21], [48, -21], [49, -24], [47, -26], [43, -24],
+      ]),
+      poly("sand", [[41, -28], [45, -29], [44, -32], [40, -30]]),
+      // Leonida Keys — island chain trailing south-west of the tip
+      poly("island", [
+        [6, -36], [12, -35], [16, -37], [14, -41], [9, -41], [5, -38],
+      ]),
+      poly("island", [
+        [18, -38], [23, -37], [25, -40], [20, -42], [16, -41],
+      ]),
+      // East offshore islet
+      poly("island", [[55, -14], [59, -16], [58, -20], [54, -18]]),
+    ],
+  };
+}
+
+function roadsGeoJSON(): GeoJSON.FeatureCollection {
+  const line = (coords: [number, number][]): GeoJSON.Feature => ({
+    type: "Feature",
+    geometry: { type: "LineString", coordinates: coords },
     properties: {},
   });
   return {
     type: "FeatureCollection",
     features: [
-      // Mainland — panhandle north, peninsula tapering south-east
-      poly([
-        [-46, 47], [-44, 30], [-40, 12], [-35, 4], [-32, -3], [-28, -9],
-        [-20, -11], [-12, -9], [-4, -11], [2, -17], [8, -24], [12, -30],
-        [16, -34], [24, -35], [32, -33], [40, -29], [45, -24], [48, -15],
-        [49, -4], [48, 6], [47, 18], [45, 30], [40, 39], [30, 45],
-        [10, 48], [-10, 48], [-30, 48],
+      // Coastal highway — Port Gellhorn to Vice City
+      line([
+        [-28, -4], [-18, -4], [-8, -8], [0, -10], [10, -12], [20, -12],
+        [28, -13], [36, -15], [43, -17],
       ]),
-      // Leonida Keys — island chain trailing south-west
-      poly([
-        [8, -33], [18, -32], [25, -35], [27, -39], [22, -43], [14, -44],
-        [7, -40],
+      // North–south highway toward Mount Kalaga
+      line([
+        [-2, -14], [4, -6], [8, 4], [10, 14], [8, 24], [2, 34], [-4, 40],
       ]),
-      // Small islet east of the Vice City area
-      poly([[52, -18], [56, -17], [57, -21], [53, -22]]),
+      // Ambrosia spur
+      line([[-8, -8], [-10, -2], [-10, 8], [-8, 14]]),
+      // Keys causeway
+      line([[24, -32], [20, -35], [15, -39]]),
     ],
   };
 }
 
 /** Region labels rendered as non-interactive DOM markers. */
 const REGION_LABELS: { name: string; at: [number, number] }[] = [
-  { name: "Mt Kalaga N.P.", at: [-12, 45] },
-  { name: "Ambrosia", at: [-6, 16] },
-  { name: "Port Gellhorn", at: [-33, -5] },
-  { name: "Grassrivers", at: [4, -24] },
+  { name: "Mt Kalaga N.P.", at: [-12, 44] },
+  { name: "Ambrosia", at: [-8, 17] },
+  { name: "Port Gellhorn", at: [-34, -6] },
+  { name: "Grassrivers", at: [4, -26] },
   { name: "Leonida Penitentiary", at: [16, -4] },
-  { name: "Vice Beach", at: [41, -12] },
-  { name: "Vice City", at: [32, -21] },
-  { name: "Leonida Keys", at: [13, -47] },
+  { name: "Vice Beach", at: [43, -9] },
+  { name: "Vice City", at: [31, -25] },
+  { name: "Leonida Keys", at: [12, -46] },
 ];
 
 export default function MapCanvas({
@@ -145,32 +224,73 @@ export default function MapCanvas({
       version: 8,
       sources: {
         grid: { type: "geojson", data: gridGeoJSON() },
-        land: { type: "geojson", data: landGeoJSON() },
+        terrain: { type: "geojson", data: terrainGeoJSON() },
+        roads: { type: "geojson", data: roadsGeoJSON() },
       },
       layers: [
         {
-          id: "background",
+          id: "water",
           type: "background",
-          paint: { "background-color": "#0b0f14" },
+          paint: { "background-color": "#0c1826" },
         },
         {
-          id: "land",
-          type: "fill",
-          source: "land",
+          id: "shallow-glow",
+          type: "line",
+          source: "terrain",
+          filter: ["==", ["get", "kind"], "land"],
           paint: {
-            "fill-color": "#14202c",
-            "fill-outline-color": "#2c4257",
+            "line-color": "#2a7a9a",
+            "line-width": 9,
+            "line-opacity": 0.22,
+            "line-blur": 7,
           },
         },
         {
-          id: "coast-glow",
-          type: "line",
-          source: "land",
+          id: "terrain",
+          type: "fill",
+          source: "terrain",
           paint: {
-            "line-color": "#35c7d9",
-            "line-width": 1.6,
-            "line-opacity": 0.35,
-            "line-blur": 2,
+            "fill-color": [
+              "match",
+              ["get", "kind"],
+              "land", "#1d3a2b",
+              "park", "#2a5c3d",
+              "wetland", "#1f5040",
+              "farmland", "#3d4a26",
+              "urban", "#3a4658",
+              "sand", "#54503a",
+              "island", "#27453a",
+              "lake", "#0c1826",
+              "#1d3a2b",
+            ],
+            "fill-outline-color": [
+              "match",
+              ["get", "kind"],
+              "lake", "#1e3a4a",
+              "land", "#0a141d",
+              "#11241c",
+            ],
+          },
+        },
+        {
+          id: "coast",
+          type: "line",
+          source: "terrain",
+          filter: ["in", ["get", "kind"], ["literal", ["land", "island", "sand"]]],
+          paint: {
+            "line-color": "#3fb0c4",
+            "line-width": 1.3,
+            "line-opacity": 0.5,
+          },
+        },
+        {
+          id: "roads",
+          type: "line",
+          source: "roads",
+          paint: {
+            "line-color": "#8b93a8",
+            "line-width": 1.4,
+            "line-opacity": 0.75,
           },
         },
         {
@@ -180,7 +300,7 @@ export default function MapCanvas({
           paint: {
             "line-color": "#1c2836",
             "line-width": 1,
-            "line-opacity": 0.6,
+            "line-opacity": 0.35,
           },
         },
       ],
