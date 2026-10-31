@@ -19,24 +19,22 @@ interface CategoryMeta {
 }
 
 /**
- * Base map: the YANIS community map by the State of Leonida mapping
- * project (map.stateofleonida.net). Their tiles use a custom pixel CRS
- * (Leaflet CRS.Simple), not Web Mercator — hence Leaflet rather than
- * MapLibre. Coordinates below live in their lat/lng pixel space.
- * Unofficial fan projection; the real world map arrives with the game.
+ * Base map: our own vector artwork (public/leonida-map.svg) — a fan-made
+ * speculative projection of Leonida drawn for this site, overlaid on a
+ * Leaflet pixel CRS rather than Web Mercator (hence Leaflet, not
+ * MapLibre). Geography follows the community consensus layout inferred
+ * from official media. Unofficial; the real map arrives with the game.
  */
-const TILE_URL =
-  "https://map.stateofleonida.net/tiles/YANIS/v17/normal/{z}/{x}/{y}.png";
+const MAP_IMAGE_URL = "/leonida-map.svg";
 const MAP_BOUNDS = L.latLngBounds([
   [-9000, -17000],
   [11000, 4000],
 ]);
 
 /**
- * The YANIS tiles are rendered in a custom pixel space where (0,0) is the
- * top-left corner of the map bounds and the full map is originalSize px at
- * maxNativeZoom. This custom CRS reproduces their Leaflet setup so tile
- * indices resolve to their non-negative {z}/{x}/{y} paths.
+ * Pixel-space CRS: (0,0) sits at the top-left corner of the map bounds and
+ * the full canvas spans ORIGINAL_SIZE px at maxNativeZoom, so lat/lng map
+ * 1:1 onto the artwork's own coordinate system.
  */
 const ORIGINAL_SIZE = { width: 21000, height: 20000 };
 const MAX_NATIVE_ZOOM = 6;
@@ -62,7 +60,7 @@ const yanisCRS: L.CRS = (() => {
   });
 })();
 const TILE_ATTRIBUTION =
-  'Map artwork © <a href="https://map.stateofleonida.net" target="_blank" rel="noopener noreferrer">YANIS — State of Leonida</a> (unofficial fan projection)';
+  "Fan-made speculative world map — unofficial community projection";
 
 export default function MapCanvas({
   points,
@@ -113,20 +111,12 @@ export default function MapCanvas({
 
     L.control.zoom({ position: "topright" }).addTo(map);
 
-    L.tileLayer(TILE_URL, {
-      tileSize: 256,
-      minZoom: 0,
-      maxZoom: 8,
-      maxNativeZoom: MAX_NATIVE_ZOOM,
-      noWrap: true,
-      bounds: MAP_BOUNDS,
+    L.imageOverlay(MAP_IMAGE_URL, MAP_BOUNDS, {
       attribution: TILE_ATTRIBUTION,
     }).addTo(map);
 
-    map.setMaxBounds(MAP_BOUNDS.pad(0.12));
-    // Fit the land area rather than the full poster (the leftmost tiles
-    // contain the map's baked-in legend/credits panel).
-    map.fitBounds(L.latLngBounds([[-9000, -14500], [11000, 4000]]));
+    map.setMaxBounds(MAP_BOUNDS.pad(0.3));
+    map.fitBounds(MAP_BOUNDS);
     map.on("zoomend", () => trackEvent("map_interaction", { type: "zoom" }));
 
     mapRef.current = map;
@@ -313,8 +303,8 @@ export default function MapCanvas({
         {points.length > 0 && (
           <div className="border-t border-border p-3">
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Base map by the YANIS community mapping project (unofficial fan
-              projection). Marker positions are community estimates — not the
+              Fan-made speculative map drawn from official-media geography
+              hints. Marker positions are community estimates — not the
               official in-game map.
             </p>
           </div>
@@ -338,9 +328,8 @@ export default function MapCanvas({
         <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[1000] flex justify-center px-4">
           <div className="pointer-events-auto rounded-md border border-border bg-card/90 px-3 py-1.5 text-center backdrop-blur">
             <p className="text-[11px] text-muted-foreground">
-              Community-made speculative map (YANIS / State of Leonida) — not
-              the official in-game map. Official world map arrives Nov 19,
-              2026.
+              Fan-made speculative map — not the official in-game map.
+              Official world map arrives Nov 19, 2026.
             </p>
           </div>
         </div>

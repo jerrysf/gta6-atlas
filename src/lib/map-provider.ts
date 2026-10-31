@@ -27,9 +27,9 @@ export const MAP_CATEGORIES: { id: MapCategory; label: string; color: string }[]
 
 /**
  * Static MVP provider. GTA VI's real world map hasn't been published, so
- * marker coordinates are COMMUNITY ESTIMATES in the YANIS community map's
- * pixel coordinate space (map.stateofleonida.net — an unofficial fan
- * projection built from trailer analysis). They exist to make the map
+ * marker coordinates are COMMUNITY ESTIMATES in the pixel coordinate space
+ * of our own speculative Leonida artwork (an unofficial fan projection
+ * built from trailer analysis). They exist to make the map
  * explorable pre-launch and will be replaced with verified in-game
  * coordinates after Nov 19, 2026. Providers must label estimates
  * honestly — never present them as official.

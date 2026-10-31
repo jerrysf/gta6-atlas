@@ -95,7 +95,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -3000, y: 2800 },
+    coordinates: { x: -4200, y: 2700 },
     mapCategory: "location",
   },
   {
@@ -201,7 +201,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "community_reported",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -700, y: 1100 },
+    coordinates: { x: -300, y: 1000 },
     mapCategory: "poi",
   },
   {
