@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { collectibleRepo, secretRepo } from "@/lib/repository";
 import { collectibles, secrets } from "@/data/collectibles";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { createMetadata } from "@/lib/seo";
 
 const all = () => [...collectibles, ...secrets];
@@ -75,6 +76,7 @@ export default async function CollectiblePage({
       role={c.category}
       description={c.description}
       verificationStatus={c.verificationStatus}
+      image={entityImages[c.slug]}
       facts={facts}
       sources={c.sourceReferences}
       related={related}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { vehicleRepo } from "@/lib/repository";
 import { vehicles } from "@/data/vehicles";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -69,6 +70,7 @@ export default async function VehiclePage({
       role={v.category}
       description={v.description}
       verificationStatus={v.verificationStatus}
+      image={entityImages[v.slug]}
       facts={facts}
       sources={v.sourceReferences}
       related={related}

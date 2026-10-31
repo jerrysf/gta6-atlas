@@ -6,6 +6,7 @@ import { PageBreadcrumbs } from "@/components/breadcrumbs";
 import { VerificationBadge } from "@/components/verification-badge";
 import { VERIFICATION_META } from "@/lib/verification";
 import type { SourceReference, VerificationStatus } from "@/lib/types";
+import type { EntityImage } from "@/data/entity-images";
 
 export function EntityDetail({
   breadcrumbs,
@@ -13,6 +14,7 @@ export function EntityDetail({
   role,
   description,
   verificationStatus,
+  image,
   facts = [],
   sources = [],
   related = [],
@@ -23,6 +25,7 @@ export function EntityDetail({
   role?: string;
   description: string;
   verificationStatus: VerificationStatus;
+  image?: EntityImage;
   facts?: { label: string; value: React.ReactNode }[];
   sources?: SourceReference[];
   related?: { name: string; href: string; description?: string }[];
@@ -33,7 +36,26 @@ export function EntityDetail({
       <PageBreadcrumbs items={breadcrumbs} />
       <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
         <article>
-          <EntityCover name={name} className="rounded-lg border border-border" />
+          <figure>
+            <EntityCover
+              name={name}
+              image={image}
+              className="rounded-lg border border-border"
+            />
+            {image && (
+              <figcaption className="mt-2 text-xs text-muted-foreground">
+                {image.caption} ·{" "}
+                <a
+                  href="https://gta.fandom.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  Image: GTA Wiki
+                </a>
+              </figcaption>
+            )}
+          </figure>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
               {name}

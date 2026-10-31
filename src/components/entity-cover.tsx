@@ -1,20 +1,42 @@
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { EntityImage } from "@/data/entity-images";
 
 /**
- * Stylized placeholder cover for database entities. We intentionally avoid
- * scraped or AI-generated game art; licensed artwork can replace this
- * component per-entity via the `image` field later.
+ * Cover for database entities: renders the hotlinked wiki image when one is
+ * mapped, otherwise the stylized placeholder. Images stay on Fandom's CDN —
+ * nothing is redistributed from this repo.
  */
 export function EntityCover({
   name,
   className,
   icon,
+  image,
 }: {
   name: string;
   className?: string;
   icon?: React.ReactNode;
+  image?: EntityImage;
 }) {
+  if (image) {
+    return (
+      <div
+        className={cn(
+          "relative aspect-[16/9] w-full overflow-hidden bg-surface-2",
+          className,
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.url}
+          alt={name}
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover"
+        />
+      </div>
+    );
+  }
+
   const initials = name
     .split(/\s+/)
     .slice(0, 2)

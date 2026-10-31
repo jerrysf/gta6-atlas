@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { characterRepo } from "@/lib/repository";
 import { characters } from "@/data/characters";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -44,6 +45,7 @@ export default async function CharacterPage({
       role={c.role}
       description={c.biography}
       verificationStatus={c.verificationStatus}
+      image={entityImages[c.slug]}
       facts={[{ label: "Role", value: c.role }]}
       sources={c.sourceReferences}
       related={related}

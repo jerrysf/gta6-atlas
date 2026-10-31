@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { weaponRepo } from "@/lib/repository";
 import { weapons } from "@/data/weapons";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -55,6 +56,7 @@ export default async function WeaponPage({
       role={w.category}
       description={w.description}
       verificationStatus={w.verificationStatus}
+      image={entityImages[w.slug]}
       facts={facts}
       sources={w.sourceReferences}
       related={related}

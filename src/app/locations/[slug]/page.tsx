@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { locationRepo, missionRepo } from "@/lib/repository";
 import { locations } from "@/data/locations";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -71,6 +72,7 @@ export default async function LocationPage({
       role={l.region === "State" ? "State" : `Region of ${l.region}`}
       description={l.description}
       verificationStatus={l.verificationStatus}
+      image={entityImages[l.slug]}
       facts={facts}
       sources={l.sourceReferences}
       related={[...relatedMissions, ...relatedLocations].slice(0, 6)}
