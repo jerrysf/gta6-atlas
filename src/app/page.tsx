@@ -8,7 +8,6 @@ import {
   Crosshair,
   Database,
   Gem,
-  Play,
   Map as MapIcon,
   MapPin,
   Users,
@@ -32,6 +31,7 @@ import { locations } from "@/data/locations";
 import { characters } from "@/data/characters";
 import { collectibles, secrets } from "@/data/collectibles";
 import { officialVideos } from "@/data/videos";
+import { VideoGrid } from "@/components/video-grid";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA6 Atlas — The Ultimate GTA 6 Guide, Interactive Map & Game Database",
@@ -293,54 +293,7 @@ export default async function HomePage() {
       {/* Official videos */}
       <section aria-labelledby="videos" className="py-8">
         <SectionHeader title="Official Videos" index={2} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {officialVideos.map((v, i) => (
-            <a
-              key={v.youtubeId}
-              href={`https://www.youtube.com/watch?v=${v.youtubeId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block"
-            >
-              <Card className="lift h-full overflow-hidden pt-0 group-hover:border-brand-cyan/40">
-                <div className="relative aspect-video overflow-hidden">
-                  <Image
-                    src={`https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`}
-                    alt={v.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
-                  <span className="absolute inset-0 m-auto flex size-12 items-center justify-center rounded-full border border-white/30 bg-black/50 text-white backdrop-blur-sm transition-colors group-hover:bg-brand group-hover:text-black">
-                    <Play className="ml-0.5 size-5 fill-current" />
-                  </span>
-                  <span className="absolute bottom-2 right-2 rounded-sm bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">
-                    {v.duration}
-                  </span>
-                  {i === 0 && (
-                    <span className="absolute left-2 top-2 rounded-sm bg-brand px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-black">
-                      New
-                    </span>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="line-clamp-1 text-sm group-hover:text-brand-cyan">
-                    {v.title}
-                  </CardTitle>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Rockstar Games · {v.publishedAt}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <p className="line-clamp-2 text-xs text-muted-foreground">
-                    {v.note}
-                  </p>
-                </CardContent>
-              </Card>
-            </a>
-          ))}
-        </div>
+        <VideoGrid videos={officialVideos} />
       </section>
 
       {/* Latest guides */}
