@@ -133,9 +133,9 @@ const homeFaq = [
 
 export default async function HomePage() {
   const guides = await getAllGuides();
-  const latest = guides.slice(0, 3);
+  const latest = guides.slice(0, 6);
   const popular = guides.filter((g) => g.category !== "news").slice(0, 3);
-  const news = guides.filter((g) => g.category === "news").slice(0, 3);
+  const news = guides.filter((g) => g.category === "news").slice(0, 6);
 
   const dbStats = [
     { n: vehicles.length, l: "Vehicles", href: "/vehicles" },
