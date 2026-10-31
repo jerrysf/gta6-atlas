@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, Crosshair, List, Play, RotateCcw, X } from "lucide-react";
+import {
+  Check,
+  Crosshair,
+  ExternalLink,
+  List,
+  MapPin,
+  Play,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DISCOVER_RADIUS_PX,
@@ -59,6 +68,11 @@ function dot(color: string, size = 14, ring = true): L.DivIcon {
   });
 }
 
+/** Google Maps URL — opens the nearest Street View panorama (Maps URLs API). */
+function streetViewUrl(spot: ExploreSpot): string {
+  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${spot.lat},${spot.lng}`;
+}
+
 function keycap(k: string) {
   return (
     <kbd
@@ -74,6 +88,7 @@ const CONTROLS: { keys: string; action: string }[] = [
   { keys: "Drag / scroll", action: "Pan & zoom the map" },
   { keys: "WASD / arrows", action: "Move" },
   { keys: "+ −", action: "Zoom in / out" },
+  { keys: "Click a dot", action: "Details + open its Street View" },
   { keys: "F", action: "Fly to next target" },
   { keys: "R", action: "Back to Miami" },
   { keys: "Esc", action: "Pause" },
@@ -91,6 +106,7 @@ export default function ExploreGame() {
   );
   const [paused, setPaused] = useState(false);
   const [showList, setShowList] = useState(false);
+  const [selected, setSelected] = useState<(ExploreSpot & { kind: Kind }) | null>(null);
   const [nextTarget, setNextTarget] = useState<{
     name: string;
     km: number;
@@ -100,13 +116,9 @@ export default function ExploreGame() {
     lng: ROAM_START.lng,
     z: ROAM_START.zoom,
   });
-  const [splash, setSplash] = useState<{
-    kind: Kind;
-    name: string;
-    analog: string;
-    blurb: string;
-    t: number;
-  } | null>(null);
+  const [splash, setSplash] = useState<
+    (ExploreSpot & { kind: Kind; t: number }) | null
+  >(null);
   const complete = found.size === roamPois.length;
 
   const mapEl = useRef<HTMLDivElement>(null);
@@ -142,13 +154,7 @@ export default function ExploreGame() {
           : apply(stashesRef.current, setStashesFound);
     if (!hit) return;
     if (splashTimer.current) clearTimeout(splashTimer.current);
-    setSplash({
-      kind,
-      name: spot.name,
-      analog: spot.analog,
-      blurb: spot.blurb,
-      t: Date.now(),
-    });
+    setSplash({ ...spot, kind, t: Date.now() });
     splashTimer.current = setTimeout(() => setSplash(null), 4200);
   }, []);
 
@@ -209,6 +215,7 @@ export default function ExploreGame() {
               icon: dot(KIND_COLOR[kind], kind === "stash" ? 11 : 14),
               title: s.name,
             }).addTo(map);
+            m.on("click", () => setSelected({ ...s, kind }));
             markers.set(s.slug, m);
           } else if (!visible && m) {
             m.remove();
@@ -518,6 +525,68 @@ export default function ExploreGame() {
         <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
       </div>
 
+      {/* selected spot card */}
+      {selected && !paused && (
+        <div className="absolute bottom-16 left-1/2 z-[700] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-md border border-white/15 bg-black/85 p-4 backdrop-blur-md">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p
+                className="font-mono text-[9px] uppercase tracking-[0.3em]"
+                style={{ color: KIND_COLOR[selected.kind] }}
+              >
+                {selected.kind === "poi"
+                  ? "Location"
+                  : selected.kind === "landmark"
+                    ? "Landmark"
+                    : "Hidden spot"}
+              </p>
+              <h3 className="mt-0.5 font-display text-2xl tracking-wide text-white">
+                {selected.name}
+              </h3>
+              <p className="font-mono text-[9px] uppercase tracking-wider text-cyan-300">
+                ≈ {selected.analog}
+              </p>
+            </div>
+            <button
+              onClick={() => setSelected(null)}
+              className="text-slate-500 transition-colors hover:text-white"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-300">
+            {selected.blurb}
+          </p>
+          <div className="mt-3 flex gap-2">
+            <a
+              href={streetViewUrl(selected)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-brand px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-background transition-shadow hover:shadow-[0_0_20px_-4px_rgba(182,243,74,0.8)]"
+            >
+              <ExternalLink className="size-3.5" />
+              Street View
+            </a>
+            <button
+              onClick={() => {
+                mapRef.current?.flyTo([selected.lat, selected.lng], 15, {
+                  duration: 1.4,
+                });
+                setSelected(null);
+              }}
+              className="flex items-center justify-center gap-1.5 rounded border border-white/20 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-slate-300 transition-colors hover:border-white/50"
+            >
+              <MapPin className="size-3.5" />
+              Zoom in
+            </button>
+          </div>
+          <p className="mt-2 font-mono text-[8px] uppercase tracking-widest text-slate-600">
+            opens Google Maps · nearest available panorama
+          </p>
+        </div>
+      )}
+
       {/* discovery splash */}
       {splash && (
         <div
@@ -537,9 +606,14 @@ export default function ExploreGame() {
           <h2 className="mt-1 font-display text-5xl leading-none tracking-wide text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl">
             {splash.name}
           </h2>
-          <p className="mt-1 max-w-sm font-mono text-[10px] uppercase tracking-wider text-cyan-300">
-            ≈ {splash.analog}
-          </p>
+          <a
+            href={streetViewUrl(splash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto mt-1 inline-flex max-w-sm items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 transition-colors hover:text-cyan-200"
+          >
+            ≈ {splash.analog} · Street View ↗
+          </a>
           <p className="mt-1 max-w-sm text-sm text-slate-300 drop-shadow">
             {splash.blurb}
           </p>
@@ -598,9 +672,15 @@ export default function ExploreGame() {
                         {kind === "stash" && !got ? "???" : s.name}
                       </span>
                       {got && (
-                        <span className="ml-auto truncate font-mono text-[8px] text-slate-500">
-                          {s.analog}
-                        </span>
+                        <a
+                          href={streetViewUrl(s)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`${s.analog} — open Street View`}
+                          className="ml-auto text-cyan-400/70 transition-colors hover:text-cyan-300"
+                        >
+                          <ExternalLink className="size-3" />
+                        </a>
                       )}
                     </li>
                   );
