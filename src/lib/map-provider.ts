@@ -1,13 +1,18 @@
-import type { MapCategory } from "@/lib/types";
+import type { MapCategory, SourceReference, VerificationStatus } from "@/lib/types";
 import { locations } from "@/data/locations";
+import { entityImages, type EntityImage } from "@/data/entity-images";
 
 export interface MapPoint {
   id: string;
+  slug: string;
   name: string;
   category: MapCategory;
   description?: string;
   href?: string;
   coordinates: { x: number; y: number };
+  verificationStatus?: VerificationStatus;
+  sources?: SourceReference[];
+  image?: EntityImage;
 }
 
 export interface MapDataProvider {
@@ -44,11 +49,15 @@ class StaticMapProvider implements MapDataProvider {
       .filter((l) => l.coordinates !== undefined)
       .map((l) => ({
         id: l.id,
+        slug: l.slug,
         name: l.name,
         category: (l.mapCategory ?? "location") as MapCategory,
         description: l.description,
         href: `/locations/${l.slug}`,
         coordinates: l.coordinates as { x: number; y: number },
+        verificationStatus: l.verificationStatus,
+        sources: l.sourceReferences,
+        image: entityImages[l.slug],
       }));
   }
 }

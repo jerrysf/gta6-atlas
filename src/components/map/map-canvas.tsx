@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapPin, PanelLeft, Search, X } from "lucide-react";
+import { ArrowRight, MapPin, PanelLeft, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { EntityCover } from "@/components/entity-cover";
+import { VerificationBadge } from "@/components/verification-badge";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import type { MapPoint } from "@/lib/map-provider";
@@ -76,8 +79,8 @@ export default function MapCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
-  const popupRef = useRef<L.Popup | null>(null);
   const [ready, setReady] = useState(false);
+  const [selected, setSelected] = useState<MapPoint | null>(null);
   const [query, setQuery] = useState("");
   const [enabled, setEnabled] = useState<Set<MapCategory>>(
     () => new Set(categories.map((c) => c.id)),
@@ -128,13 +131,32 @@ export default function MapCanvas({
     const markers = markersRef.current;
 
     return () => {
-      popupRef.current?.remove();
       markers.forEach((m) => m.remove());
       markers.clear();
       map.remove();
       mapRef.current = null;
     };
   }, []);
+
+  const focusPoint = useCallback((point: MapPoint) => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo(
+      [point.coordinates.y, point.coordinates.x],
+      Math.max(map.getZoom(), 4),
+      { duration: 0.8 },
+    );
+    trackEvent("map_interaction", { type: "focus", id: point.id });
+  }, []);
+
+  const selectPoint = useCallback(
+    (point: MapPoint) => {
+      setSelected(point);
+      setPanelOpen(true);
+      focusPoint(point);
+    },
+    [focusPoint],
+  );
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
@@ -156,40 +178,18 @@ export default function MapCanvas({
         point.coordinates.x,
       ];
 
-      const marker = L.marker(latLng, { icon }).addTo(map);
+      const marker = L.marker(latLng, {
+        icon,
+        bubblingMouseEvents: false,
+      }).addTo(map);
       marker.on("click", () => {
         trackEvent("map_interaction", { type: "marker_click", id: point.id });
-        popupRef.current?.remove();
-        popupRef.current = L.popup({
-          closeButton: true,
-          maxWidth: 280,
-          className: "atlas-popup",
-        })
-          .setLatLng(latLng)
-          .setContent(
-            `<div class="p-1">
-              <p class="font-semibold text-sm">${point.name}</p>
-              ${point.description ? `<p class="mt-1 text-xs opacity-80">${point.description}</p>` : ""}
-              ${point.href ? `<a class="mt-2 inline-block text-xs font-medium underline" href="${point.href}">View details →</a>` : ""}
-            </div>`,
-          )
-          .openOn(map);
+        selectPoint(point);
       });
 
       markersRef.current.set(point.id, marker);
     }
-  }, [ready, visible, colorByCategory]);
-
-  const focusPoint = (point: MapPoint) => {
-    const map = mapRef.current;
-    if (!map) return;
-    map.flyTo(
-      [point.coordinates.y, point.coordinates.x],
-      Math.max(map.getZoom(), 4),
-      { duration: 0.8 },
-    );
-    trackEvent("map_interaction", { type: "focus", id: point.id });
-  };
+  }, [ready, visible, colorByCategory, selectPoint]);
 
   const toggleCategory = (id: MapCategory, checked: boolean) => {
     setEnabled((prev) => {
@@ -211,7 +211,7 @@ export default function MapCanvas({
       {/* Control panel */}
       <aside
         className={cn(
-          "absolute left-0 top-0 z-[1000] flex h-full w-72 flex-col border-r border-border bg-card/95 backdrop-blur transition-transform duration-200",
+          "absolute left-0 top-0 z-[1000] flex h-full w-80 flex-col border-r border-border bg-card/95 backdrop-blur transition-transform duration-200",
           !panelOpen && "-translate-x-full",
         )}
       >
@@ -266,14 +266,73 @@ export default function MapCanvas({
           </ul>
         </div>
         <div className="flex-1 overflow-y-auto p-3">
+          {selected && (
+            <div className="mb-3 overflow-hidden rounded-lg border border-border bg-surface-2">
+              <div className="relative">
+                <EntityCover name={selected.name} image={selected.image} />
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  aria-label="Close details"
+                  className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-background/80 text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+              <div className="space-y-2.5 p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold">{selected.name}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {categories.find((c) => c.id === selected.category)
+                        ?.label ?? "Point of Interest"}
+                    </p>
+                  </div>
+                  {selected.verificationStatus && (
+                    <VerificationBadge status={selected.verificationStatus} />
+                  )}
+                </div>
+                {selected.description && (
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {selected.description}
+                  </p>
+                )}
+                {selected.href && (
+                  <Link
+                    href={selected.href}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-brand-cyan hover:underline"
+                  >
+                    View full details <ArrowRight className="size-3" />
+                  </Link>
+                )}
+                {selected.sources && selected.sources.length > 0 && (
+                  <p className="border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+                    Source:{" "}
+                    <a
+                      href={selected.sources[0].url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      {selected.sources[0].label}
+                    </a>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
           {points.length > 0 ? (
             <ul className="space-y-1">
               {visible.map((p) => (
                 <li key={p.id}>
                   <button
                     type="button"
-                    onClick={() => focusPoint(p)}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-surface-2"
+                    onClick={() => selectPoint(p)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-surface-2",
+                      selected?.id === p.id && "bg-surface-2 text-brand",
+                    )}
+                    aria-current={selected?.id === p.id}
                   >
                     <span
                       className="inline-block size-2.5 shrink-0 rounded-full"

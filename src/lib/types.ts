@@ -65,7 +65,7 @@ export interface GameLocation extends BaseEntity {
   relatedMissions?: string[];
   coordinates?: { x: number; y: number };
   /** Map layer to display on; community-estimated positions only. */
-  mapCategory?: "location" | "poi";
+  mapCategory?: "location" | "poi" | "safehouse";
 }
 
 export type CollectibleCategory = "collectible" | "secret";
