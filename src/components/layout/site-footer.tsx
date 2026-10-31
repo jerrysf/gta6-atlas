@@ -7,6 +7,7 @@ import {
   Video,
 } from "lucide-react";
 import { siteConfig } from "@/lib/site";
+import { NewsletterForm } from "@/components/newsletter-form";
 
 const SOCIAL_ICONS = {
   x: AtSign,
@@ -47,6 +48,7 @@ export function SiteFooter() {
               GTA6 <span className="text-brand">ATLAS</span>
             </Link>
             <p className="text-sm text-muted-foreground">{siteConfig.tagline}</p>
+            <NewsletterForm />
             <div className="flex gap-2 pt-1">
               {siteConfig.socials.map((s) => {
                 const Icon = SOCIAL_ICONS[s.key as keyof typeof SOCIAL_ICONS];

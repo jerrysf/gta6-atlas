@@ -4,6 +4,7 @@ import { weaponRepo } from "@/lib/repository";
 import { weapons } from "@/data/weapons";
 import { EntityDetail } from "@/components/entity-detail";
 import { entityImages } from "@/data/entity-images";
+import { prevNextOf } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -65,6 +66,7 @@ export default async function WeaponPage({
       facts={facts}
       sources={w.sourceReferences}
       related={related}
+      prevNext={prevNextOf(weapons, w.slug, (s) => `/weapons/${s}`)}
     />
   );
 }

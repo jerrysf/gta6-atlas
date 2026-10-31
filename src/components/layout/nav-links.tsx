@@ -8,7 +8,7 @@ export function NavLinks({ items }: { items: { href: string; label: string }[] }
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Primary" className="ml-6 hidden items-center gap-1 lg:flex">
+    <nav aria-label="Primary" className="ml-6 hidden items-center gap-1 xl:flex">
       {items.map((item) => {
         const active =
           item.href === "/"

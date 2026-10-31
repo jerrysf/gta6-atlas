@@ -4,6 +4,7 @@ import { vehicleRepo } from "@/lib/repository";
 import { vehicles } from "@/data/vehicles";
 import { EntityDetail } from "@/components/entity-detail";
 import { entityImages } from "@/data/entity-images";
+import { prevNextOf } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -97,6 +98,7 @@ export default async function VehiclePage({
       facts={facts}
       sources={v.sourceReferences}
       related={related}
+      prevNext={prevNextOf(vehicles, v.slug, (s) => `/vehicles/${s}`)}
     />
   );
 }

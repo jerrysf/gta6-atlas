@@ -15,6 +15,7 @@ import JsonLd from "@/components/json-ld";
 import { articleJsonLd, createMetadata } from "@/lib/seo";
 import { guideCategoryLabel } from "@/components/guide-card";
 import { ShareButtons } from "@/components/share-buttons";
+import { PrevNext } from "@/components/prev-next";
 import { PreorderCta } from "@/components/preorder-cta";
 import { absoluteUrl } from "@/lib/site";
 
@@ -50,6 +51,13 @@ export default async function GuidePage({
     related.length > 0
       ? related
       : all.filter((g) => g.slug !== guide.slug).slice(0, 3);
+
+  // Prev/next within the same category (all is already newest-first)
+  const catList = all.filter((g) => g.category === guide.category);
+  const navList = catList.length > 1 ? catList : all;
+  const idx = navList.findIndex((g) => g.slug === guide.slug);
+  const navPrev = navList[idx - 1];
+  const navNext = navList[idx + 1];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -135,6 +143,20 @@ export default async function GuidePage({
           {guide.faq && guide.faq.length > 0 && (
             <FaqSection faq={guide.faq} withSchema />
           )}
+
+          <PrevNext
+            label="More guides"
+            prev={
+              navPrev
+                ? { name: navPrev.title, href: `/guides/${navPrev.slug}` }
+                : undefined
+            }
+            next={
+              navNext
+                ? { name: navNext.title, href: `/guides/${navNext.slug}` }
+                : undefined
+            }
+          />
         </article>
 
         <aside className="space-y-6">

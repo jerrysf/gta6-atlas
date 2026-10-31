@@ -14,6 +14,7 @@ export const siteConfig = {
     { label: "Collectibles", href: "/collectibles" },
     { label: "Music", href: "/music" },
     { label: "Wildlife", href: "/wildlife" },
+    { label: "Media", href: "/media" },
     { label: "Guides", href: "/guides" },
   ],
   footerNav: [

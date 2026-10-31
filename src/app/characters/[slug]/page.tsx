@@ -4,6 +4,7 @@ import { characterRepo } from "@/lib/repository";
 import { characters } from "@/data/characters";
 import { EntityDetail } from "@/components/entity-detail";
 import { entityImages } from "@/data/entity-images";
+import { prevNextOf } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -49,6 +50,7 @@ export default async function CharacterPage({
       facts={[{ label: "Role", value: c.role }]}
       sources={c.sourceReferences}
       related={related}
+      prevNext={prevNextOf(characters, c.slug, (s) => `/characters/${s}`)}
     />
   );
 }

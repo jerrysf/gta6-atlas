@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { EntityDetail } from "@/components/entity-detail";
 import { animals, animalClasses } from "@/data/animals";
 import { createMetadata } from "@/lib/seo";
+import { prevNextOf } from "@/lib/utils";
 
 export function generateStaticParams() {
   return animals.map((a) => ({ slug: a.slug }));
@@ -52,6 +53,7 @@ export default async function AnimalPage({
         { label: "First seen", value: a.firstSeen },
       ]}
       sources={a.sourceReferences}
+      prevNext={prevNextOf(animals, a.slug, (s) => `/wildlife/${s}`)}
       related={animals
         .filter((x) => x.slug !== a.slug && x.class === a.class)
         .concat(animals.filter((x) => x.slug !== a.slug && x.class !== a.class))

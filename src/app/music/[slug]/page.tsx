@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { EntityDetail } from "@/components/entity-detail";
 import { tracks } from "@/data/music";
 import { createMetadata } from "@/lib/seo";
+import { prevNextOf } from "@/lib/utils";
 
 export function generateStaticParams() {
   return tracks.map((t) => ({ slug: t.slug }));
@@ -56,6 +57,7 @@ export default async function TrackPage({
         },
       ]}
       sources={t.sourceReferences}
+      prevNext={prevNextOf(tracks, t.slug, (s) => `/music/${s}`)}
       related={tracks
         .filter((x) => x.slug !== t.slug && x.context === t.context)
         .slice(0, 5)

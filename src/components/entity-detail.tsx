@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { EntityCover } from "@/components/entity-cover";
 import { PageBreadcrumbs } from "@/components/breadcrumbs";
+import { PrevNext } from "@/components/prev-next";
 import { VerificationBadge } from "@/components/verification-badge";
 import { AdSlot } from "@/components/ads/ad-slot";
 import { VERIFICATION_META } from "@/lib/verification";
@@ -43,6 +44,7 @@ export function EntityDetail({
   facts = [],
   sources = [],
   related = [],
+  prevNext,
   children,
 }: {
   breadcrumbs: { name: string; href: string }[];
@@ -55,6 +57,10 @@ export function EntityDetail({
   facts?: { label: string; value: React.ReactNode }[];
   sources?: SourceReference[];
   related?: { name: string; href: string; description?: string }[];
+  prevNext?: {
+    prev?: { name: string; href: string };
+    next?: { name: string; href: string };
+  };
   children?: React.ReactNode;
 }) {
   return (
@@ -116,6 +122,9 @@ export function EntityDetail({
             {description}
           </p>
           {children}
+          {prevNext && (
+            <PrevNext prev={prevNext.prev} next={prevNext.next} />
+          )}
           {sources.length > 0 && (
             <section className="mt-10" aria-label="Sources">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">

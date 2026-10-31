@@ -5,6 +5,7 @@ import { locationRepo, missionRepo } from "@/lib/repository";
 import { locations } from "@/data/locations";
 import { EntityDetail } from "@/components/entity-detail";
 import { entityImages } from "@/data/entity-images";
+import { prevNextOf } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -79,6 +80,7 @@ export default async function LocationPage({
       facts={facts}
       sources={l.sourceReferences}
       related={[...relatedMissions, ...relatedLocations].slice(0, 6)}
+      prevNext={prevNextOf(locations, l.slug, (s) => `/locations/${s}`)}
     />
   );
 }

@@ -5,6 +5,7 @@ import { collectibleRepo, secretRepo } from "@/lib/repository";
 import { collectibles, secrets } from "@/data/collectibles";
 import { EntityDetail } from "@/components/entity-detail";
 import { entityImages } from "@/data/entity-images";
+import { prevNextOf } from "@/lib/utils";
 import { createMetadata } from "@/lib/seo";
 
 const all = () => [...collectibles, ...secrets];
@@ -80,6 +81,7 @@ export default async function CollectiblePage({
       facts={facts}
       sources={c.sourceReferences}
       related={related}
+      prevNext={prevNextOf([...collectibles, ...secrets], c.slug, (s) => `/collectibles/${s}`)}
     >
       {c.discoveryInstructions && (
         <section className="mt-8">

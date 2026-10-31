@@ -8,6 +8,7 @@ import {
   Crosshair,
   Database,
   Gem,
+  Images,
   Map as MapIcon,
   MapPin,
   Music,
@@ -107,6 +108,7 @@ const databaseLinks = [
   { label: "Secrets", href: "/secrets", icon: BookOpen, note: "Easter eggs & mysteries" },
   { label: "Music", href: "/music", icon: Music, note: "Soundtrack & The Album" },
   { label: "Wildlife", href: "/wildlife", icon: PawPrint, note: "Animals of Leonida" },
+  { label: "Media", href: "/media", icon: Images, note: "Screenshots & artwork" },
 ];
 
 const homeFaq = [
@@ -184,6 +186,25 @@ export default async function HomePage() {
               "repeating-linear-gradient(0deg, transparent 0 39px, #35c7d9 39px 40px), repeating-linear-gradient(90deg, transparent 0 39px, #35c7d9 39px 40px)",
           }}
         />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 hidden w-[55%] sm:block"
+          style={{
+            maskImage:
+              "linear-gradient(to left, black 0%, transparent 95%)",
+            WebkitMaskImage:
+              "linear-gradient(to left, black 0%, transparent 95%)",
+          }}
+        >
+          <Image
+            src="/leonida-hero.webp"
+            alt=""
+            fill
+            quality={55}
+            className="object-cover object-[55%_55%] opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card/70 via-transparent to-transparent" />
+        </div>
         <p
           aria-hidden
           className="text-outline pointer-events-none absolute -right-8 top-0 select-none font-display text-[22vw] leading-none opacity-40 sm:text-[16vw] lg:text-[13rem]"
@@ -236,7 +257,7 @@ export default async function HomePage() {
       {/* Database stats strip */}
       <section
         aria-label="Database coverage"
-        className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-border/60 gap-px sm:grid-cols-5"
+        className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-border/60 gap-px sm:grid-cols-4 lg:grid-cols-7"
       >
         {dbStats.map((s) => (
           <Link
