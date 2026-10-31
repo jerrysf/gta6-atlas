@@ -9,6 +9,7 @@ import * as THREE from "three";
 import {
   exploreIslands,
   explorePois,
+  exploreRings,
   terrainHeight,
 } from "@/data/explore";
 
@@ -342,6 +343,39 @@ function Beacon({
   );
 }
 
+/* ---------- golden rings ---------- */
+
+function GoldenRing({
+  ring,
+  collected,
+}: {
+  ring: { id: string; x: number; z: number; y: number; hint: string };
+  collected: boolean;
+}) {
+  const g = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    const m = g.current;
+    if (!m) return;
+    const t = clock.getElapsedTime();
+    m.rotation.y = t * 0.9;
+    m.position.y = ring.y + Math.sin(t * 1.6) * 0.8;
+  });
+  if (collected) return null;
+  return (
+    <group ref={g} position={[ring.x, ring.y, ring.z]}>
+      <mesh rotation={[0, Math.PI / 2, 0]}>
+        <torusGeometry args={[8, 0.9, 10, 36]} />
+        <meshBasicMaterial color="#ffd25a" fog={false} toneMapped={false} />
+      </mesh>
+      <mesh rotation={[0, Math.PI / 2, 0]}>
+        <torusGeometry args={[8, 0.35, 8, 36]} />
+        <meshBasicMaterial color="#fff3c4" fog={false} toneMapped={false} />
+      </mesh>
+      <pointLight color="#ffd25a" intensity={14} distance={40} />
+    </group>
+  );
+}
+
 /* ---------- airboat & camera ---------- */
 
 const SPAWN = { x: 30, z: 150, heading: Math.PI };
@@ -349,14 +383,21 @@ const SPAWN = { x: 30, z: 150, heading: Math.PI };
 function Airboat({
   keysRef,
   foundRef,
+  ringsRef,
+  posRef,
   onDiscover,
+  onRing,
 }: {
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
+  ringsRef: RefObject<Set<string>>;
+  posRef: RefObject<{ x: number; z: number; heading: number }>;
   onDiscover: (slug: string) => void;
+  onRing: (id: string) => void;
 }) {
   const boat = useRef<THREE.Group>(null);
   const fan = useRef<THREE.Mesh>(null);
+  const wake = useRef<THREE.Mesh>(null);
   const s = useRef({
     x: SPAWN.x,
     z: SPAWN.z,
@@ -412,6 +453,24 @@ function Airboat({
     }
     if (fan.current) fan.current.rotation.z += dt * (4 + Math.abs(st.speed) * 0.55);
 
+    // wake trail — visible when moving fast and close to the surface
+    if (wake.current) {
+      const nearSurface = st.lift < 2;
+      const strength = nearSurface
+        ? Math.min(1, Math.abs(st.speed) / MAX)
+        : 0;
+      (wake.current.material as THREE.MeshBasicMaterial).opacity =
+        strength * 0.28;
+      wake.current.scale.set(1, 1, 0.4 + strength * 1.6);
+      wake.current.position.y = terrainHeight(st.x, st.z) + 0.3 - st.y;
+    }
+
+    if (posRef.current) {
+      posRef.current.x = st.x;
+      posRef.current.z = st.z;
+      posRef.current.heading = st.heading;
+    }
+
     // chase camera
     const fx = Math.sin(st.heading);
     const fz = Math.cos(st.heading);
@@ -431,6 +490,19 @@ function Airboat({
         if (dx * dx + dz * dz < 42 * 42) {
           found.add(p.slug);
           onDiscover(p.slug);
+        }
+      }
+    }
+    const rings = ringsRef.current;
+    if (rings) {
+      for (const r of exploreRings) {
+        if (rings.has(r.id)) continue;
+        const dx = st.x - r.x;
+        const dz = st.z - r.z;
+        const dy = st.y - r.y;
+        if (dx * dx + dz * dz + dy * dy < 12 * 12) {
+          rings.add(r.id);
+          onRing(r.id);
         }
       }
     }
@@ -467,6 +539,20 @@ function Airboat({
         <boxGeometry args={[0.35, 1.8, 0.35]} />
         <meshStandardMaterial color="#22282f" roughness={0.6} />
       </mesh>
+      {/* wake trail */}
+      <mesh
+        ref={wake}
+        position={[0, -1.2, 6]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[3.4, 8]} />
+        <meshBasicMaterial
+          color="#bfe8ff"
+          transparent
+          opacity={0}
+          depthWrite={false}
+        />
+      </mesh>
       {/* running light */}
       <pointLight position={[0, 2, -3.6]} color="#B6F34A" intensity={6} distance={16} />
     </group>
@@ -477,14 +563,22 @@ function Airboat({
 
 export function ExploreScene({
   found,
+  ringsFound,
   keysRef,
   foundRef,
+  ringsRef,
+  posRef,
   onDiscover,
+  onRing,
 }: {
   found: Set<string>;
+  ringsFound: Set<string>;
   keysRef: RefObject<Record<string, boolean>>;
   foundRef: RefObject<Set<string>>;
+  ringsRef: RefObject<Set<string>>;
+  posRef: RefObject<{ x: number; z: number; heading: number }>;
   onDiscover: (slug: string) => void;
+  onRing: (id: string) => void;
 }) {
   return (
     <Canvas
@@ -507,7 +601,17 @@ export function ExploreScene({
       {explorePois.map((p) => (
         <Beacon key={p.slug} poi={p} found={found.has(p.slug)} />
       ))}
-      <Airboat keysRef={keysRef} foundRef={foundRef} onDiscover={onDiscover} />
+      {exploreRings.map((r) => (
+        <GoldenRing key={r.id} ring={r} collected={ringsFound.has(r.id)} />
+      ))}
+      <Airboat
+        keysRef={keysRef}
+        foundRef={foundRef}
+        ringsRef={ringsRef}
+        posRef={posRef}
+        onDiscover={onDiscover}
+        onRing={onRing}
+      />
     </Canvas>
   );
 }

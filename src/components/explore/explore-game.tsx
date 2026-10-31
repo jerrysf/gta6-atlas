@@ -1,10 +1,126 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Compass, List, Play, RotateCcw, X } from "lucide-react";
-import { explorePois } from "@/data/explore";
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Circle,
+  Compass,
+  List,
+  Play,
+  RotateCcw,
+  X,
+} from "lucide-react";
+import { exploreIslands, explorePois, exploreRings } from "@/data/explore";
 import { ExploreScene } from "@/components/explore/scene";
 import { cn } from "@/lib/utils";
+
+const STORAGE_KEY = "gta6-explore-v1";
+
+function loadProgress(): { pois: Set<string>; rings: Set<string> } {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { pois: new Set(), rings: new Set() };
+    const d = JSON.parse(raw) as { pois?: string[]; rings?: string[] };
+    return { pois: new Set(d.pois ?? []), rings: new Set(d.rings ?? []) };
+  } catch {
+    return { pois: new Set(), rings: new Set() };
+  }
+}
+
+function Minimap({
+  posRef,
+  found,
+  ringsFound,
+}: {
+  posRef: React.RefObject<{ x: number; z: number; heading: number }>;
+  found: Set<string>;
+  ringsFound: Set<string>;
+}) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    let raf = 0;
+    const draw = () => {
+      raf = requestAnimationFrame(draw);
+      const c = ref.current;
+      if (!c) return;
+      const g = c.getContext("2d");
+      if (!g) return;
+      const W = c.width;
+      const toMap = (x: number, z: number) => [
+        ((x + 480) / 960) * W,
+        ((z + 480) / 960) * W,
+      ];
+      g.clearRect(0, 0, W, W);
+      g.fillStyle = "rgba(8,24,38,0.9)";
+      g.fillRect(0, 0, W, W);
+      // islands
+      g.fillStyle = "#1d3323";
+      for (const isl of exploreIslands) {
+        const [px, pz] = toMap(isl.cx, isl.cz);
+        g.beginPath();
+        g.ellipse(
+          px,
+          pz,
+          (isl.rx / 960) * W,
+          (isl.rz / 960) * W,
+          0,
+          0,
+          Math.PI * 2
+        );
+        g.fill();
+      }
+      // pois
+      for (const p of explorePois) {
+        const [px, pz] = toMap(p.x, p.z);
+        g.fillStyle = found.has(p.slug) ? "#B6F34A" : "#ff4fd8";
+        g.beginPath();
+        g.arc(px, pz, 2.2, 0, Math.PI * 2);
+        g.fill();
+      }
+      // rings
+      for (const r of exploreRings) {
+        if (ringsFound.has(r.id)) continue;
+        const [px, pz] = toMap(r.x, r.z);
+        g.strokeStyle = "#ffd25a";
+        g.lineWidth = 1.4;
+        g.beginPath();
+        g.arc(px, pz, 3, 0, Math.PI * 2);
+        g.stroke();
+      }
+      // boat
+      const pos = posRef.current;
+      if (pos) {
+        const [px, pz] = toMap(pos.x, pos.z);
+        g.save();
+        g.translate(px, pz);
+        g.rotate(-pos.heading);
+        g.fillStyle = "#ffffff";
+        g.beginPath();
+        g.moveTo(0, -5);
+        g.lineTo(3.4, 4);
+        g.lineTo(-3.4, 4);
+        g.closePath();
+        g.fill();
+        g.restore();
+      }
+    };
+    raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
+  }, [posRef, found, ringsFound]);
+  return (
+    <canvas
+      ref={ref}
+      width={160}
+      height={160}
+      className="size-32 rounded-lg border border-border bg-card/80 backdrop-blur sm:size-40"
+      aria-label="Minimap"
+    />
+  );
+}
 
 const KEY_ROWS: { keys: string; action: string }[] = [
   { keys: "W / S", action: "Throttle forward / reverse" },
@@ -16,7 +132,9 @@ const KEY_ROWS: { keys: string; action: string }[] = [
 
 export function ExploreGame() {
   const [started, setStarted] = useState(false);
-  const [found, setFound] = useState<Set<string>>(new Set());
+  const [saved] = useState(loadProgress);
+  const [found, setFound] = useState<Set<string>>(saved.pois);
+  const [ringsFound, setRingsFound] = useState<Set<string>>(saved.rings);
   const [toast, setToast] = useState<{ name: string; blurb: string } | null>(null);
   const [showList, setShowList] = useState(false);
   const [webglOk] = useState(() => {
@@ -28,8 +146,15 @@ export function ExploreGame() {
     }
   });
   const keysRef = useRef<Record<string, boolean>>({});
-  const foundRef = useRef<Set<string>>(new Set());
+  const foundRef = useRef<Set<string>>(saved.pois);
+  const ringsRef = useRef<Set<string>>(saved.rings);
+  const posRef = useRef({ x: 30, z: 150, heading: Math.PI });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isTouch] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches
+  );
 
 
   useEffect(() => {
@@ -50,14 +175,46 @@ export function ExploreGame() {
     };
   }, []);
 
-  const onDiscover = useCallback((slug: string) => {
-    const poi = explorePois.find((p) => p.slug === slug);
-    if (!poi) return;
-    setFound(new Set(foundRef.current));
-    setToast({ name: poi.name, blurb: poi.blurb });
+  const persist = useCallback(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          pois: [...foundRef.current],
+          rings: [...ringsRef.current],
+        })
+      );
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  const showToast = useCallback((name: string, blurb: string) => {
+    setToast({ name, blurb });
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 4200);
   }, []);
+
+  const onDiscover = useCallback(
+    (slug: string) => {
+      const poi = explorePois.find((p) => p.slug === slug);
+      if (!poi) return;
+      setFound(new Set(foundRef.current));
+      persist();
+      showToast(poi.name, poi.blurb);
+    },
+    [persist, showToast]
+  );
+
+  const onRing = useCallback(
+    (id: string) => {
+      const ring = exploreRings.find((r) => r.id === id);
+      setRingsFound(new Set(ringsRef.current));
+      persist();
+      showToast("Golden Ring", ring ? ring.hint : "Ring collected");
+    },
+    [persist, showToast]
+  );
 
   const allFound = found.size === explorePois.length;
 
@@ -66,9 +223,13 @@ export function ExploreGame() {
       {webglOk ? (
         <ExploreScene
           found={found}
+          ringsFound={ringsFound}
           keysRef={keysRef}
           foundRef={foundRef}
+          ringsRef={ringsRef}
+          posRef={posRef}
           onDiscover={onDiscover}
+          onRing={onRing}
         />
       ) : (
         <div className="flex h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -89,6 +250,9 @@ export function ExploreGame() {
               {" "}
               / {explorePois.length}
             </span>
+          </p>
+          <p className="mt-0.5 font-mono text-[10px] text-amber-300">
+            {ringsFound.size} / {exploreRings.length} golden rings
           </p>
         </div>
         <p className="max-w-[240px] rounded-md bg-background/60 px-2 py-1 font-mono text-[10px] leading-relaxed text-muted-foreground backdrop-blur">
@@ -185,6 +349,56 @@ export function ExploreGame() {
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {/* minimap */}
+      <div className="pointer-events-none absolute bottom-4 right-4">
+        <Minimap posRef={posRef} found={found} ringsFound={ringsFound} />
+      </div>
+
+      {/* touch controls */}
+      {isTouch && started && (
+        <div className="absolute bottom-40 left-1/2 flex w-full max-w-xs -translate-x-1/2 items-end justify-between px-4">
+          <div className="flex gap-2">
+            {(
+              [
+                { code: "KeyA", icon: ChevronLeft, label: "Steer left" },
+                { code: "KeyD", icon: ChevronRight, label: "Steer right" },
+              ] as const
+            ).map((b) => (
+              <button
+                key={b.code}
+                aria-label={b.label}
+                className="flex size-14 items-center justify-center rounded-full border border-border bg-card/80 text-foreground backdrop-blur active:border-brand active:bg-brand/20"
+                onTouchStart={() => (keysRef.current[b.code] = true)}
+                onTouchEnd={() => (keysRef.current[b.code] = false)}
+                onTouchCancel={() => (keysRef.current[b.code] = false)}
+              >
+                <b.icon className="size-6" />
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {(
+              [
+                { code: "ShiftLeft", icon: ChevronDown, label: "Descend" },
+                { code: "Space", icon: Circle, label: "Climb" },
+                { code: "KeyW", icon: ChevronUp, label: "Throttle" },
+              ] as const
+            ).map((b) => (
+              <button
+                key={b.code}
+                aria-label={b.label}
+                className="flex size-14 items-center justify-center rounded-full border border-border bg-card/80 text-foreground backdrop-blur active:border-brand active:bg-brand/20"
+                onTouchStart={() => (keysRef.current[b.code] = true)}
+                onTouchEnd={() => (keysRef.current[b.code] = false)}
+                onTouchCancel={() => (keysRef.current[b.code] = false)}
+              >
+                <b.icon className="size-6" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

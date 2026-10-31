@@ -54,6 +54,27 @@ export const exploreIslands: ExploreIsland[] = [
   { id: "key-6", name: "Keys", cx: -112, cz: 272, rx: 26, rz: 24, y: 1.5, kind: "keys" },
 ];
 
+export interface ExploreRing {
+  id: string;
+  x: number;
+  z: number;
+  y: number;
+  hint: string;
+}
+
+/** Golden rings to fly through — bonus collectibles scattered over water,
+ * channels and one over Mount Kalaga's peak. */
+export const exploreRings: ExploreRing[] = [
+  { id: "r1", x: -270, z: 200, y: 14, hint: "South channel" },
+  { id: "r2", x: -60, z: 205, y: 15, hint: "Keys strait" },
+  { id: "r3", x: 60, z: 60, y: 20, hint: "Vice City bay" },
+  { id: "r4", x: 140, z: 40, y: 24, hint: "East coast" },
+  { id: "r5", x: -175, z: -400, y: 72, hint: "Kalaga summit — climb!" },
+  { id: "r6", x: -330, z: -110, y: 18, hint: "West coast" },
+  { id: "r7", x: -140, z: 60, y: 15, hint: "Mainland lake" },
+  { id: "r8", x: -30, z: -140, y: 16, hint: "North bay" },
+];
+
 /** Terrain height at a world position — islands get their flat top plus a
  * soft coastal falloff; Mount Kalaga rises into a peak. Water is 0. */
 export function terrainHeight(x: number, z: number): number {
