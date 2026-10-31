@@ -21,6 +21,7 @@ export default async function WeaponsPage() {
     slug: w.slug,
     description: w.description,
     href: `/weapons/${w.slug}`,
+    meta: w.basedOn,
     category: w.category,
     verificationStatus: w.verificationStatus,
   }));

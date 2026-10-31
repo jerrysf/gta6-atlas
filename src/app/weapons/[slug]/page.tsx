@@ -34,6 +34,7 @@ export default async function WeaponPage({
   const facts: Fact[] = (
     [
       { label: "Category", value: w.category },
+      w.basedOn && { label: "Based on (real life)", value: w.basedOn },
       w.damage != null && { label: "Damage", value: String(w.damage) },
       w.accuracy != null && { label: "Accuracy", value: String(w.accuracy) },
       w.fireRate != null && { label: "Fire rate", value: String(w.fireRate) },

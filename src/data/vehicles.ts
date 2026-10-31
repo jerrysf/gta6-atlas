@@ -24,6 +24,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Vapid",
     description:
       "Brian Heder's pickup, seen when he visits Jason in the Leonida Keys at the start of Trailer 2. A heavy-duty 4x4 in the style of a Ford Raptor — the community-identified name carries over from GTA Online.",
+    basedOn: "Ford F-150 Raptor",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -36,6 +38,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Maibatsu",
     description:
       "Two-door coupe spotted curbside as Jason drives through his neighborhood in Trailer 2 — Eclipse-style compact sports styling. Name is community-identified from the returning GTA model.",
+    basedOn: "Mitsubishi Eclipse",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -48,6 +52,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Invetero",
     description:
       "Blue Corvette-style sports car seen on the highway in Trailer 2. Widely identified by the community as the returning Coquette; in-game name unconfirmed.",
+    basedOn: "Chevrolet Corvette",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -60,6 +66,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bravado",
     description:
       "Viper-style sports car visible in the downtown Vice City traffic shots of Trailer 2. Community-identified as the returning Banshee nameplate.",
+    basedOn: "Dodge Viper",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -72,6 +80,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Emperor",
     description:
       "Lexus RC F-style coupe seen among the street scenes in Trailer 2. Community identification pending in-game verification.",
+    basedOn: "Lexus RC F",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -84,6 +94,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Pfister",
     description:
       "Porsche Cayman-style sports car spotted in Trailer 2's Vice City sequences. Name carried over from the GTA Online model by community consensus.",
+    basedOn: "Porsche 718 Cayman",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -96,6 +108,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Imponte",
     description:
       "Second-generation Firebird-style muscle car identified in Trailer 2 footage. Returning nameplate unconfirmed.",
+    basedOn: "Pontiac Firebird Trans Am",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -108,6 +122,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bravado",
     description:
       "Modern muscle car visible in Trailer 2 street scenes — identified by the community as the widebody Gauntlet variant from GTA Online.",
+    basedOn: "Dodge Challenger SRT",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -120,6 +136,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bravado",
     description:
       "Charger-style pursuit sedan seen as a police interceptor in Trailer 2's chase footage. Community-identified name; final model name unconfirmed.",
+    basedOn: "Dodge Charger",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -132,6 +150,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Dundreary",
     description:
       "Full-size Navigator-style SUV spotted in Trailer 2. Community-applied name from the returning GTA Online model.",
+    basedOn: "Chevrolet Suburban",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -144,6 +164,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Pfister",
     description:
       "Macan-style compact SUV seen in official footage. Community identification pending in-game verification.",
+    basedOn: "Porsche Macan",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -156,6 +178,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Brute",
     description:
       "Armored SWAT truck rammed into by an explosion-launched sedan during the Trailer 2 pursuit sequence — Leonida law enforcement's heavy response unit.",
+    basedOn: "Lenco BearCat",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -168,6 +192,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "MTL",
     description:
       "Cab-over semi truck seen hauling through Leonida in official footage. Community-identified returning nameplate.",
+    basedOn: "Kenworth cab-over semi",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -180,6 +206,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "LCC",
     description:
       "Red chopper Jason rides past a seaplane in Trailer 2's Keys footage. Community-identified as the returning Avarus nameplate.",
+    basedOn: "custom chopper",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -192,6 +220,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Western",
     description:
       "Harley-style cruiser spotted in official footage. Community-applied name from the returning GTA Online model.",
+    basedOn: "Harley-Davidson chopper",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -204,6 +234,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Maibatsu",
     description:
       "Dirt bike seen in backcountry and off-road footage around Mount Kalaga. Community identification; name unconfirmed.",
+    basedOn: "Honda CRF dirt bike",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -216,6 +248,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Speedophile",
     description:
       "Jet ski ridden past yachts off the Leonida coast in Trailer 2 — the returning personal watercraft nameplate by community identification.",
+    basedOn: "Sea-Doo personal watercraft",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -228,6 +262,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Dinka",
     description:
       "Sailing yacht visible in marina and offshore shots of official footage. Community-identified returning name.",
+    basedOn: "cruising sailboat",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -240,6 +276,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Nagasaki",
     description:
       "Rigid inflatable boat spotted in Keys water footage. Community identification pending in-game verification.",
+    basedOn: "rigid inflatable boat",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -251,6 +289,8 @@ export const vehicles: Vehicle[] = [
     category: "boats",
     description:
       "Flat-bottomed fan boat skimmed through the Grassrivers wetlands in Trailer 2 — the signature way to cross Leonida's swamps. Model name unconfirmed.",
+    basedOn: "Everglades fan boat",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -263,6 +303,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Nagasaki",
     description:
       "Light attack helicopter seen over the Grassrivers in Trailer 2 — the returning Buzzard nameplate by community identification.",
+    basedOn: "light attack helicopter",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -274,6 +316,8 @@ export const vehicles: Vehicle[] = [
     category: "aircraft",
     description:
       "Law-enforcement helicopter visible in pursuit footage across Vice City. Community-identified returning name.",
+    basedOn: "police patrol helicopter",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -285,6 +329,8 @@ export const vehicles: Vehicle[] = [
     category: "aircraft",
     description:
       "Seaplane parked at Brian's Boat Works & Marina and flown over the Leonida Keys in Trailer 2 — a nod to the GTA III-era nameplate by community identification.",
+    basedOn: "Cessna-style seaplane",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -296,6 +342,8 @@ export const vehicles: Vehicle[] = [
     category: "aircraft",
     description:
       "Commercial airliner seen low over the highway gantries of Vice City in Trailer 2 — FlyUS livery. Model name unconfirmed.",
+    basedOn: "commercial airliner",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -308,6 +356,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Vapid",
     description:
       "The weathered Ford Ranchero-style coupe-utility Jason drives in the first official GTA VI artwork — his daily beater. Community-identified manufacturer.",
+    basedOn: "Chevrolet El Camino-style ute",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -320,6 +370,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Albany",
     description:
       "A finned late-'50s Cadillac-style cruiser parked roadside in Trailer 2 — all chrome and tailfins. Community-applied manufacturer name pending in-game verification.",
+    basedOn: "classic American sedan",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -332,6 +384,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Declasse",
     description:
       "Rusty hooded pickup followed through a highway POV shot in Trailer 2 — a workhorse two-tone truck. Community-identified nameplate.",
+    basedOn: "Chevrolet K5 Blazer",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -344,6 +398,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bravado",
     description:
       "Dually pickup spotted towing a Sea-Doo-style jet ski trailer toward Vice City in Trailer 2. Community-identified returning name.",
+    basedOn: "Ram 1500 dually",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -356,6 +412,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Vapid",
     description:
       "Expedition-style full-size SUV seen in Trailer 2 traffic. Community identification from the returning GTA Online model.",
+    basedOn: "Ford Expedition",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -368,6 +426,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Declasse",
     description:
       "Suburban-style SUV spotted in official footage. Community-applied name from the returning model.",
+    basedOn: "Chevrolet Suburban",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -380,6 +440,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Vapid",
     description:
       "Explorer-style police SUV in Vice City Police Department livery — seen in Trailer 2 pursuit and response footage. Community-identified name.",
+    basedOn: "Ford Explorer",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -392,6 +454,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Emperor",
     description:
       "VDPD patrol sedan nicknamed 'La Perle' by the community — the standard Vice City police interceptor seen across Trailer 2.",
+    basedOn: "Lexus GS police cruiser",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -404,6 +468,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Benefactor",
     description:
       "Mercedes-style sedan with aggressive spike-like wheel rims spotted in Trailer 2 street scenes — closely resembles the returning Schafter but visibly updated.",
+    basedOn: "Mercedes-Benz S-Class",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -416,6 +482,8 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Pegassi",
     description:
       "Lamborghini-style supercar spotted near the shipping containers in Trailer 2. Community-identified as the returning Tempesta nameplate.",
+    basedOn: "Lamborghini Huracán",
+    debut: "returning",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -427,6 +495,7 @@ export const vehicles: Vehicle[] = [
     category: "cars",
     description:
       "Buick Reatta-inspired convertible seen in Trailer 2 cruising shots. No manufacturer or model name confirmed.",
+    basedOn: "Buick Reatta",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -438,6 +507,7 @@ export const vehicles: Vehicle[] = [
     category: "cars",
     description:
       "Mercedes CLE-inspired drop-top Bae-Luxe leans on in Trailer 2. Unnamed — community identification by styling only.",
+    basedOn: "Mercedes-Benz CLE",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -449,6 +519,8 @@ export const vehicles: Vehicle[] = [
     category: "other",
     description:
       "Vice City Metro Mule — the elevated rapid-transit train seen gliding through downtown in Trailer 2, 'VCMM' branding visible. Community-documented name.",
+    basedOn: "Miami Metrorail",
+    debut: "new",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
@@ -460,6 +532,7 @@ export const vehicles: Vehicle[] = [
     category: "cars",
     description:
       "Hydraulic-bouncing lowrider seen in Trailer 1's street montage — Leonida's car culture on full display. Model name unconfirmed.",
+    basedOn: "classic lowrider",
     verificationStatus: "community_reported",
     sourceReferences: [OFFICIAL_FOOTAGE],
     lastVerifiedAt: "2026-10-31",
@@ -472,6 +545,7 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Vapid",
     description:
       "SUV parked outside Hank's Waffles in Trailer 2's diner sequence. Community-identified manufacturer; model name unconfirmed.",
+    basedOn: "Ford Explorer-style SUV",
     verificationStatus: "community_reported",
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",

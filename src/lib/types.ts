@@ -30,6 +30,10 @@ export type VehicleCategory =
 export interface Vehicle extends BaseEntity {
   category: VehicleCategory;
   manufacturer?: string;
+  /** Real-life vehicle the design is based on (community-documented). */
+  basedOn?: string;
+  /** Whether the model is new to the series or returns from an earlier GTA. */
+  debut?: "new" | "returning";
   performance?: {
     topSpeed?: number;
     acceleration?: number;
@@ -42,6 +46,8 @@ export interface Vehicle extends BaseEntity {
 
 export interface Weapon extends BaseEntity {
   category: string;
+  /** Real-world firearm the design is based on (community-documented). */
+  basedOn?: string;
   damage?: number;
   accuracy?: number;
   fireRate?: number;

@@ -15,6 +15,7 @@ export function EntityDetail({
   description,
   verificationStatus,
   image,
+  tags = [],
   facts = [],
   sources = [],
   related = [],
@@ -26,6 +27,7 @@ export function EntityDetail({
   description: string;
   verificationStatus: VerificationStatus;
   image?: EntityImage;
+  tags?: { label: string; tone?: "lime" | "cyan" | "muted" }[];
   facts?: { label: string; value: React.ReactNode }[];
   sources?: SourceReference[];
   related?: { name: string; href: string; description?: string }[];
@@ -61,6 +63,20 @@ export function EntityDetail({
               {name}
             </h1>
             <VerificationBadge status={verificationStatus} />
+            {tags.map((t) => (
+              <span
+                key={t.label}
+                className={
+                  t.tone === "lime"
+                    ? "rounded-full border border-brand/40 bg-brand/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand"
+                    : t.tone === "cyan"
+                      ? "rounded-full border border-brand-cyan/40 bg-brand-cyan/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-cyan"
+                      : "rounded-full border border-border bg-surface-2 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground"
+                }
+              >
+                {t.label}
+              </span>
+            ))}
           </div>
           {role && (
             <p className="mt-1 text-sm font-medium text-brand-cyan">{role}</p>

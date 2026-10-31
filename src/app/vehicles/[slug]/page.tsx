@@ -33,7 +33,16 @@ export default async function VehiclePage({
   type Fact = { label: string; value: React.ReactNode };
   const facts: Fact[] = (
     [
+      { label: "Class", value: v.category },
       v.manufacturer && { label: "Manufacturer", value: v.manufacturer },
+      v.basedOn && { label: "Based on (real life)", value: v.basedOn },
+      v.debut && {
+        label: "Series status",
+        value:
+          v.debut === "new"
+            ? "New to the series in GTA VI"
+            : "Returning from an earlier GTA",
+      },
       v.location && { label: "Where to find", value: v.location },
       v.acquisition && { label: "How to get", value: v.acquisition },
       v.performance?.topSpeed != null && {
@@ -71,6 +80,16 @@ export default async function VehiclePage({
       description={v.description}
       verificationStatus={v.verificationStatus}
       image={entityImages[v.slug]}
+      tags={
+        v.debut
+          ? [
+              {
+                label: v.debut === "new" ? "New in VI" : "Returning",
+                tone: v.debut === "new" ? "lime" : "cyan",
+              },
+            ]
+          : []
+      }
       facts={facts}
       sources={v.sourceReferences}
       related={related}

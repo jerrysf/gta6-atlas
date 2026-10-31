@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
@@ -20,7 +21,14 @@ import { FaqSection } from "@/components/faq";
 import { PendingBanner } from "@/components/pending-banner";
 import { getAllGuides } from "@/lib/mdx";
 import JsonLd from "@/components/json-ld";
+import { Countdown } from "@/components/countdown";
 import { createMetadata, videoGameJsonLd } from "@/lib/seo";
+import { entityImages } from "@/data/entity-images";
+import { vehicles } from "@/data/vehicles";
+import { weapons } from "@/data/weapons";
+import { locations } from "@/data/locations";
+import { characters } from "@/data/characters";
+import { collectibles, secrets } from "@/data/collectibles";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA6 Atlas — The Ultimate GTA 6 Guide, Interactive Map & Game Database",
@@ -45,6 +53,9 @@ const tools = [
       "Chart Leonida — locations, missions, collectibles and hidden secrets on our interactive map as data is verified.",
     href: "/map",
     icon: MapIcon,
+    image: "/leonida-base.webp",
+    imageAlt: "Fan-made Leonida world map artwork",
+    objectPosition: "55% 60%",
   },
   {
     title: "100% Completion Tracker",
@@ -52,6 +63,9 @@ const tools = [
       "Track every mission, collectible and requirement on your road to 100% — progress saves in your browser.",
     href: "/completion",
     icon: CheckSquare,
+    image: entityImages["lucia-caminos"].url,
+    imageAlt: "Lucia Caminos official portrait",
+    objectPosition: "50% 20%",
   },
   {
     title: "GTA 6 Database",
@@ -59,6 +73,9 @@ const tools = [
       "Vehicles, weapons, characters and locations — a living encyclopedia for Grand Theft Auto VI.",
     href: "/vehicles",
     icon: Database,
+    image: entityImages["bravado-banshee"].url,
+    imageAlt: "Bravado Banshee in GTA VI Trailer 2",
+    objectPosition: "50% 50%",
   },
 ];
 
@@ -117,6 +134,24 @@ export default async function HomePage() {
   const popular = guides.filter((g) => g.category !== "news").slice(0, 3);
   const news = guides.filter((g) => g.category === "news").slice(0, 3);
 
+  const dbStats = [
+    { n: vehicles.length, l: "Vehicles", href: "/vehicles" },
+    { n: weapons.length, l: "Weapons", href: "/weapons" },
+    { n: locations.length, l: "Locations", href: "/locations" },
+    { n: characters.length, l: "Characters", href: "/characters" },
+    {
+      n: secrets.length,
+      l: "Secrets",
+      href: "/secrets",
+    },
+  ];
+  const dbCounts: Record<string, number> = Object.fromEntries(
+    dbStats.map((s) => [s.href, s.n]),
+  );
+  dbCounts["/collectibles"] = collectibles.filter(
+    (c) => c.kind === "collectible",
+  ).length;
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <JsonLd data={videoGameJsonLd()} />
@@ -145,9 +180,12 @@ export default async function HomePage() {
           VI
         </p>
         <div className="relative px-6 py-16 sm:px-12 sm:py-24 lg:px-16">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 font-mono text-[11px] font-semibold tracking-[0.2em] text-brand">
-            GRAND THEFT AUTO VI · LEONIDA
-          </p>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <p className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 font-mono text-[11px] font-semibold tracking-[0.2em] text-brand">
+              GRAND THEFT AUTO VI · LEONIDA
+            </p>
+            <Countdown />
+          </div>
           <h1 className="max-w-3xl font-display text-5xl uppercase leading-[0.95] tracking-wide sm:text-6xl lg:text-7xl">
             Your Ultimate Guide to{" "}
             <span className="text-brand">Grand Theft Auto VI</span>
@@ -184,18 +222,54 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Database stats strip */}
+      <section
+        aria-label="Database coverage"
+        className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-border/60 gap-px sm:grid-cols-5"
+      >
+        {dbStats.map((s) => (
+          <Link
+            key={s.l}
+            href={s.href}
+            className="group bg-card px-4 py-5 text-center transition-colors hover:bg-surface-2"
+          >
+            <p className="font-display text-3xl text-brand group-hover:text-brand-cyan">
+              {s.n}
+            </p>
+            <p className="mt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              {s.l}
+            </p>
+          </Link>
+        ))}
+      </section>
+      <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        Documented from official GTA VI media · every entry tagged by
+        verification status
+      </p>
+
       {/* Featured tools */}
       <section aria-labelledby="tools-heading" className="py-8">
         <SectionHeader title="Featured Tools" index={1} />
         <div className="grid gap-4 md:grid-cols-3">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="group">
-              <Card className="lift clip-notch h-full group-hover:border-brand/40">
-                <CardHeader>
-                  <span className="flex size-11 items-center justify-center rounded-lg bg-surface-2 text-brand">
+              <Card className="lift clip-notch h-full pt-0 group-hover:border-brand/40">
+                <div className="relative aspect-[16/8] overflow-hidden">
+                  <Image
+                    src={tool.image}
+                    alt={tool.imageAlt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ objectPosition: tool.objectPosition }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+                  <span className="absolute left-4 top-4 flex size-11 items-center justify-center rounded-lg border border-border/60 bg-background/70 text-brand backdrop-blur">
                     <tool.icon className="size-5" />
                   </span>
-                  <CardTitle className="mt-3 text-lg group-hover:text-brand">
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-lg group-hover:text-brand">
                     {tool.title}
                   </CardTitle>
                 </CardHeader>
@@ -263,6 +337,11 @@ export default async function HomePage() {
                   <div>
                     <p className="font-semibold group-hover:text-brand-cyan">
                       {d.label}
+                      {dbCounts[d.href] > 0 && (
+                        <span className="ml-1.5 rounded-sm bg-brand/15 px-1.5 py-0.5 font-mono text-[11px] text-brand">
+                          {dbCounts[d.href]}
+                        </span>
+                      )}
                     </p>
                     <p className="text-xs text-muted-foreground">{d.note}</p>
                   </div>

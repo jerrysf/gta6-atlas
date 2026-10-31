@@ -22,7 +22,7 @@ export default async function VehiclesPage() {
     slug: v.slug,
     description: v.description,
     href: `/vehicles/${v.slug}`,
-    meta: v.manufacturer,
+    meta: [v.manufacturer, v.basedOn].filter(Boolean).join(" · "),
     category: v.category,
     verificationStatus: v.verificationStatus,
   }));
