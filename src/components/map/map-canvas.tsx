@@ -19,13 +19,14 @@ interface CategoryMeta {
 }
 
 /**
- * Base map: our own vector artwork (public/leonida-map.svg) — a fan-made
- * speculative projection of Leonida drawn for this site, overlaid on a
- * Leaflet pixel CRS rather than Web Mercator (hence Leaflet, not
- * MapLibre). Geography follows the community consensus layout inferred
- * from official media. Unofficial; the real map arrives with the game.
+ * Base map: the YANIS community map by the State of Leonida mapping
+ * project (map.stateofleonida.net), self-hosted as a single stitched
+ * image (public/leonida-base.webp) rather than hotlinked tiles. It's a
+ * fan-made speculative projection rendered in a custom pixel CRS —
+ * hence Leaflet, not MapLibre. Unofficial; the real map arrives with
+ * the game.
  */
-const MAP_IMAGE_URL = "/leonida-map.svg";
+const MAP_IMAGE_URL = "/leonida-base.webp";
 const MAP_BOUNDS = L.latLngBounds([
   [-9000, -17000],
   [11000, 4000],
@@ -60,7 +61,7 @@ const yanisCRS: L.CRS = (() => {
   });
 })();
 const TILE_ATTRIBUTION =
-  "Fan-made speculative world map — unofficial community projection";
+  'Map artwork © <a href="https://map.stateofleonida.net" target="_blank" rel="noopener noreferrer">YANIS — State of Leonida</a> community project (unofficial fan projection)';
 
 export default function MapCanvas({
   points,
@@ -303,8 +304,8 @@ export default function MapCanvas({
         {points.length > 0 && (
           <div className="border-t border-border p-3">
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Fan-made speculative map drawn from official-media geography
-              hints. Marker positions are community estimates — not the
+              Base map by the YANIS community mapping project (unofficial fan
+              projection). Marker positions are community estimates — not the
               official in-game map.
             </p>
           </div>
@@ -328,8 +329,9 @@ export default function MapCanvas({
         <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[1000] flex justify-center px-4">
           <div className="pointer-events-auto rounded-md border border-border bg-card/90 px-3 py-1.5 text-center backdrop-blur">
             <p className="text-[11px] text-muted-foreground">
-              Fan-made speculative map — not the official in-game map.
-              Official world map arrives Nov 19, 2026.
+              Community-made speculative map (YANIS / State of Leonida) — not
+              the official in-game map. Official world map arrives Nov 19,
+              2026.
             </p>
           </div>
         </div>
