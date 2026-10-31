@@ -27,8 +27,11 @@ interface CategoryMeta {
  * the game.
  */
 const MAP_IMAGE_URL = "/leonida-base.webp";
+// The source poster's leftmost 3040px (a baked-in legend/credits panel)
+// was cropped out, so the west bound starts at lng -10920 instead of
+// -17000. East/north/south are unchanged.
 const MAP_BOUNDS = L.latLngBounds([
-  [-9000, -17000],
+  [-9000, -10920],
   [11000, 4000],
 ]);
 
