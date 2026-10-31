@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { SectionHeader } from "@/components/section-header";
 import { EmptyState } from "@/components/empty-state";
 import { GuideCard, guideCategoryLabel } from "@/components/guide-card";
 import { getAllGuides } from "@/lib/mdx";
@@ -49,21 +50,26 @@ export default async function GuidesPage() {
         />
       ) : (
         <div className="space-y-12">
-          {CATEGORY_ORDER.filter((c) => byCategory.has(c)).map((category) => (
-            <section key={category} aria-labelledby={`cat-${category}`}>
-              <h2
-                id={`cat-${category}`}
-                className="mb-4 text-xl font-bold tracking-tight"
-              >
-                {guideCategoryLabel(category)}
-              </h2>
+          {CATEGORY_ORDER.filter((c) => byCategory.has(c)).map(
+            (category, i) => (
+            <section
+              key={category}
+              id={`cat-${category}`}
+              aria-label={guideCategoryLabel(category)}
+              className="scroll-mt-24"
+            >
+              <SectionHeader
+                title={guideCategoryLabel(category)}
+                index={i + 1}
+              />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {byCategory.get(category)!.map((g) => (
                   <GuideCard key={g.slug} guide={g} />
                 ))}
               </div>
             </section>
-          ))}
+            ),
+          )}
         </div>
       )}
     </div>

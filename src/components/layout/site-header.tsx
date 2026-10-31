@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Map } from "lucide-react";
 import { siteConfig } from "@/lib/site";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { NavLinks } from "@/components/layout/nav-links";
 import { GlobalSearch } from "@/components/search/global-search";
 
 export function SiteHeader() {
@@ -25,20 +26,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav
-          aria-label="Primary"
-          className="ml-6 hidden items-center gap-1 lg:flex"
-        >
-          {siteConfig.nav.slice(1).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <NavLinks items={siteConfig.nav.slice(1)} />
 
         <div className="ml-auto flex items-center gap-2">
           <GlobalSearch />

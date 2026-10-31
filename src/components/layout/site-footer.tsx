@@ -1,6 +1,19 @@
 import Link from "next/link";
-import { Map } from "lucide-react";
+import {
+  AtSign,
+  Map,
+  MessageCircle,
+  MessagesSquare,
+  Video,
+} from "lucide-react";
 import { siteConfig } from "@/lib/site";
+
+const SOCIAL_ICONS = {
+  x: AtSign,
+  youtube: Video,
+  discord: MessageCircle,
+  reddit: MessagesSquare,
+} as const;
 
 const resourceLinks = [
   { label: "Interactive Map", href: "/map" },
@@ -32,19 +45,27 @@ export function SiteFooter() {
               GTA6 <span className="text-brand">ATLAS</span>
             </Link>
             <p className="text-sm text-muted-foreground">{siteConfig.tagline}</p>
-            <div className="flex gap-3 pt-1">
-              {siteConfig.socials.map((s) => (
-                <a
-                  key={s.key}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-brand"
-                  aria-label={`${siteConfig.name} on ${s.label}`}
-                >
-                  {s.label}
-                </a>
-              ))}
+            <div className="flex gap-2 pt-1">
+              {siteConfig.socials.map((s) => {
+                const Icon = SOCIAL_ICONS[s.key as keyof typeof SOCIAL_ICONS];
+                return (
+                  <a
+                    key={s.key}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex size-8 items-center justify-center rounded-md border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:border-brand/50 hover:text-brand"
+                    aria-label={`${siteConfig.name} on ${s.label}`}
+                    title={s.label}
+                  >
+                    {Icon ? (
+                      <Icon className="size-4" />
+                    ) : (
+                      <span className="text-xs font-medium">{s.label}</span>
+                    )}
+                  </a>
+                );
+              })}
             </div>
           </div>
 

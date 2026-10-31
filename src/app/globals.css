@@ -169,10 +169,17 @@
     @apply text-foreground/90 leading-relaxed;
   }
   .prose-guide h2 {
-    @apply mt-10 mb-4 text-2xl font-bold tracking-tight text-foreground scroll-mt-24;
+    @apply mt-12 mb-4 flex items-center gap-3 border-b border-border/60 pb-3 text-2xl font-bold tracking-tight text-foreground scroll-mt-24;
+  }
+  .prose-guide h2::before {
+    content: "";
+    @apply h-6 w-1 shrink-0 rounded-full bg-gradient-to-b from-brand to-brand-cyan;
   }
   .prose-guide h3 {
     @apply mt-8 mb-3 text-xl font-semibold tracking-tight text-foreground scroll-mt-24;
+  }
+  .prose-guide hr {
+    @apply my-8 border-border/60;
   }
   .prose-guide p {
     @apply my-4;
@@ -207,6 +214,12 @@
   }
   .prose-guide code {
     @apply rounded bg-surface-2 px-1.5 py-0.5 text-sm text-brand-cyan;
+  }
+  .prose-guide img {
+    @apply my-6 rounded-lg border border-border;
+  }
+  .prose-guide tr:hover td {
+    @apply bg-surface-2/40;
   }
 }
 

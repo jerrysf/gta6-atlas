@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, User } from "lucide-react";
+import { CalendarDays, Clock, User } from "lucide-react";
 import { getAllGuides, getGuide, getGuideSlugs } from "@/lib/mdx";
 import { MdxRenderer } from "@/components/mdx-renderer";
 import { PageBreadcrumbs } from "@/components/breadcrumbs";
@@ -104,6 +104,14 @@ export default async function GuidePage({
                   day: "numeric",
                 })}
               </time>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="size-4" />
+              {Math.max(
+                1,
+                Math.round(guide.body.split(/\s+/).length / 200),
+              )}{" "}
+              min read
             </span>
           </div>
 

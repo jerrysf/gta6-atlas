@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { EntityCover } from "@/components/entity-cover";
@@ -146,20 +147,25 @@ export function EntityDetail({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="-mx-2 space-y-0.5">
                   {related.map((r) => (
                     <li key={r.href}>
                       <Link
                         href={r.href}
-                        className="text-sm font-medium text-foreground hover:text-brand"
+                        className="group/rel flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-2"
                       >
-                        {r.name}
+                        <span>
+                          <span className="text-sm font-medium text-foreground group-hover/rel:text-brand">
+                            {r.name}
+                          </span>
+                          {r.description && (
+                            <span className="block text-xs text-muted-foreground">
+                              {r.description}
+                            </span>
+                          )}
+                        </span>
+                        <ArrowRight className="size-3.5 shrink-0 text-muted-foreground/40 transition-transform group-hover/rel:translate-x-0.5 group-hover/rel:text-brand" />
                       </Link>
-                      {r.description && (
-                        <p className="text-xs text-muted-foreground">
-                          {r.description}
-                        </p>
-                      )}
                     </li>
                   ))}
                 </ul>
