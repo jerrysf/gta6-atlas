@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   AtSign,
+  Coffee,
   Map,
   MessageCircle,
   MessagesSquare,
@@ -76,6 +77,15 @@ export function SiteFooter() {
                 );
               })}
             </div>
+            <a
+              href="https://buymeacoffee.com/jwstecho"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-fit items-center gap-2 rounded-md border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-300 transition-colors hover:border-amber-400 hover:bg-amber-400/20"
+            >
+              <Coffee className="size-4" />
+              Buy me a coffee
+            </a>
           </div>
 
           <nav aria-label="Resources" className="space-y-2">
