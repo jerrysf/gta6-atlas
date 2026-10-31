@@ -36,6 +36,7 @@ import { collectibles, secrets } from "@/data/collectibles";
 import { tracks } from "@/data/music";
 import { animals } from "@/data/animals";
 import { officialVideos } from "@/data/videos";
+import { changelog } from "@/data/changelog";
 import { VideoGrid } from "@/components/video-grid";
 
 export const metadata: Metadata = createMetadata({
@@ -414,6 +415,40 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Site updates strip */}
+      <section aria-labelledby="site-updates" className="pb-8">
+        <div className="rounded-lg border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <span className="mr-2 inline-block size-1.5 rounded-full bg-brand align-middle" />
+              Site updates
+            </p>
+            <Link
+              href="/changelog"
+              className="text-xs font-medium text-brand-cyan hover:underline"
+            >
+              Full changelog →
+            </Link>
+          </div>
+          <ul className="divide-y divide-border/60">
+            {changelog.slice(0, 3).map((e) => (
+              <li
+                key={e.date + e.title}
+                className="flex flex-wrap items-baseline gap-x-4 px-4 py-2.5"
+              >
+                <time className="shrink-0 font-mono text-xs text-brand">
+                  {e.date}
+                </time>
+                <span className="text-sm font-medium">{e.title}</span>
+                <span className="hidden text-xs text-muted-foreground sm:inline">
+                  {e.detail}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       {/* Pre-order CTA */}
       <section aria-label="Pre-order" className="pb-8">

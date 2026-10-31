@@ -65,6 +65,7 @@ export function buildSearchDocs(input: {
     { id: "page-watch", title: "Official Videos", description: "Watch every official GTA 6 trailer and the Extended Look.", href: "/watch", type: "page" },
     { id: "page-timeline", title: "Road to Launch Timeline", description: "Every confirmed GTA 6 event from leak to launch day.", href: "/timeline", type: "page" },
     { id: "page-changelog", title: "Site Changelog", description: "What's new on GTA6 Atlas — every update logged.", href: "/changelog", type: "page" },
+    { id: "page-facts", title: "GTA 6 by the Numbers", description: "Records, stats and confirmed figures.", href: "/facts", type: "page" },
   );
   for (const t of input.tracks ?? [])
     docs.push({ id: `trk-${t.slug}`, title: `${t.name} — ${t.artist}`, description: t.description, href: `/music/${t.slug}`, type: "music", verificationStatus: t.verificationStatus });

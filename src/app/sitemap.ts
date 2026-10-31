@@ -29,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/media",
     "/watch",
     "/timeline",
+    "/facts",
     "/changelog",
     "/guides",
     "/search",
