@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
@@ -30,7 +31,9 @@ export default async function GuidesPage() {
           description="Guides are on the way — check back soon."
         />
       ) : (
-        <GuideBrowser guides={guides} />
+        <Suspense>
+          <GuideBrowser guides={guides} />
+        </Suspense>
       )}
     </div>
   );

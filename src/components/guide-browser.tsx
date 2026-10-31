@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { GuideCard, guideCategoryLabel } from "@/components/guide-card";
 import type { Guide, GuideCategory } from "@/lib/types";
@@ -18,8 +19,30 @@ const CATEGORY_ORDER: GuideCategory[] = [
 ];
 
 export function GuideBrowser({ guides }: { guides: Guide[] }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<GuideCategory | "all">("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const initialCat = searchParams.get("category") ?? "all";
+  const [category, setCategory] = useState<GuideCategory | "all">(
+    (CATEGORY_ORDER as string[]).includes(initialCat)
+      ? (initialCat as GuideCategory)
+      : "all",
+  );
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("q", query.trim());
+      if (category !== "all") params.set("category", category);
+      const qs = params.toString();
+      router.replace(qs ? `/guides?${qs}` : "/guides", { scroll: false });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [query, category, router]);
 
   const counts = useMemo(() => {
     const map = new Map<GuideCategory, number>();
