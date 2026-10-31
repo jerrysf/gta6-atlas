@@ -6,7 +6,8 @@ import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
 import { StatStrip } from "@/components/database/stat-strip";
 import { weaponRepo } from "@/lib/repository";
-import { createMetadata } from "@/lib/seo";
+import { createMetadata, itemListJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/json-ld";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA 6 Weapons — Full Weapon Database & Stats",
@@ -33,6 +34,16 @@ export default async function WeaponsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <JsonLd
+        data={itemListJsonLd({
+          name: "GTA 6 Weapons",
+          path: "/weapons",
+          items: list.map((w) => ({
+            name: w.name,
+            href: `/weapons/${w.slug}`,
+          })),
+        })}
+      />
       <PageHeader
         title="GTA 6 Weapons"
         description="Every confirmed weapon in Grand Theft Auto VI — stats, categories and acquisition methods."

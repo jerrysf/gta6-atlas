@@ -5,7 +5,8 @@ import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
 import { StatStrip } from "@/components/database/stat-strip";
 import { characterRepo } from "@/lib/repository";
-import { createMetadata } from "@/lib/seo";
+import { createMetadata, itemListJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/json-ld";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA 6 Characters — Confirmed Cast of Grand Theft Auto VI",
@@ -27,6 +28,16 @@ export default async function CharactersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <JsonLd
+        data={itemListJsonLd({
+          name: "GTA 6 Characters",
+          path: "/characters",
+          items: list.map((c) => ({
+            name: c.name,
+            href: `/characters/${c.slug}`,
+          })),
+        })}
+      />
       <PageHeader
         title="GTA 6 Characters"
         description="Every officially announced character in Grand Theft Auto VI — protagonists, allies and the faces of Leonida's underworld."

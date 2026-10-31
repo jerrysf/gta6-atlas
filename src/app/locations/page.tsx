@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
 import { locationRepo } from "@/lib/repository";
-import { createMetadata } from "@/lib/seo";
+import { createMetadata, itemListJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/json-ld";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA 6 Locations — Every Confirmed Region of Leonida",
@@ -32,6 +33,16 @@ export default async function LocationsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <JsonLd
+        data={itemListJsonLd({
+          name: "GTA 6 Locations",
+          path: "/locations",
+          items: list.map((l) => ({
+            name: l.name,
+            href: `/locations/${l.slug}`,
+          })),
+        })}
+      />
       <PageHeader
         title="GTA 6 Locations"
         description="The officially confirmed regions of Leonida. In-game map coordinates will be added after release — see the interactive map for updates."

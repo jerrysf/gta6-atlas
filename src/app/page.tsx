@@ -23,6 +23,7 @@ import { PendingBanner } from "@/components/pending-banner";
 import { getAllGuides } from "@/lib/mdx";
 import JsonLd from "@/components/json-ld";
 import { Countdown } from "@/components/countdown";
+import { PreorderCta } from "@/components/preorder-cta";
 import { createMetadata, videoGameJsonLd } from "@/lib/seo";
 import { entityImages } from "@/data/entity-images";
 import { vehicles } from "@/data/vehicles";
@@ -431,6 +432,11 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Pre-order CTA */}
+      <section aria-label="Pre-order" className="pb-8">
+        <PreorderCta />
+      </section>
 
       {/* FAQ */}
       <section className="pb-16">

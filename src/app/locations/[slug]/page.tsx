@@ -51,7 +51,10 @@ export default async function LocationPage({
       ? {
           label: "Map position",
           value: (
-            <Link href="/map" className="text-brand-cyan underline">
+            <Link
+              href={`/map?focus=${l.slug}`}
+              className="text-brand-cyan underline"
+            >
               View on map
             </Link>
           ),

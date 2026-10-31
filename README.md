@@ -95,6 +95,25 @@ See `.env.example`. Everything is optional — the site works with zero configur
 - **Database entries:** append to the relevant file in `src/data/` — always set an honest `verificationStatus` and `sourceReferences`.
 - **Completion checklist:** replace `src/data/completion.ts` with verified requirements after launch (`isSampleData: false` removes the demo banner).
 
+## Launch-day content pipeline (Nov 19, 2026)
+
+Traffic peaks at release — whoever publishes verified data first wins the
+search results. In order of expected search volume:
+
+1. **Missions** — add real entries to `src/data/missions.ts` (`main`/`side`)
+   as they're verified; walkthrough pages generate automatically.
+2. **Collectibles** — real coordinates go into `src/data/collectibles.ts`
+   (`kind: "collectible"`) so they appear on the interactive map.
+3. **Vehicles/weapons** — flip `community_reported` entries to
+   `gameplay_verified` once confirmed in-game; fill `location`/`acquisition`.
+4. **Achievements** — update the achievements guide with the real PSN/Xbox
+   list when it publishes.
+5. **Map** — replace community coordinates with verified in-game positions;
+   keep the artwork attribution until an official map exists.
+
+Every new entry still needs an honest `verificationStatus` +
+`sourceReferences` — that's the site's credibility moat.
+
 ## Known limitations
 
 - Vehicle/weapon/collectible/secret/mission datasets are intentionally empty until verified information exists (after the Nov 19, 2026 release).

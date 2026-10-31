@@ -7,7 +7,8 @@ import { EntityBrowser } from "@/components/database/entity-browser";
 import { StatStrip } from "@/components/database/stat-strip";
 import { vehicleRepo } from "@/lib/repository";
 import { vehicleCategories } from "@/data/vehicles";
-import { createMetadata } from "@/lib/seo";
+import { createMetadata, itemListJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/json-ld";
 
 export const metadata: Metadata = createMetadata({
   title: "GTA 6 Vehicles — Cars, Motorcycles, Boats & Aircraft Database",
@@ -36,6 +37,16 @@ export default async function VehiclesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <JsonLd
+        data={itemListJsonLd({
+          name: "GTA 6 Vehicles",
+          path: "/vehicles",
+          items: list.map((v) => ({
+            name: v.name,
+            href: `/vehicles/${v.slug}`,
+          })),
+        })}
+      />
       <PageHeader
         title="GTA 6 Vehicles"
         description="Every car, motorcycle, boat and aircraft in Grand Theft Auto VI — catalogued with performance stats, locations and acquisition methods."

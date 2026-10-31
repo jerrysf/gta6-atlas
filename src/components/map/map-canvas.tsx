@@ -158,6 +158,15 @@ export default function MapCanvas({
     [focusPoint],
   );
 
+  // Deep-link: /map?focus=<slug> selects & flies to a point on load.
+  useEffect(() => {
+    if (!ready) return;
+    const slug = new URLSearchParams(window.location.search).get("focus");
+    if (!slug) return;
+    const p = points.find((x) => x.slug === slug);
+    if (p) selectPoint(p);
+  }, [ready, points, selectPoint]);
+
   useEffect(() => {
     if (!ready || !mapRef.current) return;
     const map = mapRef.current;

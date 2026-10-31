@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { EntityCover } from "@/components/entity-cover";
 import { PageBreadcrumbs } from "@/components/breadcrumbs";
 import { VerificationBadge } from "@/components/verification-badge";
+import { AdSlot } from "@/components/ads/ad-slot";
 import { VERIFICATION_META } from "@/lib/verification";
 import type { SourceReference, VerificationStatus } from "@/lib/types";
 import type { EntityImage } from "@/data/entity-images";
@@ -165,6 +166,7 @@ export function EntityDetail({
               </CardContent>
             </Card>
           )}
+          <AdSlot placement="sidebar" />
         </aside>
       </div>
     </div>

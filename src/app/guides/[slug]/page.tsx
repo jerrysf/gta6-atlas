@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import JsonLd from "@/components/json-ld";
 import { articleJsonLd, createMetadata } from "@/lib/seo";
 import { guideCategoryLabel } from "@/components/guide-card";
+import { ShareButtons } from "@/components/share-buttons";
+import { PreorderCta } from "@/components/preorder-cta";
+import { absoluteUrl } from "@/lib/site";
 
 export function generateStaticParams() {
   return getGuideSlugs().map((slug) => ({ slug }));
@@ -109,6 +112,15 @@ export default async function GuidePage({
           <div className="mt-8">
             <MdxRenderer source={guide.body} />
           </div>
+
+          <div className="mt-8 border-t border-border/60 pt-6">
+            <ShareButtons
+              url={absoluteUrl(`/guides/${guide.slug}`)}
+              title={guide.title}
+            />
+          </div>
+
+          <PreorderCta className="mt-8" />
 
           <AdSlot placement="in-article" className="my-8" />
 
