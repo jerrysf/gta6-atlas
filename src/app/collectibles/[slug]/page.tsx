@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { collectibleRepo } from "@/lib/repository";
-import { collectibles } from "@/data/collectibles";
+import { collectibleRepo, secretRepo } from "@/lib/repository";
+import { collectibles, secrets } from "@/data/collectibles";
 import { EntityDetail } from "@/components/entity-detail";
 import { createMetadata } from "@/lib/seo";
 
+const all = () => [...collectibles, ...secrets];
+
 export function generateStaticParams() {
-  return collectibles.map((c) => ({ slug: c.slug }));
+  return all().map((c) => ({ slug: c.slug }));
+}
+
+async function getEntry(slug: string) {
+  return (
+    (await collectibleRepo.getBySlug(slug)) ??
+    (await secretRepo.getBySlug(slug))
+  );
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/collectibles/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const c = await collectibleRepo.getBySlug(slug);
+  const c = await getEntry(slug);
   if (!c) return {};
   return createMetadata({
-    title: `${c.name} — GTA 6 Collectible`,
+    title: `${c.name} — GTA 6 ${c.kind === "secret" ? "Secret" : "Collectible"}`,
     description: c.description,
     path: `/collectibles/${c.slug}`,
   });
@@ -27,12 +36,13 @@ export default async function CollectiblePage({
   params,
 }: PageProps<"/collectibles/[slug]">) {
   const { slug } = await params;
-  const c = await collectibleRepo.getBySlug(slug);
+  const c = await getEntry(slug);
   if (!c) notFound();
 
-  type Fact = { label: string; value: React.ReactNode };
-  const facts: Fact[] = (
+  const typeLabel = c.kind === "secret" ? "Secret" : "Collectible";
+  const facts = (
     [
+      { label: "Type", value: typeLabel },
       { label: "Category", value: c.category },
       c.location && { label: "Location", value: c.location },
       c.coordinates && {
@@ -43,18 +53,22 @@ export default async function CollectiblePage({
           </Link>
         ),
       },
-    ] as (Fact | false | undefined)[]
-  ).filter((f): f is Fact => Boolean(f));
+    ] as ({ label: string; value: React.ReactNode } | false | undefined)[]
+  ).filter(
+    (f): f is { label: string; value: React.ReactNode } => Boolean(f),
+  );
 
-  const related = collectibles
-    .filter((x) => x.slug !== c.slug)
+  const related = all()
+    .filter((x) => x.kind === c.kind && x.slug !== c.slug)
     .slice(0, 5)
     .map((x) => ({ name: x.name, href: `/collectibles/${x.slug}` }));
 
   return (
     <EntityDetail
       breadcrumbs={[
-        { name: "Collectibles", href: "/collectibles" },
+        c.kind === "secret"
+          ? { name: "Secrets", href: "/secrets" }
+          : { name: "Collectibles", href: "/collectibles" },
         { name: c.name, href: `/collectibles/${c.slug}` },
       ]}
       name={c.name}

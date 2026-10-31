@@ -62,6 +62,7 @@ export const locationSchema = z.object({
   region: z.string(),
   relatedMissions: z.array(z.string()).optional(),
   coordinates: z.object({ x: z.number(), y: z.number() }).optional(),
+  mapCategory: z.enum(["location", "poi"]).optional(),
 });
 
 export const collectibleSchema = z.object({

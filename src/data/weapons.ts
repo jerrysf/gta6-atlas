@@ -176,4 +176,59 @@ export const weapons: Weapon[] = [
     sourceReferences: [OFFICIAL],
     lastVerifiedAt: "2026-10-31",
   },
+  {
+    id: "wpn-double-barrel",
+    slug: "double-barreled-shotgun",
+    name: "Double-Barreled Shotgun",
+    category: "Shotguns",
+    description:
+      "Break-action side-by-side shotgun spotted in official footage — the classic short-range answer. No official name yet.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "wpn-belt-fed",
+    slug: "belt-fed-machine-gun",
+    name: "Belt-Fed Machine Gun",
+    category: "Heavy",
+    description:
+      "A squared-receiver, belt-fed machine gun seen on a shop counter in Trailer 2 — Phil's Ammu-Nation stocks the heavy stuff too. No official name yet.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "wpn-machine-pistol",
+    slug: "machine-pistol",
+    name: "Machine Pistol",
+    category: "Submachine Guns",
+    description:
+      "Compact fully-automatic pistol with a long straight magazine and ported compensator, seen in official footage. No official name yet.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "wpn-compensated-pistol",
+    slug: "compensated-pistol",
+    name: "Compensated Pistol",
+    category: "Handguns",
+    description:
+      "Stainless pistol with a ribbed muzzle compensator and green fiber-optic sights, held by Lucia in an Extended Look frame. No official name yet.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
+    id: "wpn-duke-sniper",
+    slug: "duke-sniper-rifle",
+    name: "Duke Sniper Rifle",
+    category: "Sniper Rifles",
+    description:
+      "A Duke Arms Company-marked long rifle carried by a hunter in official screenshots — shares the Duke insignia with the 556 carbine but no model name has been shown.",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL],
+    lastVerifiedAt: "2026-10-31",
+  },
 ];

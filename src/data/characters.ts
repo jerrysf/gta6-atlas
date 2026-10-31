@@ -101,6 +101,19 @@ export const characters: Character[] = [
     lastVerifiedAt: "2026-10-31",
   },
   {
+    id: "char-phil",
+    slug: "phil",
+    name: "Phil",
+    role: "Supporting character",
+    description:
+      "The face of Phil's Ammu-Nation, the returning gun-store chain — heard pitching 'more guns than the law allows' in Trailer 2's in-world ad.",
+    biography:
+      "Phil fronts the Ammu-Nation franchise in Leonida, delivering the gun store's gleefully lawless ad copy heard over Trailer 2's gun-shop sequence. His full name and story role haven't been detailed — for now he's the voice (and name) of Leonida's favorite place to buy more guns than the law allows.",
+    verificationStatus: "community_reported",
+    sourceReferences: [ROCKSTAR_GTA6],
+    lastVerifiedAt: "2026-10-31",
+  },
+  {
     id: "char-real-dimez",
     slug: "real-dimez",
     name: "Real Dimez",

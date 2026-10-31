@@ -26,13 +26,12 @@ export const MAP_CATEGORIES: { id: MapCategory; label: string; color: string }[]
 ];
 
 /**
- * Static MVP provider. GTA VI's map is fictional and no verified in-game
- * coordinates exist yet — so this returns only high-level confirmed regions
- * as an empty dataset placeholder structure. After release, replace this
- * provider (or back it with Supabase/GeoJSON) without touching the map UI.
- *
- * Confirmed locations are included with coordinates = undefined until the
- * in-game map can be verified — providers MUST NOT invent coordinates.
+ * Static MVP provider. GTA VI's real world map hasn't been published, so
+ * marker coordinates are COMMUNITY ESTIMATES derived from trailer analysis
+ * (Leonida's layout roughly mirrors Florida's geography). They exist to
+ * make the map explorable pre-launch and will be replaced with verified
+ * in-game coordinates after Nov 19, 2026. Providers must label estimates
+ * honestly — never present them as official.
  */
 class StaticMapProvider implements MapDataProvider {
   getCategories(): MapCategory[] {
@@ -45,7 +44,7 @@ class StaticMapProvider implements MapDataProvider {
       .map((l) => ({
         id: l.id,
         name: l.name,
-        category: "location" as const,
+        category: (l.mapCategory ?? "location") as MapCategory,
         description: l.description,
         href: `/locations/${l.slug}`,
         coordinates: l.coordinates as { x: number; y: number },

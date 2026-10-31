@@ -300,6 +300,14 @@ export default function MapCanvas({
             </div>
           )}
         </div>
+        {points.length > 0 && (
+          <div className="border-t border-border p-3">
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Marker positions are community estimates from trailer analysis on
+              a schematic canvas — not the official in-game map.
+            </p>
+          </div>
+        )}
       </aside>
 
       {!panelOpen && (
@@ -312,6 +320,18 @@ export default function MapCanvas({
         >
           <PanelLeft className="size-4" />
         </Button>
+      )}
+
+      {/* Schematic-canvas disclaimer */}
+      {points.length > 0 && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
+          <div className="pointer-events-auto rounded-md border border-border bg-card/90 px-3 py-1.5 text-center backdrop-blur">
+            <p className="text-[11px] text-muted-foreground">
+              Schematic map — community-estimated positions. Official world map
+              arrives with the game on Nov 19, 2026.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Honest empty-state overlay for the fictional world */}

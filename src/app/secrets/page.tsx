@@ -37,11 +37,11 @@ export default async function SecretsPage() {
         description="Hidden locations, easter eggs and mysteries in Leonida — documented only once verified."
         breadcrumbs={[{ name: "Secrets", href: "/secrets" }]}
       />
-      <PendingBanner>
-        Secrets are the last thing anyone can verify before launch. Once the
-        community starts uncovering Leonida&apos;s hidden corners after
-        November 19, 2026, we&apos;ll document each discovery here — clearly
-        labelled by verification status.
+      <PendingBanner title="Community-documented trailer findings">
+        Everything below was spotted by the community in official trailers,
+        the Extended Look and screenshots — marked Community Reported until
+        verified in-game. Deeper secrets will be catalogued after the
+        November 19, 2026 release.
       </PendingBanner>
       <EntityBrowser
         items={items}

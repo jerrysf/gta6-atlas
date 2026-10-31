@@ -5,7 +5,7 @@ import { characters } from "@/data/characters";
 import { locations } from "@/data/locations";
 import { vehicles } from "@/data/vehicles";
 import { weapons } from "@/data/weapons";
-import { collectibles } from "@/data/collectibles";
+import { collectibles, secrets } from "@/data/collectibles";
 
 export const dynamic = "force-static";
 
@@ -17,7 +17,7 @@ export async function GET() {
     locations,
     vehicles,
     weapons,
-    collectibles,
+    collectibles: [...collectibles, ...secrets],
   });
   return NextResponse.json(docs);
 }

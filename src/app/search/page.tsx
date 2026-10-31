@@ -7,7 +7,7 @@ import { characters } from "@/data/characters";
 import { locations } from "@/data/locations";
 import { vehicles } from "@/data/vehicles";
 import { weapons } from "@/data/weapons";
-import { collectibles } from "@/data/collectibles";
+import { collectibles, secrets } from "@/data/collectibles";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -30,7 +30,7 @@ export default async function SearchPage({
     locations,
     vehicles,
     weapons,
-    collectibles,
+    collectibles: [...collectibles, ...secrets],
   });
 
   return (
