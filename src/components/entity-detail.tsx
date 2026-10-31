@@ -7,6 +7,8 @@ import { PageBreadcrumbs } from "@/components/breadcrumbs";
 import { PrevNext } from "@/components/prev-next";
 import { VerificationBadge } from "@/components/verification-badge";
 import { AdSlot } from "@/components/ads/ad-slot";
+import { ShareButtons } from "@/components/share-buttons";
+import { absoluteUrl } from "@/lib/site";
 import { VERIFICATION_META } from "@/lib/verification";
 import type { SourceReference, VerificationStatus } from "@/lib/types";
 import type { EntityImage } from "@/data/entity-images";
@@ -68,21 +70,22 @@ export function EntityDetail({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <PageBreadcrumbs items={breadcrumbs} />
-      <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <article>
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <article className="min-w-0">
           <figure>
             <div className="relative">
               <EntityCover
                 name={name}
                 image={image}
                 icon={coverIcon}
+                priority
                 className="rounded-lg border border-border"
               />
               {image && (
                 <>
                   <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-t from-background via-background/30 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end gap-3 p-5">
-                    <h1 className="font-display text-4xl uppercase leading-none tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:text-5xl">
+                    <h1 className="font-display text-4xl uppercase leading-none tracking-wide [overflow-wrap:anywhere] drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:text-5xl">
                       {name}
                     </h1>
                     <VerificationBadge status={verificationStatus} />
@@ -109,7 +112,7 @@ export function EntityDetail({
           </figure>
           {!image && (
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
+              <h1 className="font-display text-4xl uppercase tracking-wide [overflow-wrap:anywhere] sm:text-5xl">
                 {name}
               </h1>
               <VerificationBadge status={verificationStatus} />
@@ -128,6 +131,12 @@ export function EntityDetail({
           {prevNext && (
             <PrevNext prev={prevNext.prev} next={prevNext.next} />
           )}
+          <div className="mt-8 border-t border-border/60 pt-6">
+            <ShareButtons
+              url={absoluteUrl(breadcrumbs[breadcrumbs.length - 1].href)}
+              title={`${name} — GTA6 Atlas`}
+            />
+          </div>
           {sources.length > 0 && (
             <section className="mt-10" aria-label="Sources">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -150,7 +159,7 @@ export function EntityDetail({
             </section>
           )}
         </article>
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           {facts.length > 0 && (
             <Card>
               <CardHeader>

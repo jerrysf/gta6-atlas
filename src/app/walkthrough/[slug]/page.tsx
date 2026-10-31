@@ -70,8 +70,8 @@ export default async function MissionPage({
         ]}
       />
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <article>
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <article className="min-w-0">
           <EntityCover name={m.name} className="rounded-lg border border-border" />
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
@@ -146,7 +146,7 @@ export default async function MissionPage({
           </p>
         </article>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <TableOfContents headings={headings} />
           <Card>
             <CardHeader>

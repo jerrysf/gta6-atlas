@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { ListChecks } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
-import { EmptyState } from "@/components/empty-state";
+import { LockedMissions } from "@/components/locked-missions";
 import { WalkthroughNav } from "@/components/walkthrough-nav";
 import { MissionList } from "@/components/mission-list";
 import { missionRepo } from "@/lib/repository";
@@ -36,11 +35,7 @@ export default async function SideMissionsPage() {
         walkthrough will appear here once verified after launch.
       </PendingBanner>
       {missions.length === 0 ? (
-        <EmptyState
-          icon={ListChecks}
-          title="No side missions published yet"
-          description="Side mission guides will be published here as they're verified in-game."
-        />
+        <LockedMissions />
       ) : (
         <MissionList missions={missions} />
       )}

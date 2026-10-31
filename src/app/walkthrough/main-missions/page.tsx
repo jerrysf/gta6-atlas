@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { ScrollText } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
-import { EmptyState } from "@/components/empty-state";
+import { LockedMissions } from "@/components/locked-missions";
 import { WalkthroughNav } from "@/components/walkthrough-nav";
 import { MissionList } from "@/components/mission-list";
 import { missionRepo } from "@/lib/repository";
@@ -37,11 +36,7 @@ export default async function MainMissionsPage() {
         November 19, 2026 launch.
       </PendingBanner>
       {missions.length === 0 ? (
-        <EmptyState
-          icon={ScrollText}
-          title="No missions published yet"
-          description="Main story walkthroughs will be published here as each mission is verified in-game."
-        />
+        <LockedMissions />
       ) : (
         <MissionList missions={missions} />
       )}

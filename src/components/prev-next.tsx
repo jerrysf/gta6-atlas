@@ -14,7 +14,7 @@ export function PrevNext({
   return (
     <nav
       aria-label={label ?? "Previous and next entries"}
-      className="mt-10 grid gap-3 border-t border-border/60 pt-6 sm:grid-cols-2"
+      className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-3 border-t border-border/60 pt-6 sm:grid-cols-2"
     >
       {prev ? (
         <Link

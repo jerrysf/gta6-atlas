@@ -14,12 +14,14 @@ export function EntityCover({
   imageClassName,
   icon,
   image,
+  priority,
 }: {
   name: string;
   className?: string;
   imageClassName?: string;
   icon?: React.ReactNode;
   image?: EntityImage;
+  priority?: boolean;
 }) {
   if (image) {
     return (
@@ -33,6 +35,7 @@ export function EntityCover({
           src={image.url}
           alt={name}
           fill
+          priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
           className={cn("object-cover", imageClassName)}
         />

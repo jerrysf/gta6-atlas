@@ -80,15 +80,15 @@ export default async function GuidePage({
         ]}
       />
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <article>
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <article className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               {guideCategoryLabel(guide.category)}
             </Badge>
             <VerificationBadge status={guide.verificationStatus} />
           </div>
-          <h1 className="mt-4 font-display text-3xl tracking-wide sm:text-5xl">
+          <h1 className="mt-4 font-display text-3xl tracking-wide [overflow-wrap:anywhere] sm:text-5xl">
             {guide.title}
           </h1>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -161,7 +161,7 @@ export default async function GuidePage({
           />
         </article>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <TableOfContents headings={guide.headings} className="sticky top-20 hidden lg:block" />
           {fallbackRelated.length > 0 && (
             <Card>
