@@ -55,6 +55,51 @@ function gridGeoJSON(): GeoJSON.FeatureCollection {
   return { type: "FeatureCollection", features };
 }
 
+/**
+ * Stylized Leonida silhouette — a fictional schematic landmass drawn to
+ * loosely echo the peninsula + keys geography hinted at in official media.
+ * Purely illustrative; not extracted from or resembling real cartography.
+ */
+function landGeoJSON(): GeoJSON.FeatureCollection {
+  const poly = (ring: [number, number][]): GeoJSON.Feature => ({
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: [[...ring, ring[0]]] },
+    properties: {},
+  });
+  return {
+    type: "FeatureCollection",
+    features: [
+      // Mainland — panhandle north, peninsula tapering south-east
+      poly([
+        [-46, 47], [-44, 30], [-40, 12], [-35, 4], [-32, -3], [-28, -9],
+        [-20, -11], [-12, -9], [-4, -11], [2, -17], [8, -24], [12, -30],
+        [16, -34], [24, -35], [32, -33], [40, -29], [45, -24], [48, -15],
+        [49, -4], [48, 6], [47, 18], [45, 30], [40, 39], [30, 45],
+        [10, 48], [-10, 48], [-30, 48],
+      ]),
+      // Leonida Keys — island chain trailing south-west
+      poly([
+        [8, -33], [18, -32], [25, -35], [27, -39], [22, -43], [14, -44],
+        [7, -40],
+      ]),
+      // Small islet east of the Vice City area
+      poly([[52, -18], [56, -17], [57, -21], [53, -22]]),
+    ],
+  };
+}
+
+/** Region labels rendered as non-interactive DOM markers. */
+const REGION_LABELS: { name: string; at: [number, number] }[] = [
+  { name: "Mt Kalaga N.P.", at: [-12, 45] },
+  { name: "Ambrosia", at: [-6, 16] },
+  { name: "Port Gellhorn", at: [-33, -5] },
+  { name: "Grassrivers", at: [4, -24] },
+  { name: "Leonida Penitentiary", at: [16, -4] },
+  { name: "Vice Beach", at: [41, -12] },
+  { name: "Vice City", at: [32, -21] },
+  { name: "Leonida Keys", at: [13, -47] },
+];
+
 export default function MapCanvas({
   points,
   categories,
@@ -100,6 +145,7 @@ export default function MapCanvas({
       version: 8,
       sources: {
         grid: { type: "geojson", data: gridGeoJSON() },
+        land: { type: "geojson", data: landGeoJSON() },
       },
       layers: [
         {
@@ -108,10 +154,34 @@ export default function MapCanvas({
           paint: { "background-color": "#0b0f14" },
         },
         {
+          id: "land",
+          type: "fill",
+          source: "land",
+          paint: {
+            "fill-color": "#14202c",
+            "fill-outline-color": "#2c4257",
+          },
+        },
+        {
+          id: "coast-glow",
+          type: "line",
+          source: "land",
+          paint: {
+            "line-color": "#35c7d9",
+            "line-width": 1.6,
+            "line-opacity": 0.35,
+            "line-blur": 2,
+          },
+        },
+        {
           id: "grid",
           type: "line",
           source: "grid",
-          paint: { "line-color": "#1a2430", "line-width": 1 },
+          paint: {
+            "line-color": "#1c2836",
+            "line-width": 1,
+            "line-opacity": 0.6,
+          },
         },
       ],
     };
@@ -128,6 +198,15 @@ export default function MapCanvas({
     map.addControl(new NavigationControl(), "top-right");
     map.fitBounds(GRID_BOUNDS, { padding: 40, duration: 0 });
     map.on("load", () => setReady(true));
+
+    for (const label of REGION_LABELS) {
+      const el = document.createElement("div");
+      el.className = "map-region-label";
+      el.textContent = label.name;
+      new Marker({ element: el, anchor: "center" })
+        .setLngLat(label.at)
+        .addTo(map);
+    }
     map.on("zoom", () => trackEvent("map_interaction", { type: "zoom" }));
     mapRef.current = map;
     const markers = markersRef.current;

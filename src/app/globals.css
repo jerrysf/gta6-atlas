@@ -211,6 +211,17 @@
 }
 
 /* MapLibre marker + popup styling */
+.map-region-label {
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: var(--font-display), sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #54687e;
+  text-shadow: 0 1px 4px rgba(11, 15, 20, 0.9);
+  transform: translateY(-2px);
+}
 .map-marker {
   width: 14px;
   height: 14px;
