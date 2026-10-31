@@ -30,6 +30,8 @@ const databaseLinks = [
   { label: "Locations", href: "/locations" },
   { label: "Collectibles", href: "/collectibles" },
   { label: "Secrets", href: "/secrets" },
+  { label: "Music & Soundtrack", href: "/music" },
+  { label: "Wildlife", href: "/wildlife" },
 ];
 
 export function SiteFooter() {

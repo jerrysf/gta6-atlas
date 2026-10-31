@@ -166,7 +166,7 @@ export function EntityBrowser({
           description="Try a different search term or clear your filters."
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {pageItems.map((item) => (
             <EntityCard
               key={item.slug}

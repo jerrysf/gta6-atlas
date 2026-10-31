@@ -93,7 +93,7 @@ export function GuideBrowser({ guides }: { guides: Guide[] }) {
       </p>
 
       {filtered.length > 0 ? (
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((g) => (
             <GuideCard key={g.slug} guide={g} />
           ))}

@@ -550,6 +550,70 @@ export const vehicles: Vehicle[] = [
     sourceReferences: [TRAILER_2],
     lastVerifiedAt: "2026-10-31",
   },
+  {
+    id: "veh-golf-cart",
+    slug: "golf-cart",
+    name: "Golf Cart",
+    category: "other",
+    description:
+      "Electric cart spotted in Leonida Keys marina shots — the community calls it the returning Caddy. Model name unconfirmed.",
+    basedOn: "Club Car golf cart",
+    debut: "returning",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-11-01",
+  },
+  {
+    id: "veh-beach-cruiser",
+    slug: "beach-cruiser-bicycle",
+    name: "Beach Cruiser Bicycle",
+    category: "other",
+    description:
+      "Cruiser bicycles along the Vice Beach boardwalk in trailer footage — pedal transport returning to the series. Model name unconfirmed.",
+    basedOn: "classic beach cruiser",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-11-01",
+  },
+  {
+    id: "veh-taxi",
+    slug: "vice-city-taxi",
+    name: "Vice City Taxi",
+    category: "cars",
+    description:
+      "Yellow cabs circulating in Vice City traffic shots — the series' staple taxi returns. Community expects a Downtown Cab Co.-style operator; name unconfirmed.",
+    basedOn: "Ford Crown Victoria taxi",
+    debut: "returning",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-11-01",
+  },
+  {
+    id: "veh-transit-bus",
+    slug: "transit-bus",
+    name: "Transit Bus",
+    category: "other",
+    description:
+      "City bus on Vice City streets in trailer traffic shots — public transit vehicles return for Leonida's roads. Model name unconfirmed.",
+    basedOn: "North American transit bus",
+    debut: "returning",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-11-01",
+  },
+  {
+    id: "veh-ambulance",
+    slug: "ambulance",
+    name: "Ambulance",
+    category: "other",
+    description:
+      "Emergency vehicle response shots in official footage — the classic Ambulance returns for Leonida's streets. Model name unconfirmed.",
+    basedOn: "Ford E-Series ambulance",
+    debut: "returning",
+    verificationStatus: "community_reported",
+    sourceReferences: [OFFICIAL_FOOTAGE],
+    lastVerifiedAt: "2026-11-01",
+  },
 ];
 
 export const vehicleCategories = [

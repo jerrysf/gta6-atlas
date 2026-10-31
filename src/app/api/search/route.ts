@@ -6,6 +6,8 @@ import { locations } from "@/data/locations";
 import { vehicles } from "@/data/vehicles";
 import { weapons } from "@/data/weapons";
 import { collectibles, secrets } from "@/data/collectibles";
+import { tracks } from "@/data/music";
+import { animals } from "@/data/animals";
 
 export const dynamic = "force-static";
 
@@ -18,6 +20,8 @@ export async function GET() {
     vehicles,
     weapons,
     collectibles: [...collectibles, ...secrets],
+    tracks,
+    animals,
   });
   return NextResponse.json(docs);
 }

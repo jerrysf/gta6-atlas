@@ -10,6 +10,8 @@ import {
   Gem,
   Map as MapIcon,
   MapPin,
+  Music,
+  PawPrint,
   Users,
   Wrench,
 } from "lucide-react";
@@ -30,6 +32,8 @@ import { weapons } from "@/data/weapons";
 import { locations } from "@/data/locations";
 import { characters } from "@/data/characters";
 import { collectibles, secrets } from "@/data/collectibles";
+import { tracks } from "@/data/music";
+import { animals } from "@/data/animals";
 import { officialVideos } from "@/data/videos";
 import { VideoGrid } from "@/components/video-grid";
 
@@ -101,6 +105,8 @@ const databaseLinks = [
   { label: "Locations", href: "/locations", icon: MapPin, note: "Every region of Leonida" },
   { label: "Collectibles", href: "/collectibles", icon: Gem, note: "Hidden pickups & sets" },
   { label: "Secrets", href: "/secrets", icon: BookOpen, note: "Easter eggs & mysteries" },
+  { label: "Music", href: "/music", icon: Music, note: "Soundtrack & The Album" },
+  { label: "Wildlife", href: "/wildlife", icon: PawPrint, note: "Animals of Leonida" },
 ];
 
 const homeFaq = [
@@ -147,6 +153,8 @@ export default async function HomePage() {
       l: "Secrets",
       href: "/secrets",
     },
+    { n: tracks.length, l: "Tracks", href: "/music" },
+    { n: animals.length, l: "Animals", href: "/wildlife" },
   ];
   const dbCounts: Record<string, number> = Object.fromEntries(
     dbStats.map((s) => [s.href, s.n]),

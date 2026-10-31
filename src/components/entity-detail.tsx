@@ -10,6 +10,28 @@ import { VERIFICATION_META } from "@/lib/verification";
 import type { SourceReference, VerificationStatus } from "@/lib/types";
 import type { EntityImage } from "@/data/entity-images";
 
+function TagPill({
+  label,
+  tone = "muted",
+}: {
+  label: string;
+  tone?: "lime" | "cyan" | "muted";
+}) {
+  return (
+    <span
+      className={
+        tone === "lime"
+          ? "rounded-full border border-brand/40 bg-brand/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand"
+          : tone === "cyan"
+            ? "rounded-full border border-brand-cyan/40 bg-brand-cyan/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-cyan"
+            : "rounded-full border border-border bg-surface-2 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground"
+      }
+    >
+      {label}
+    </span>
+  );
+}
+
 export function EntityDetail({
   breadcrumbs,
   name,
@@ -41,11 +63,27 @@ export function EntityDetail({
       <div className="mt-6 grid gap-8 lg:grid-cols-[2fr_1fr]">
         <article>
           <figure>
-            <EntityCover
-              name={name}
-              image={image}
-              className="rounded-lg border border-border"
-            />
+            <div className="relative">
+              <EntityCover
+                name={name}
+                image={image}
+                className="rounded-lg border border-border"
+              />
+              {image && (
+                <>
+                  <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-t from-background via-background/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end gap-3 p-5">
+                    <h1 className="font-display text-4xl uppercase leading-none tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:text-5xl">
+                      {name}
+                    </h1>
+                    <VerificationBadge status={verificationStatus} />
+                    {tags.map((t) => (
+                      <TagPill key={t.label} {...t} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             {image && (
               <figcaption className="mt-2 text-xs text-muted-foreground">
                 {image.caption} ·{" "}
@@ -60,26 +98,17 @@ export function EntityDetail({
               </figcaption>
             )}
           </figure>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
-              {name}
-            </h1>
-            <VerificationBadge status={verificationStatus} />
-            {tags.map((t) => (
-              <span
-                key={t.label}
-                className={
-                  t.tone === "lime"
-                    ? "rounded-full border border-brand/40 bg-brand/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand"
-                    : t.tone === "cyan"
-                      ? "rounded-full border border-brand-cyan/40 bg-brand-cyan/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-cyan"
-                      : "rounded-full border border-border bg-surface-2 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground"
-                }
-              >
-                {t.label}
-              </span>
-            ))}
-          </div>
+          {!image && (
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
+                {name}
+              </h1>
+              <VerificationBadge status={verificationStatus} />
+              {tags.map((t) => (
+                <TagPill key={t.label} {...t} />
+              ))}
+            </div>
+          )}
           {role && (
             <p className="mt-1 text-sm font-medium text-brand-cyan">{role}</p>
           )}

@@ -16,6 +16,8 @@ const TYPE_LABELS: Record<SearchDoc["type"], string> = {
   character: "Character",
   location: "Location",
   collectible: "Collectible",
+  music: "Music",
+  wildlife: "Wildlife",
   page: "Page",
 };
 

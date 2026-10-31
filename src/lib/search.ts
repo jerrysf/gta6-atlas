@@ -12,6 +12,8 @@ export interface SearchDoc {
     | "character"
     | "location"
     | "collectible"
+    | "music"
+    | "wildlife"
     | "page";
   verificationStatus?: VerificationStatus;
 }
@@ -29,6 +31,8 @@ export function buildSearchDocs(input: {
   vehicles: { name: string; slug: string; description: string; verificationStatus: VerificationStatus }[];
   weapons: { name: string; slug: string; description: string; verificationStatus: VerificationStatus }[];
   collectibles: { name: string; slug: string; description: string; verificationStatus: VerificationStatus }[];
+  tracks?: { name: string; slug: string; artist: string; description: string; verificationStatus: VerificationStatus }[];
+  animals?: { name: string; slug: string; description: string; verificationStatus: VerificationStatus }[];
 }): SearchDoc[] {
   const docs: SearchDoc[] = [
     { id: "page-map", title: "Interactive Map", description: "Explore the world of Leonida on the GTA6 Atlas interactive map.", href: "/map", type: "page" },
@@ -54,6 +58,14 @@ export function buildSearchDocs(input: {
     docs.push({ id: `wpn-${w.slug}`, title: w.name, description: w.description, href: `/weapons/${w.slug}`, type: "weapon", verificationStatus: w.verificationStatus });
   for (const c of input.collectibles)
     docs.push({ id: `col-${c.slug}`, title: c.name, description: c.description, href: `/collectibles/${c.slug}`, type: "collectible", verificationStatus: c.verificationStatus });
+  docs.push(
+    { id: "page-music", title: "Music & Soundtrack", description: "Every confirmed GTA 6 song and The Album.", href: "/music", type: "page" },
+    { id: "page-wildlife", title: "Animals & Wildlife", description: "Every creature spotted in Leonida.", href: "/wildlife", type: "page" },
+  );
+  for (const t of input.tracks ?? [])
+    docs.push({ id: `trk-${t.slug}`, title: `${t.name} — ${t.artist}`, description: t.description, href: `/music/${t.slug}`, type: "music", verificationStatus: t.verificationStatus });
+  for (const a of input.animals ?? [])
+    docs.push({ id: `anm-${a.slug}`, title: a.name, description: a.description, href: `/wildlife/${a.slug}`, type: "wildlife", verificationStatus: a.verificationStatus });
   return docs;
 }
 

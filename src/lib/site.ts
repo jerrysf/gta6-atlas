@@ -12,6 +12,8 @@ export const siteConfig = {
     { label: "Weapons", href: "/weapons" },
     { label: "Characters", href: "/characters" },
     { label: "Collectibles", href: "/collectibles" },
+    { label: "Music", href: "/music" },
+    { label: "Wildlife", href: "/wildlife" },
     { label: "Guides", href: "/guides" },
   ],
   footerNav: [
