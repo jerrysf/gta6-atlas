@@ -204,7 +204,7 @@ export default function MapCanvas({
     <div className="relative flex h-[calc(100dvh-3.5rem)] min-h-[480px] w-full overflow-hidden">
       <div
         ref={containerRef}
-        className="h-full w-full bg-[#16283d]"
+        className="atlas-leaflet h-full w-full"
         aria-label="Interactive map of Leonida"
       />
 

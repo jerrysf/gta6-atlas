@@ -211,9 +211,13 @@
 }
 
 /* Leaflet map — marker, popup, chrome styling */
-.leaflet-container {
+.atlas-leaflet.leaflet-container {
   font-family: inherit;
   outline: none;
+  /* Sea-toned margins that blend into the base map's edge colors */
+  background:
+    radial-gradient(140% 90% at 50% 45%, transparent 55%, rgba(8, 34, 62, 0.35) 100%),
+    linear-gradient(180deg, #2c67a3 0%, #1c548e 30%, #1a528c 72%, #2c67a3 100%);
 }
 .leaflet-control-attribution {
   background: rgba(11, 15, 20, 0.72);
