@@ -31,6 +31,7 @@ export function EntityCover({
           src={image.url}
           alt={name}
           loading="lazy"
+          referrerPolicy="no-referrer"
           className="absolute inset-0 size-full object-cover"
         />
       </div>
