@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
 import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
+import { StatStrip } from "@/components/database/stat-strip";
 import { weaponRepo } from "@/lib/repository";
 import { createMetadata } from "@/lib/seo";
 
@@ -44,6 +45,27 @@ export default async function WeaponsPage() {
         but unnamed. Damage, accuracy and fire-rate stats will be verified
         in-game after launch.
       </PendingBanner>
+      <StatStrip
+        stats={[
+          { label: "weapons documented", value: list.length },
+          {
+            label: "officially named",
+            value: list.filter(
+              (w) => w.verificationStatus === "officially_confirmed",
+            ).length,
+          },
+          {
+            label: "community identified",
+            value: list.filter(
+              (w) => w.verificationStatus === "community_reported",
+            ).length,
+          },
+          {
+            label: "real-world basis",
+            value: list.filter((w) => w.basedOn).length,
+          },
+        ]}
+      />
       <EntityBrowser
         items={items}
         categoryOptions={categories}

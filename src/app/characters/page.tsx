@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
+import { StatStrip } from "@/components/database/stat-strip";
 import { characterRepo } from "@/lib/repository";
 import { createMetadata } from "@/lib/seo";
 
@@ -31,9 +32,25 @@ export default async function CharactersPage() {
         description="Every officially announced character in Grand Theft Auto VI — protagonists, allies and the faces of Leonida's underworld."
         breadcrumbs={[{ name: "Characters", href: "/characters" }]}
       />
+      <StatStrip
+        stats={[
+          { label: "confirmed cast", value: list.length },
+          {
+            label: "playable protagonists",
+            value: list.filter((c) =>
+              c.role.toLowerCase().includes("protagonist"),
+            ).length,
+          },
+          {
+            label: "official portraits",
+            value: list.length,
+          },
+        ]}
+      />
       <EntityBrowser
         items={items}
         searchPlaceholder="Search characters..."
+        portrait
         emptyState={
           <EmptyState
             icon={Users}

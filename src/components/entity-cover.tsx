@@ -11,11 +11,13 @@ import type { EntityImage } from "@/data/entity-images";
 export function EntityCover({
   name,
   className,
+  imageClassName,
   icon,
   image,
 }: {
   name: string;
   className?: string;
+  imageClassName?: string;
   icon?: React.ReactNode;
   image?: EntityImage;
 }) {
@@ -32,7 +34,7 @@ export function EntityCover({
           alt={name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-          className="object-cover"
+          className={cn("object-cover", imageClassName)}
         />
       </div>
     );

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { PendingBanner } from "@/components/pending-banner";
 import { EmptyState } from "@/components/empty-state";
 import { EntityBrowser } from "@/components/database/entity-browser";
+import { StatStrip } from "@/components/database/stat-strip";
 import { vehicleRepo } from "@/lib/repository";
 import { vehicleCategories } from "@/data/vehicles";
 import { createMetadata } from "@/lib/seo";
@@ -46,6 +47,23 @@ export default async function VehiclesPage() {
         been officially confirmed, and no performance stats exist yet. Every
         entry upgrades to verified status after the November 19, 2026 release.
       </PendingBanner>
+      <StatStrip
+        stats={[
+          { label: "vehicles spotted", value: list.length },
+          {
+            label: "returning models",
+            value: list.filter((v) => v.debut === "returning").length,
+          },
+          {
+            label: "new to series",
+            value: list.filter((v) => v.debut === "new").length,
+          },
+          {
+            label: "real-life basis documented",
+            value: list.filter((v) => v.basedOn).length,
+          },
+        ]}
+      />
       <EntityBrowser
         items={items}
         categoryOptions={vehicleCategories.map((c) => ({

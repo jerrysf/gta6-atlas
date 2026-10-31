@@ -32,17 +32,27 @@ export function EntityBrowser({
   items,
   categoryOptions = [],
   searchPlaceholder = "Search...",
+  portrait,
   emptyState,
 }: {
   items: BrowserItem[];
   categoryOptions?: { value: string; label: string }[];
   searchPlaceholder?: string;
+  portrait?: boolean;
   emptyState?: React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("name-asc");
   const [page, setPage] = useState(1);
+
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { all: items.length };
+    for (const i of items) {
+      if (i.category) map[i.category] = (map[i.category] ?? 0) + 1;
+    }
+    return map;
+  }, [items]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -88,27 +98,6 @@ export function EntityBrowser({
             className="pl-9"
           />
         </div>
-        {categoryOptions.length > 0 && (
-          <Select
-            value={category}
-            onValueChange={(v) => {
-              setCategory(v);
-              reset();
-            }}
-          >
-            <SelectTrigger className="w-44" aria-label="Filter by category">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {categoryOptions.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
         <Select
           value={sort}
           onValueChange={(v) => {
@@ -126,7 +115,47 @@ export function EntityBrowser({
         </Select>
       </div>
 
-      <p className="text-sm text-muted-foreground" role="status">
+      {categoryOptions.length > 0 && (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          role="tablist"
+          aria-label="Filter by category"
+        >
+          {[{ value: "all", label: "All" }, ...categoryOptions].map((o) => {
+            const active = category === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => {
+                  setCategory(o.value);
+                  reset();
+                }}
+                className={
+                  active
+                    ? "inline-flex items-center gap-1.5 rounded-full border border-brand/60 bg-brand/15 px-3.5 py-1.5 text-xs font-semibold text-brand transition-colors"
+                    : "inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-brand/40 hover:text-foreground"
+                }
+              >
+                {o.label}
+                <span
+                  className={
+                    active
+                      ? "rounded-full bg-brand/20 px-1.5 font-mono text-[10px]"
+                      : "rounded-full bg-border/60 px-1.5 font-mono text-[10px]"
+                  }
+                >
+                  {counts[o.value] ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground" role="status">
         {filtered.length} {filtered.length === 1 ? "result" : "results"}
       </p>
 
@@ -146,6 +175,7 @@ export function EntityBrowser({
               href={item.href}
               meta={item.meta}
               tag={item.tag}
+              portrait={portrait}
               verificationStatus={item.verificationStatus}
             />
           ))}
