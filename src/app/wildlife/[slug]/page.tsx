@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PawPrint } from "lucide-react";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { animals, animalClasses } from "@/data/animals";
 import { createMetadata } from "@/lib/seo";
 import { prevNextOf } from "@/lib/utils";
@@ -39,6 +41,8 @@ export default async function AnimalPage({
       role={a.species}
       description={a.description}
       verificationStatus={a.verificationStatus}
+      image={entityImages[a.slug]}
+      coverIcon={<PawPrint className="size-12 text-muted-foreground/40" />}
       tags={[
         {
           label:

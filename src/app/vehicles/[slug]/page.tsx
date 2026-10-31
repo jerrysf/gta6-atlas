@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Bike, Car, Plane, Ship } from "lucide-react";
 import { notFound } from "next/navigation";
 import { vehicleRepo } from "@/lib/repository";
 import { vehicles } from "@/data/vehicles";
@@ -85,6 +86,15 @@ export default async function VehiclePage({
       description={v.description}
       verificationStatus={v.verificationStatus}
       image={entityImages[v.slug]}
+      coverIcon={
+        {
+          cars: <Car className="size-12 text-muted-foreground/40" />,
+          motorcycles: <Bike className="size-12 text-muted-foreground/40" />,
+          boats: <Ship className="size-12 text-muted-foreground/40" />,
+          aircraft: <Plane className="size-12 text-muted-foreground/40" />,
+          other: <Car className="size-12 text-muted-foreground/40" />,
+        }[v.category]
+      }
       tags={
         v.debut
           ? [

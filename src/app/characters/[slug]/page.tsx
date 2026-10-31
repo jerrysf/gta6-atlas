@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { User } from "lucide-react";
 import { notFound } from "next/navigation";
 import { characterRepo } from "@/lib/repository";
 import { characters } from "@/data/characters";
@@ -47,6 +48,7 @@ export default async function CharacterPage({
       description={c.biography}
       verificationStatus={c.verificationStatus}
       image={entityImages[c.slug]}
+      coverIcon={<User className="size-12 text-muted-foreground/40" />}
       facts={[{ label: "Role", value: c.role }]}
       sources={c.sourceReferences}
       related={related}

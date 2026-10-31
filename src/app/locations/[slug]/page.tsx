@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { locationRepo, missionRepo } from "@/lib/repository";
@@ -77,6 +78,7 @@ export default async function LocationPage({
       description={l.description}
       verificationStatus={l.verificationStatus}
       image={entityImages[l.slug]}
+      coverIcon={<MapPin className="size-12 text-muted-foreground/40" />}
       facts={facts}
       sources={l.sourceReferences}
       related={[...relatedMissions, ...relatedLocations].slice(0, 6)}

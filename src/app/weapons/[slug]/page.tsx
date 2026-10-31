@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Crosshair } from "lucide-react";
 import { notFound } from "next/navigation";
 import { weaponRepo } from "@/lib/repository";
 import { weapons } from "@/data/weapons";
@@ -63,6 +64,7 @@ export default async function WeaponPage({
       description={w.description}
       verificationStatus={w.verificationStatus}
       image={entityImages[w.slug]}
+      coverIcon={<Crosshair className="size-12 text-muted-foreground/40" />}
       facts={facts}
       sources={w.sourceReferences}
       related={related}

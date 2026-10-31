@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Music } from "lucide-react";
 import { EntityDetail } from "@/components/entity-detail";
+import { entityImages } from "@/data/entity-images";
 import { tracks } from "@/data/music";
 import { createMetadata } from "@/lib/seo";
 import { prevNextOf } from "@/lib/utils";
@@ -39,6 +41,8 @@ export default async function TrackPage({
       role={`${t.artist}${t.featuring ? ` feat. ${t.featuring}` : ""}`}
       description={t.description}
       verificationStatus={t.verificationStatus}
+      image={entityImages[t.slug]}
+      coverIcon={<Music className="size-12 text-muted-foreground/40" />}
       tags={[
         {
           label: t.context === "trailer" ? "Trailer song" : "Album track",

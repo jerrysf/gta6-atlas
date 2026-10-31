@@ -61,11 +61,16 @@ export function EntityCover({
             "repeating-linear-gradient(135deg, #b6f34a 0 1px, transparent 1px 14px)",
         }}
       />
-      {icon ?? (
-        <span className="relative font-display text-5xl tracking-wide text-muted-foreground/40">
-          {initials || <MapPin className="size-8" />}
+      <div className="relative flex flex-col items-center gap-2.5">
+        {icon ?? (
+          <span className="font-display text-5xl tracking-wide text-muted-foreground/40">
+            {initials || <MapPin className="size-8" />}
+          </span>
+        )}
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50">
+          Image pending
         </span>
-      )}
+      </div>
     </div>
   );
 }

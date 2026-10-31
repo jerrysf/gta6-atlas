@@ -363,4 +363,132 @@ export const entityImages: Record<string, EntityImage> = {
     url: `${W}/4/4f/Artwork-RealDimezBG-GTAVI.png/revision/latest/scale-to-width-down/800?cb=20250813100554`,
     caption: `${VI} — Ocean View Hotel in the Real Dimez key art`,
   },
+
+  /* ------------------------- Additional vehicles ------------------------- */
+  "golf-cart": {
+    url: `${W}/0/0e/Caddy-GTAV-front.png/revision/latest/scale-to-width-down/800?cb=20161018175900`,
+    caption: "Reference render of the Caddy golf cart in GTA V — the GTA VI version may look different",
+  },
+  "ambulance": {
+    url: `${W}/e/ee/Ambulance-GTAV-front-LSMC.png/revision/latest/scale-to-width-down/800?cb=20160116221217`,
+    caption: REF,
+  },
+  "transit-bus": {
+    url: `${W}/9/93/Bus-GTAV-front.png/revision/latest/scale-to-width-down/800?cb=20180331183551`,
+    caption: REF,
+  },
+  "vice-city-taxi": {
+    url: `${W}/f/f6/Taxi-GTAVe-front.png/revision/latest/scale-to-width-down/800?cb=20230119194740`,
+    caption: REF,
+  },
+  "beach-cruiser-bicycle": {
+    url: `${W}/f/f7/MountainBike-GTASA-front.jpg/revision/latest/scale-to-width-down/800?cb=20230619200858`,
+    caption: "Reference render of a bicycle in GTA San Andreas — the GTA VI version may look different",
+  },
+
+  /* ------------------------- Additional weapons -------------------------- */
+  "morgan-revolver": {
+    url: `${W}/7/7e/DoubleActionRevolver-GTAOee.png/revision/latest/scale-to-width-down/800?cb=20250619123623`,
+    caption: "Reference render of the Double-Action Revolver in GTA Online — the engraved Morgan pair may look different",
+  },
+
+  /* ------------------------- Additional locations ------------------------ */
+  "crosstown": {
+    url: `${W}/6/64/GTAVITrailer-GTAVI-SS26.png/revision/latest/scale-to-width-down/800?cb=20231206020911`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "effluvia": {
+    url: `${W}/a/af/GTAVI-Effluvia-Sign.jpg/revision/latest/scale-to-width-down/800?cb=20260924113447`,
+    caption: `${VI} — Effluvia town sign`,
+  },
+  "key-lento": {
+    url: `${W}/c/cd/KeyLento-GTAVI-Trailer2.png/revision/latest/scale-to-width-down/800?cb=20250516033700`,
+    caption: `${VI} — Trailer 2 screenshot`,
+  },
+  "tequesta-condos": {
+    url: `${W}/4/45/GTAVITrailer-GTAVI-SS8.png/revision/latest/scale-to-width-down/800?cb=20231206020308`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "stockyard-car-meet": {
+    url: `${W}/6/6f/Stockyard-GTAVI-Trailer1.png/revision/latest/scale-to-width-down/800?cb=20250826012138`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "sinfrontera-national-bank": {
+    url: `${W}/8/83/SinfronteraNationalBank-GTAVI-Trailer2-Logo.png/revision/latest?cb=20250812034513`,
+    caption: `${VI} — bank logo from Trailer 2`,
+  },
+  "thrillbilly-mud-club": {
+    url: `${W}/1/15/ThrillbillyMudClub-GTAVI-Trailer1Logo.png/revision/latest/scale-to-width-down/800?cb=20231205175335`,
+    caption: `${VI} — Thrillbilly Mud Club logo from Trailer 1`,
+  },
+  "venetian-islands": {
+    url: `${W}/9/9d/GTAVITrailer-GTAVI-SS17.png/revision/latest/scale-to-width-down/800?cb=20231206020623`,
+    caption: `${VI} — Rialto Islands frame from Trailer 1`,
+  },
+  "vice-city-international-airport": {
+    url: `${W}/f/f1/GTAVITrailer-GTAVI-SS22.png/revision/latest/scale-to-width-down/800?cb=20231206020843`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "gloriana-key": {
+    url: `${W}/b/b3/Gloriana-GTAVI-PlateMontage.png/revision/latest/scale-to-width-down/800?cb=20250507212831`,
+    caption: `${VI} — State of Gloriana license-plate montage`,
+  },
+  "megamundo": {
+    url: `${W}/5/50/Mega-Noticias-GTAVI-Logo-Trailer1.png/revision/latest?cb=20231205093735`,
+    caption: `${VI} — Megamundo logo seen in Trailer 1`,
+  },
+  "fleeca-bank": {
+    url: `${W}/b/bd/Fleeca-GTAV-Logo.png/revision/latest/scale-to-width-down/800?cb=20151005150527`,
+    caption: "Fleeca logo from GTA V — the brand returns in GTA VI's trailers",
+  },
+
+  /* ------------------------------- Wildlife ------------------------------ */
+  "american-alligator": {
+    url: `${W}/5/58/Alligator-GTAVI-SecurityCameraFootage-Trailer1.png/revision/latest/scale-to-width-down/800?cb=20250925063416`,
+    caption: `${VI} — security-camera footage in Trailer 1`,
+  },
+  "flamingo": {
+    url: `${W}/8/8a/GTAVITrailer-GTAVI-SS10.png/revision/latest/scale-to-width-down/800?cb=20231206020323`,
+    caption: `${VI} — Trailer 1 screenshot`,
+  },
+  "green-iguana": {
+    url: `${W}/9/94/Iguana-GTAVI.png/revision/latest/scale-to-width-down/800?cb=20250509032118`,
+    caption: `${VI} — official screenshot`,
+  },
+  "raccoon": {
+    url: `${W}/e/e9/Raccoon-GTAVI.png/revision/latest?cb=20250509052914`,
+    caption: `${VI} — official screenshot`,
+  },
+  "white-tailed-deer": {
+    url: `${W}/c/c2/Deer-GTAV.png/revision/latest?cb=20191125223938`,
+    caption: "Reference render of a deer in GTA V — the GTA VI version may look different",
+  },
+  "bottlenose-dolphin": {
+    url: `${W}/1/12/Dolphin-GTAV.jpg/revision/latest/scale-to-width-down/800?cb=20191127215043`,
+    caption: "Reference image of a dolphin in GTA V — the GTA VI version may look different",
+  },
+  "domestic-dog": {
+    url: `${W}/3/3f/Labrador-GTAV.png/revision/latest?cb=20191127213701`,
+    caption: "Reference render of a dog in GTA V — GTA VI dog breeds are unconfirmed",
+  },
+
+  /* ------------------------- Additional collectibles --------------------- */
+  "gator-in-the-pool": {
+    url: `${W}/5/58/Alligator-GTAVI-SecurityCameraFootage-Trailer1.png/revision/latest/scale-to-width-down/800?cb=20250925063416`,
+    caption: `${VI} — Trailer 1 security-camera footage`,
+  },
+
+  /* ------------------------------- Music --------------------------------- */
+  "flower-in-a-hurricane": {
+    url: "https://i.ytimg.com/vi/rz1B4B2yBZY/maxresdefault.jpg",
+    caption: `${VI} — Launch Trailer thumbnail (the track debuted in this video)`,
+  },
+  "love-is-a-long-road": {
+    url: "https://i.ytimg.com/vi/QdBZY2fkU-0/maxresdefault.jpg",
+    caption: `${VI} — Trailer 1 thumbnail (the track debuted in this video)`,
+  },
+  "hot-together": {
+    url: "https://i.ytimg.com/vi/VQRLujxTm3c/maxresdefault.jpg",
+    caption: `${VI} — Trailer 2 thumbnail (the track debuted in this video)`,
+  },
 };

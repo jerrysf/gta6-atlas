@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Gem } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { collectibleRepo, secretRepo } from "@/lib/repository";
@@ -78,6 +79,7 @@ export default async function CollectiblePage({
       description={c.description}
       verificationStatus={c.verificationStatus}
       image={entityImages[c.slug]}
+      coverIcon={<Gem className="size-12 text-muted-foreground/40" />}
       facts={facts}
       sources={c.sourceReferences}
       related={related}

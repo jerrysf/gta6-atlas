@@ -40,6 +40,7 @@ export function EntityDetail({
   description,
   verificationStatus,
   image,
+  coverIcon,
   tags = [],
   facts = [],
   sources = [],
@@ -53,6 +54,7 @@ export function EntityDetail({
   description: string;
   verificationStatus: VerificationStatus;
   image?: EntityImage;
+  coverIcon?: React.ReactNode;
   tags?: { label: string; tone?: "lime" | "cyan" | "muted" }[];
   facts?: { label: string; value: React.ReactNode }[];
   sources?: SourceReference[];
@@ -73,6 +75,7 @@ export function EntityDetail({
               <EntityCover
                 name={name}
                 image={image}
+                icon={coverIcon}
                 className="rounded-lg border border-border"
               />
               {image && (
