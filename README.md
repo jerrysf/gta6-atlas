@@ -2,21 +2,24 @@
 
 The ultimate GTA 6 guide, interactive map & game database — an independent, fan-made gaming guide website for Grand Theft Auto VI.
 
-Built with **Next.js 16 (App Router, Turbopack) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · MapLibre GL · MDX · Zod**.
+Built with **Next.js 16 (App Router, Turbopack) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · Leaflet · MDX · Zod**.
 
 > GTA6 Atlas is an independent fan-made guide website. It is not affiliated with, endorsed by, or sponsored by Rockstar Games or Take-Two Interactive. Grand Theft Auto and related trademarks belong to their respective owners.
 
 ## Features
 
-- **Homepage** — hero, featured tools, latest guides, database hub, FAQ (`/`)
-- **Interactive Map** (`/map`) — MapLibre-powered fictional-world canvas with search, category filters, markers and popups. Honest empty state until verified in-game map data exists.
+- **Homepage** — ambient map hero, launch countdown, database stats strip, featured tools, official video lightbox, latest guides, database hub (`/`)
+- **Interactive Map** (`/map`) — Leaflet canvas over the cropped community map artwork with search, category filters, marker detail cards, `?focus=` deep links and layer toggles.
 - **100% Completion Tracker** (`/completion`) — checklist with progress bars, localStorage persistence, JSON export/import, reset confirmation. Ships with clearly-labeled demo data.
-- **Walkthroughs** (`/walkthrough`) — main/side mission guide system with objectives, steps, rewards, related content and FAQs. Awaiting-verification placeholders until launch.
-- **Game Database** — `/vehicles`, `/weapons`, `/characters`, `/locations`, `/collectibles`, `/secrets` with shared search/filter/sort/pagination UI and SEO-friendly detail pages.
-- **Guides** (`/guides`) — MDX editorial content with TOC, metadata, related articles and FAQ schema.
+- **Walkthroughs** (`/walkthrough`) — main/side mission guide system with objectives, steps, rewards, related content and FAQs. Awaiting-verification placeholders until launch; entry template lives in `src/data/missions.ts`.
+- **Game Database** — `/vehicles`, `/weapons`, `/characters`, `/locations`, `/collectibles`, `/music`, `/wildlife` with shared search/filter/sort UI, stat strips, prev/next navigation and SEO-friendly detail pages with hero covers.
+- **Media Gallery** (`/media`) — 85-image curated gallery with subject/authenticity filters, keyboard-navigable lightbox and per-image entry links.
+- **Guides** (`/guides`) — 28 MDX editorial articles with search + category filters, sticky scroll-spy TOC, reading progress bar, share buttons, FAQ schema, related + prev/next navigation.
+- **Official Videos** — homepage cards open an in-site lightbox (youtube-nocookie embeds); age-restricted trailers show a branded fallback with a YouTube CTA.
 - **Global search** — `Ctrl/⌘ + K` dialog plus `/search` page over a static client-side index (`/api/search`).
-- **SEO** — canonical URLs, unique titles/descriptions, OG + Twitter cards, JSON-LD (Organization, WebSite, BreadcrumbList, Article, VideoGame-eligible FAQ), `sitemap.xml`, `robots.txt`, custom 404.
-- **Monetization-ready** — disabled-by-default ad slots (header/sidebar/in-article/footer), `AffiliateLink` component, affiliate disclosure page, GA4/AdSense env-driven analytics.
+- **SEO** — canonical URLs, unique titles/descriptions, **per-page generated OG share cards** for every guide and entity, JSON-LD (Organization, WebSite, BreadcrumbList, Article, ItemList, FAQPage), `sitemap.xml`, `robots.txt`, `/feed.xml` RSS, web app manifest, human-readable `/sitemap` page, custom 404 + error boundaries, security headers.
+- **Monetization-ready** — disabled-by-default ad slots (header/sidebar/in-article/footer), `AffiliateLink` component, preorder CTA, newsletter capture, affiliate disclosure page, GA4/AdSense env-driven analytics.
+- **Accessibility** — skip-to-content link, aria-current nav states, keyboard-navigable dialogs, `prefers-reduced-motion` support, focus management in lightboxes.
 
 ## Verification statuses
 
@@ -53,7 +56,7 @@ Entities are defined in `src/lib/types.ts`, validated by `src/lib/schemas.ts` (Z
 
 ### Map architecture
 
-`src/lib/map-provider.ts` exposes a `MapDataProvider` interface returning `MapPoint`s (GeoJSON-compatible). The MVP `StaticMapProvider` returns **no invented coordinates** — markers appear only once verified coordinates exist. Replace or extend the provider after launch.
+`src/lib/map-provider.ts` exposes a `MapDataProvider` interface returning `MapPoint`s. `StaticMapProvider` currently serves ~47 community-reported trailer-sighting locations; swap or extend the provider when verified in-game coordinates exist.
 
 ## Local development
 
@@ -68,7 +71,8 @@ Other commands:
 ```bash
 npm run lint
 npm run build
-npm start
+npm start                # production server on :3000
+npm run smoke            # fetch every sitemap route, assert 200
 ```
 
 ## Environment variables
@@ -80,6 +84,8 @@ See `.env.example`. Everything is optional — the site works with zero configur
 | `NEXT_PUBLIC_SITE_URL` | Canonical URLs, sitemap, OG tags |
 | `NEXT_PUBLIC_GA_ID` | GA4 measurement ID — analytics off when unset |
 | `NEXT_PUBLIC_ADSENSE_ID` | AdSense client ID — ad slots off when unset |
+| `NEXT_PUBLIC_PREORDER_URL` | Preorder/affiliate link used by `PreorderCta` — falls back to the official Rockstar page |
+| `NEXT_PUBLIC_NEWSLETTER_URL` | Newsletter form POST target — form hidden when unset |
 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Reserved for future DB backend |
 
 ## Deployment (Vercel)
@@ -116,7 +122,8 @@ Every new entry still needs an honest `verificationStatus` +
 
 ## Known limitations
 
-- Vehicle/weapon/collectible/secret/mission datasets are intentionally empty until verified information exists (after the Nov 19, 2026 release).
-- The map canvas is a stylized placeholder plane — not the in-game map — pending official cartography/verified coordinates.
+- Mission and collectible datasets are intentionally empty until verified information exists (after the Nov 19, 2026 release).
+- The map uses the community-made speculative YANIS / State of Leonida artwork (labelled in-app) — not the in-game map — pending official cartography.
+- Entity imagery is hotlinked from GTA Wiki and captioned to distinguish official GTA VI media from GTA V-era reference renders.
 - Progress tracking is per-browser localStorage (no accounts yet).
 - Contact form opens a mailto draft — no backend email service is wired.
