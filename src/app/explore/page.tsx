@@ -3,9 +3,9 @@ import ExploreClient from "@/components/explore/explore-client";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Leonida 3D Explorer — Fly a Fan Boat Across the GTA 6 Map",
+  title: "South Florida Roam — Explore the Real Map Behind GTA 6",
   description:
-    "A fan-made 3D diorama of Leonida: pilot an airboat from Vice City to the Leonida Keys and discover 16 real locations from official GTA VI media.",
+    "Roam the real South Florida that Leonida is built on: zoom across Miami, the Everglades and the Keys to log all 16 GTA VI locations at their real-world inspirations.",
   path: "/explore",
 });
 

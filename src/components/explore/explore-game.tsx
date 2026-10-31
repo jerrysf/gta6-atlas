@@ -1,977 +1,657 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Camera,
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Circle,
-  Compass,
-  List,
-  Pause,
-  Play,
-  RotateCcw,
-  Volume2,
-  VolumeX,
-  X,
-} from "lucide-react";
-import {
-  exploreIslands,
-  explorePois,
-  exploreRings,
-  exploreStashes,
-} from "@/data/explore";
-import { ExploreScene } from "@/components/explore/scene";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { Check, Crosshair, List, Play, RotateCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DISCOVER_RADIUS_PX,
+  DISCOVER_ZOOM,
+  roamLandmarks,
+  roamPois,
+  roamStashes,
+  ROAM_BOUNDS,
+  ROAM_START,
+  type ExploreSpot,
+} from "@/data/explore-miami";
 
-const STORAGE_KEY = "gta6-explore-v1";
+const STORAGE_KEY = "gta6atlas-roam-progress-v1";
 
-interface BoatPos {
-  x: number;
-  z: number;
-  heading: number;
-  speed: number;
-  alt: number;
+type Kind = "poi" | "landmark" | "stash";
+
+const KIND_COLOR: Record<Kind, string> = {
+  poi: "#f0518f",
+  landmark: "#ffc94d",
+  stash: "#5adfff",
+};
+
+interface Saved {
+  found: string[];
+  landmarks: string[];
+  stashes: string[];
 }
 
-function loadProgress(): {
-  pois: Set<string>;
-  rings: Set<string>;
-  stashes: Set<string>;
-} {
+function loadSaved(): Saved {
+  if (typeof window === "undefined") return { found: [], landmarks: [], stashes: [] };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { pois: new Set(), rings: new Set(), stashes: new Set() };
-    const d = JSON.parse(raw) as {
-      pois?: string[];
-      rings?: string[];
-      stashes?: string[];
-    };
-    return {
-      pois: new Set(d.pois ?? []),
-      rings: new Set(d.rings ?? []),
-      stashes: new Set(d.stashes ?? []),
-    };
+    if (raw) {
+      const p = JSON.parse(raw) as Partial<Saved>;
+      return {
+        found: p.found ?? [],
+        landmarks: p.landmarks ?? [],
+        stashes: p.stashes ?? [],
+      };
+    }
   } catch {
-    return { pois: new Set(), rings: new Set(), stashes: new Set() };
+    /* fresh start */
   }
+  return { found: [], landmarks: [], stashes: [] };
 }
 
-/* ---------- HUD widgets ---------- */
+function dot(color: string, size = 14, ring = true): L.DivIcon {
+  return L.divIcon({
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:${color};${ring ? `box-shadow:0 0 0 2px rgba(7,13,24,.9),0 0 10px ${color};` : ""}"></span>`,
+  });
+}
 
-const COMPASS_POINTS: [number, string][] = [
-  [0, "N"],
-  [45, "NE"],
-  [90, "E"],
-  [135, "SE"],
-  [180, "S"],
-  [225, "SW"],
-  [270, "W"],
-  [315, "NW"],
+function keycap(k: string) {
+  return (
+    <kbd
+      key={k}
+      className="inline-flex min-w-5 items-center justify-center rounded border border-white/20 bg-white/10 px-1 py-px font-mono text-[9px] text-white/80"
+    >
+      {k}
+    </kbd>
+  );
+}
+
+const CONTROLS: { keys: string; action: string }[] = [
+  { keys: "Drag / scroll", action: "Pan & zoom the map" },
+  { keys: "WASD / arrows", action: "Move" },
+  { keys: "+ −", action: "Zoom in / out" },
+  { keys: "F", action: "Fly to next target" },
+  { keys: "R", action: "Back to Miami" },
+  { keys: "Esc", action: "Pause" },
 ];
 
-function CompassStrip({ posRef }: { posRef: React.RefObject<BoatPos> }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+export default function ExploreGame() {
+  const saved = useMemo(() => loadSaved(), []);
+  const [started, setStarted] = useState(false);
+  const [found, setFound] = useState<Set<string>>(() => new Set(saved.found));
+  const [landmarksFound, setLandmarksFound] = useState<Set<string>>(
+    () => new Set(saved.landmarks)
+  );
+  const [stashesFound, setStashesFound] = useState<Set<string>>(
+    () => new Set(saved.stashes)
+  );
+  const [paused, setPaused] = useState(false);
+  const [showList, setShowList] = useState(false);
+  const [nextTarget, setNextTarget] = useState<{
+    name: string;
+    km: number;
+  } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number; z: number }>({
+    lat: ROAM_START.lat,
+    lng: ROAM_START.lng,
+    z: ROAM_START.zoom,
+  });
+  const [splash, setSplash] = useState<{
+    kind: Kind;
+    name: string;
+    analog: string;
+    blurb: string;
+    t: number;
+  } | null>(null);
+  const complete = found.size === roamPois.length;
+
+  const mapEl = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const foundRef = useRef<Set<string>>(new Set(saved.found));
+  const landmarksRef = useRef<Set<string>>(new Set(saved.landmarks));
+  const stashesRef = useRef<Set<string>>(new Set(saved.stashes));
+  const pausedRef = useRef(false);
+  const keysRef = useRef<Record<string, boolean>>({});
+  const splashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panLoop = useRef<number | null>(null);
+
+  const total = roamPois.length + roamLandmarks.length + roamStashes.length;
+  const done = found.size + landmarksFound.size + stashesFound.size;
+  const pct = Math.round((done / total) * 100);
+
+  /* ---------- discovery ---------- */
+
+  const discover = useCallback((kind: Kind, spot: ExploreSpot) => {
+    const apply = (set: Set<string>, setState: (s: Set<string>) => void) => {
+      if (set.has(spot.slug)) return false;
+      const next = new Set(set);
+      next.add(spot.slug);
+      setState(next);
+      return true;
+    };
+    const hit =
+      kind === "poi"
+        ? apply(foundRef.current, setFound)
+        : kind === "landmark"
+          ? apply(landmarksRef.current, setLandmarksFound)
+          : apply(stashesRef.current, setStashesFound);
+    if (!hit) return;
+    if (splashTimer.current) clearTimeout(splashTimer.current);
+    setSplash({
+      kind,
+      name: spot.name,
+      analog: spot.analog,
+      blurb: spot.blurb,
+      t: Date.now(),
+    });
+    splashTimer.current = setTimeout(() => setSplash(null), 4200);
+  }, []);
+
+  /* ---------- map lifecycle ---------- */
+
   useEffect(() => {
-    let raf = 0;
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      const c = ref.current;
-      if (!c) return;
-      const g = c.getContext("2d");
-      if (!g) return;
-      const W = c.width;
-      const H = c.height;
-      g.clearRect(0, 0, W, H);
-      const heading = posRef.current?.heading ?? 0;
-      // heading → degrees, 0 = forward +z?? our heading: forward = (sin h, cos h); h=PI faces -z = north
-      const deg = ((180 - (heading * 180) / Math.PI) % 360 + 360) % 360;
-      const pxPerDeg = W / 120; // show 120° of compass
-      g.font = "600 11px ui-monospace, monospace";
-      g.textAlign = "center";
-      // ticks every 15°
-      for (let d = -60; d <= 60; d += 15) {
-        const a = (deg + d + 360) % 360;
-        const x = W / 2 + d * pxPerDeg;
-        const isMajor = a % 45 === 0;
-        g.fillStyle = isMajor ? "rgba(182,243,74,0.9)" : "rgba(148,163,184,0.45)";
-        g.fillRect(x - 0.5, isMajor ? 6 : 12, 1.4, isMajor ? 8 : 5);
-        if (isMajor) {
-          const label = COMPASS_POINTS.find(([dd]) => dd === a)?.[1];
-          if (label) {
-            g.fillStyle = "rgba(226,232,240,0.9)";
-            g.fillText(label, x, H - 6);
+    if (!started || !mapEl.current || mapRef.current) return;
+
+    const map = L.map(mapEl.current, {
+      center: [ROAM_START.lat, ROAM_START.lng],
+      zoom: ROAM_START.zoom,
+      minZoom: 9,
+      maxZoom: 18,
+      maxBounds: ROAM_BOUNDS,
+      maxBoundsViscosity: 0.8,
+      zoomControl: false,
+      attributionControl: true,
+      keyboard: false,
+      worldCopyJump: false,
+    });
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+    map.attributionControl?.setPrefix(false);
+    // Esri World Imagery — real satellite view of South Florida, no key needed.
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        maxZoom: 19,
+        keepBuffer: 6,
+        updateWhenIdle: false,
+        attribution:
+          "Esri, Maxar, Earthstar Geographics & contributors",
+      }
+    ).addTo(map);
+    // light place-name labels designed for satellite imagery
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+      { maxZoom: 19, opacity: 0.85 }
+    ).addTo(map);
+
+    const markers = markersRef.current;
+    const syncMarkers = () => {
+      const z = map.getZoom();
+      const ensure = (
+        list: ExploreSpot[],
+        foundSet: Set<string>,
+        kind: Kind,
+        hiddenUntilNear: boolean
+      ) => {
+        for (const s of list) {
+          const doneSpot = foundSet.has(s.slug);
+          const center = map.getCenter();
+          const distKm = center.distanceTo([s.lat, s.lng]) / 1000;
+          const visible =
+            !doneSpot && (!hiddenUntilNear || (z >= 13 && distKm < 4));
+          let m = markers.get(s.slug);
+          if (visible && !m) {
+            m = L.marker([s.lat, s.lng], {
+              icon: dot(KIND_COLOR[kind], kind === "stash" ? 11 : 14),
+              title: s.name,
+            }).addTo(map);
+            markers.set(s.slug, m);
+          } else if (!visible && m) {
+            m.remove();
+            markers.delete(s.slug);
           }
         }
-      }
-      // center caret
-      g.fillStyle = "#B6F34A";
-      g.beginPath();
-      g.moveTo(W / 2, 0);
-      g.lineTo(W / 2 - 4, 6);
-      g.lineTo(W / 2 + 4, 6);
-      g.closePath();
-      g.fill();
-      // heading degrees
-      g.fillStyle = "rgba(182,243,74,0.9)";
-      g.font = "700 10px ui-monospace, monospace";
-      g.fillText(`${Math.round(deg)}°`, W / 2, H - 22);
+      };
+      ensure(roamPois, foundRef.current, "poi", false);
+      ensure(roamLandmarks, landmarksRef.current, "landmark", false);
+      ensure(roamStashes, stashesRef.current, "stash", true);
     };
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
-  }, [posRef]);
-  return (
-    <canvas
-      ref={ref}
-      width={240}
-      height={40}
-      className="h-10 w-60"
-      aria-hidden="true"
-    />
-  );
-}
 
-function Instruments({ posRef }: { posRef: React.RefObject<BoatPos> }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    let raf = 0;
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      const c = ref.current;
-      if (!c) return;
-      const g = c.getContext("2d");
-      if (!g) return;
-      const W = c.width;
-      const H = c.height;
-      g.clearRect(0, 0, W, H);
-      const pos = posRef.current;
-      const spd = Math.abs(pos?.speed ?? 0);
-      const alt = pos?.alt ?? 0;
-      const spdP = Math.min(1, spd / 58);
-      const altP = Math.min(1, alt / 46);
-      // speed bar
-      g.font = "600 9px ui-monospace, monospace";
-      g.textAlign = "left";
-      g.fillStyle = "rgba(148,163,184,0.7)";
-      g.fillText("SPD", 0, 10);
-      g.fillStyle = "rgba(30,41,59,0.9)";
-      g.fillRect(28, 4, W - 70, 6);
-      const grad = g.createLinearGradient(28, 0, W - 42, 0);
-      grad.addColorStop(0, "#B6F34A");
-      grad.addColorStop(1, "#5ADFFF");
-      g.fillStyle = grad;
-      g.fillRect(28, 4, (W - 70) * spdP, 6);
-      g.fillStyle = "#e2e8f0";
-      g.textAlign = "right";
-      g.fillText(`${Math.round(spd)}`, W - 30, 10);
-      g.fillStyle = "rgba(148,163,184,0.7)";
-      g.fillText("kn", W - 12, 10);
-      // altitude bar
-      g.textAlign = "left";
-      g.fillText("ALT", 0, 28);
-      g.fillStyle = "rgba(30,41,59,0.9)";
-      g.fillRect(28, 22, W - 70, 6);
-      g.fillStyle = alt > 20 ? "#ffd25a" : "#5ADFFF";
-      g.fillRect(28, 22, (W - 70) * altP, 6);
-      g.fillStyle = "#e2e8f0";
-      g.textAlign = "right";
-      g.fillText(`${Math.round(alt)}`, W - 30, 28);
-      g.fillStyle = "rgba(148,163,184,0.7)";
-      g.fillText("m", W - 12, 28);
+    const checkDiscovery = () => {
+      if (pausedRef.current) return;
+      const z = map.getZoom();
+      const cPt = map.latLngToContainerPoint(map.getCenter());
+      const probe = (
+        list: ExploreSpot[],
+        foundSet: Set<string>,
+        kind: Kind,
+        minZoom: number
+      ) => {
+        if (z < minZoom) return;
+        for (const s of list) {
+          if (foundSet.has(s.slug)) continue;
+          const pt = map.latLngToContainerPoint([s.lat, s.lng]);
+          if (pt.distanceTo(cPt) < DISCOVER_RADIUS_PX) discover(kind, s);
+        }
+      };
+      probe(roamPois, foundRef.current, "poi", DISCOVER_ZOOM);
+      probe(roamLandmarks, landmarksRef.current, "landmark", DISCOVER_ZOOM);
+      probe(roamStashes, stashesRef.current, "stash", 13);
+      syncMarkers();
+
+      // next target = nearest undiscovered
+      const c = map.getCenter();
+      let best: { name: string; km: number } | null = null;
+      for (const s of roamPois) {
+        if (foundRef.current.has(s.slug)) continue;
+        const km = c.distanceTo([s.lat, s.lng]) / 1000;
+        if (!best || km < best.km) best = { name: s.name, km };
+      }
+      setNextTarget(best);
+      setCoords({ lat: c.lat, lng: c.lng, z });
     };
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
-  }, [posRef]);
-  return (
-    <canvas
-      ref={ref}
-      width={200}
-      height={34}
-      className="h-[34px] w-[200px]"
-      aria-hidden="true"
-    />
-  );
-}
 
-function Minimap({
-  posRef,
-  found,
-  ringsFound,
-}: {
-  posRef: React.RefObject<BoatPos>;
-  found: Set<string>;
-  ringsFound: Set<string>;
-}) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    let raf = 0;
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      const c = ref.current;
-      if (!c) return;
-      const g = c.getContext("2d");
-      if (!g) return;
-      const W = c.width;
-      const toMap = (x: number, z: number) => [
-        ((x + 480) / 960) * W,
-        ((z + 480) / 960) * W,
-      ];
-      g.clearRect(0, 0, W, W);
-      g.fillStyle = "rgba(6,18,30,0.92)";
-      g.fillRect(0, 0, W, W);
-      g.fillStyle = "#1d3323";
-      for (const isl of exploreIslands) {
-        const [px, pz] = toMap(isl.cx, isl.cz);
-        g.beginPath();
-        g.ellipse(px, pz, (isl.rx / 960) * W, (isl.rz / 960) * W, 0, 0, Math.PI * 2);
-        g.fill();
-      }
-      for (const r of exploreRings) {
-        if (ringsFound.has(r.id)) continue;
-        const [px, pz] = toMap(r.x, r.z);
-        g.strokeStyle = "#ffd25a";
-        g.lineWidth = 1.4;
-        g.beginPath();
-        g.arc(px, pz, 3, 0, Math.PI * 2);
-        g.stroke();
-      }
-      for (const p of explorePois) {
-        const [px, pz] = toMap(p.x, p.z);
-        g.fillStyle = found.has(p.slug) ? "#B6F34A" : "#ff4fd8";
-        g.beginPath();
-        g.arc(px, pz, 2.2, 0, Math.PI * 2);
-        g.fill();
-      }
-      const pos = posRef.current;
-      if (pos) {
-        const [px, pz] = toMap(pos.x, pos.z);
-        g.save();
-        g.translate(px, pz);
-        g.rotate(-pos.heading);
-        g.fillStyle = "#ffffff";
-        g.shadowColor = "#B6F34A";
-        g.shadowBlur = 6;
-        g.beginPath();
-        g.moveTo(0, -5.5);
-        g.lineTo(3.6, 4.4);
-        g.lineTo(-3.6, 4.4);
-        g.closePath();
-        g.fill();
-        g.restore();
-      }
+    map.on("move", checkDiscovery);
+    map.on("zoomend", checkDiscovery);
+    checkDiscovery();
+    mapRef.current = map;
+    return () => {
+      map.off("move", checkDiscovery);
+      map.off("zoomend", checkDiscovery);
+      map.remove();
+      mapRef.current = null;
+      markers.clear();
     };
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
-  }, [posRef, found, ringsFound]);
-  return (
-    <div className="relative">
-      <canvas
-        ref={ref}
-        width={168}
-        height={168}
-        className="size-32 rounded-md sm:size-40"
-        aria-label="Minimap"
-      />
-      <span className="pointer-events-none absolute inset-0 rounded-md border border-lime-300/25" />
-      <span className="pointer-events-none absolute left-1 top-1 font-mono text-[8px] uppercase tracking-widest text-lime-300/70">
-        Leonida
-      </span>
-    </div>
-  );
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started]);
 
-const KEY_ROWS: { keys: string; action: string }[] = [
-  { keys: "W / S", action: "Throttle forward / reverse" },
-  { keys: "A / D", action: "Steer the fan boat" },
-  { keys: "Space", action: "Climb — fly over terrain" },
-  { keys: "Shift", action: "Descend" },
-  { keys: "R", action: "Reset position" },
-  { keys: "V", action: "Switch fan boat / street roam" },
-  { keys: "C", action: "Camera — near / far / survey" },
-  { keys: "Drag", action: "Look around (street roam)" },
-  { keys: "M", action: "Engine sound on/off" },
-  { keys: "Esc", action: "Pause menu" },
-];
-
-export function ExploreGame() {
-  const [started, setStarted] = useState(false);
-  const [saved] = useState(loadProgress);
-  const [found, setFound] = useState<Set<string>>(saved.pois);
-  const [ringsFound, setRingsFound] = useState<Set<string>>(saved.rings);
-  const [stashesFound, setStashesFound] = useState<Set<string>>(saved.stashes);
-  const [paused, setPaused] = useState(false);
-  const [camMode, setCamMode] = useState(0);
-  const [roamMode, setRoamMode] = useState<"boat" | "walk">("boat");
-  const [muted, setMuted] = useState(false);
-  const [nextTarget, setNextTarget] = useState<{ name: string; dist: number } | null>(null);
-  const [splash, setSplash] = useState<{
-    name: string;
-    blurb: string;
-    kind: "poi" | "ring" | "stash";
-  } | null>(null);
-  const [showList, setShowList] = useState(false);
-  const [webglOk] = useState(() => {
-    try {
-      const c = document.createElement("canvas");
-      return !!(c.getContext("webgl2") || c.getContext("webgl"));
-    } catch {
-      return false;
-    }
-  });
-  const keysRef = useRef<Record<string, boolean>>({});
-  const foundRef = useRef<Set<string>>(saved.pois);
-  const ringsRef = useRef<Set<string>>(saved.rings);
-  const stashesRef = useRef<Set<string>>(saved.stashes);
-  const camModeRef = useRef(0);
-  const pausedRef = useRef(false);
-  const posRef = useRef<BoatPos>({ x: 30, z: 150, heading: Math.PI, speed: 0, alt: 0 });
-  const splashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isTouch] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(pointer: coarse)").matches
-  );
+  /* ---------- keyboard + auto-pan ---------- */
 
   useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  const flyToNext = () => {
+    if (!nextTarget) return;
+    const spot =
+      roamPois.find((s) => s.name === nextTarget.name) ??
+      roamLandmarks.find((s) => s.name === nextTarget.name);
+    if (spot) mapRef.current?.flyTo([spot.lat, spot.lng], 13, { duration: 1.6 });
+  };
+
+  useEffect(() => {
+    if (!started) return;
     const down = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      )
-        return;
+      const t = e.target as HTMLElement;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
       if (e.code === "Escape") {
-        setPaused((v) => {
-          pausedRef.current = !v;
-          return !v;
-        });
+        setPaused((p) => !p);
         return;
       }
-      if (e.code === "KeyC") {
-        setCamMode((m) => {
-          const n = (m + 1) % 3;
-          camModeRef.current = n;
-          return n;
-        });
+      if (e.code === "KeyF") {
+        flyToNext();
         return;
       }
-      if (e.code === "KeyM") {
-        setMuted((m) => !m);
-        return;
-      }
-      if (e.code === "KeyV") {
-        setRoamMode((m) => (m === "boat" ? "walk" : "boat"));
+      if (e.code === "KeyR") {
+        mapRef.current?.flyTo([ROAM_START.lat, ROAM_START.lng], ROAM_START.zoom);
         return;
       }
       keysRef.current[e.code] = true;
-      if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code))
+        e.preventDefault();
+      if (e.code === "Equal" || e.code === "NumpadAdd")
+        mapRef.current?.zoomIn();
+      if (e.code === "Minus" || e.code === "NumpadSubtract")
+        mapRef.current?.zoomOut();
     };
     const up = (e: KeyboardEvent) => {
       keysRef.current[e.code] = false;
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
+    const step = () => {
+      const map = mapRef.current;
+      if (map && !pausedRef.current) {
+        const k = keysRef.current;
+        const dx =
+          (k["KeyD"] || k["ArrowRight"] ? 1 : 0) -
+          (k["KeyA"] || k["ArrowLeft"] ? 1 : 0);
+        const dy =
+          (k["KeyS"] || k["ArrowDown"] ? 1 : 0) -
+          (k["KeyW"] || k["ArrowUp"] ? 1 : 0);
+        if (dx || dy) {
+          const px = 7;
+          map.panBy([dx * px, dy * px], { animate: false });
+        }
+      }
+      panLoop.current = requestAnimationFrame(step);
+    };
+    panLoop.current = requestAnimationFrame(step);
     return () => {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
+      if (panLoop.current) cancelAnimationFrame(panLoop.current);
     };
-  }, []);
-
-  const persist = useCallback(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          pois: [...foundRef.current],
-          rings: [...ringsRef.current],
-          stashes: [...stashesRef.current],
-        })
-      );
-    } catch {
-      /* storage unavailable */
-    }
-  }, []);
-
-  const showSplash = useCallback(
-    (name: string, blurb: string, kind: "poi" | "ring" | "stash") => {
-      setSplash({ name, blurb, kind });
-      if (splashTimer.current) clearTimeout(splashTimer.current);
-      splashTimer.current = setTimeout(() => setSplash(null), 3800);
-    },
-    []
-  );
-
-  const onDiscover = useCallback(
-    (slug: string) => {
-      const poi = explorePois.find((p) => p.slug === slug);
-      if (!poi) return;
-      setFound(new Set(foundRef.current));
-      persist();
-      showSplash(poi.name, poi.blurb, "poi");
-    },
-    [persist, showSplash]
-  );
-
-  const onRing = useCallback(
-    (id: string) => {
-      const ring = exploreRings.find((r) => r.id === id);
-      setRingsFound(new Set(ringsRef.current));
-      persist();
-      showSplash("Golden Ring", ring ? ring.hint : "Ring collected", "ring");
-    },
-    [persist, showSplash]
-  );
-
-  const onStash = useCallback(
-    (id: string) => {
-      const stash = exploreStashes.find((x) => x.id === id);
-      setStashesFound(new Set(stashesRef.current));
-      persist();
-      showSplash("Hidden Stash", stash ? stash.label : "Secret found", "stash");
-    },
-    [persist, showSplash]
-  );
-
-  // fan boat engine hum — WebAudio, no assets
-  const audioRef = useRef<{ ctx: AudioContext; osc: OscillatorNode; gain: GainNode } | null>(null);
-  useEffect(() => {
-    if (!started || muted || !webglOk) {
-      if (audioRef.current) {
-        audioRef.current.osc.stop();
-        audioRef.current.ctx.close().catch(() => {});
-        audioRef.current = null;
-      }
-      return;
-    }
-    try {
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.value = 48;
-      gain.gain.value = 0.0;
-      osc.connect(gain).connect(ctx.destination);
-      osc.start();
-      audioRef.current = { ctx, osc, gain };
-      let raf = 0;
-      const pump = () => {
-        raf = requestAnimationFrame(pump);
-        const spd = Math.abs(posRef.current?.speed ?? 0);
-        const n = Math.min(1, spd / 58);
-        gain.gain.value = 0.018 + n * 0.05;
-        osc.frequency.value = 48 + n * 110 + (posRef.current?.alt ?? 0) * 0.6;
-      };
-      raf = requestAnimationFrame(pump);
-      return () => {
-        cancelAnimationFrame(raf);
-        osc.stop();
-        ctx.close().catch(() => {});
-        audioRef.current = null;
-      };
-    } catch {
-      /* audio unavailable */
-    }
-  }, [started, muted, webglOk]);
-
-  // nearest undiscovered POI — mission guidance like the yellow pillar
-  useEffect(() => {
-    if (!started) return;
-    const t = setInterval(() => {
-      const pos = posRef.current;
-      let best: { name: string; dist: number } | null = null;
-      for (const p of explorePois) {
-        if (foundRef.current.has(p.slug)) continue;
-        const d = Math.hypot(pos.x - p.x, pos.z - p.z);
-        if (!best || d < best.dist) best = { name: p.name, dist: d };
-      }
-      setNextTarget(best);
-    }, 600);
-    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [started]);
 
-  const takePhoto = useCallback(() => {
-    const canvas = document.querySelector<HTMLCanvasElement>("canvas");
-    if (!canvas) return;
-    try {
-      const a = document.createElement("a");
-      a.href = canvas.toDataURL("image/png");
-      a.download = "leonida-3d-explorer.png";
-      a.click();
-    } catch {
-      /* capture unavailable */
-    }
-  }, []);
+  /* ---------- persistence ---------- */
 
-  const allFound = found.size === explorePois.length;
-  const totalPct = Math.round(
-    ((found.size + ringsFound.size + stashesFound.size) /
-      (explorePois.length + exploreRings.length + exploreStashes.length)) *
-      100
-  );
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        found: [...found],
+        landmarks: [...landmarksFound],
+        stashes: [...stashesFound],
+      })
+    );
+  }, [found, landmarksFound, stashesFound]);
+
+  /* ---------- render ---------- */
+
+  if (!started) {
+    return (
+      <div className="relative flex h-[calc(100vh-4rem)] min-h-[540px] items-center justify-center overflow-hidden bg-[#070d18] px-4">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(0deg, transparent, transparent 3px, #5adfff 3px, #5adfff 4px)",
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(4,8,16,0.85))]" />
+        <div className="relative w-full max-w-lg rounded-xl border border-white/10 bg-black/70 p-8 shadow-2xl backdrop-blur-md">
+          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-brand">
+            Leonida, for real
+          </p>
+          <h1 className="mt-2 font-display text-5xl tracking-wide text-white">
+            SOUTH FLORIDA<span className="text-brand"> ROAM</span>
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+            Roam the <strong className="text-white">real map</strong> that Leonida
+            is built on — Miami is Vice City, the Everglades are the Grassrivers,
+            Homestead Speedway is Gellhorn Raceway. Zoom in and center each marker
+            to log it. Six curiosities only appear when you get close.
+          </p>
+          <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+            {[
+              [roamPois.length, "LOCATIONS", "text-brand"],
+              [roamLandmarks.length, "LANDMARKS", "text-amber-300"],
+              [roamStashes.length, "HIDDEN", "text-cyan-300"],
+            ].map(([n, l, c]) => (
+              <div
+                key={l as string}
+                className="rounded-md border border-white/10 bg-white/5 py-2.5"
+              >
+                <div className={cn("font-display text-2xl", c)}>{n}</div>
+                <div className="font-mono text-[8px] uppercase tracking-widest text-slate-500">
+                  {l}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 space-y-1.5">
+            {CONTROLS.map((c) => (
+              <div key={c.keys} className="flex items-center justify-between text-xs">
+                <span className="flex gap-1">
+                  {c.keys.split(" / ").map(keycap)}
+                </span>
+                <span className="text-muted-foreground">{c.action}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => setStarted(true)}
+            className="group mt-6 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 font-display text-xl tracking-widest text-background transition-all hover:shadow-[0_0_35px_-5px_rgba(182,243,74,0.7)]"
+          >
+            <Play className="size-5 fill-current" />
+            START ROAMING
+          </button>
+          <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-widest text-slate-500">
+            Real satellite map · Esri/OSM · progress saves locally
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-[calc(100vh-4rem)] min-h-[540px] w-full overflow-hidden bg-[#070d18]">
-      {webglOk ? (
-        <ExploreScene
-          mode={roamMode}
-          found={found}
-          ringsFound={ringsFound}
-          stashesFound={stashesFound}
-          keysRef={keysRef}
-          foundRef={foundRef}
-          ringsRef={ringsRef}
-          stashesRef={stashesRef}
-          camModeRef={camModeRef}
-          pausedRef={pausedRef}
-          posRef={posRef}
-          onDiscover={onDiscover}
-          onRing={onRing}
-          onStash={onStash}
-        />
-      ) : (
-        <div className="flex h-full items-center justify-center p-8 text-center text-muted-foreground">
-          Your browser could not create a WebGL context — the 3D Explorer needs
-          hardware acceleration enabled.
+      <div ref={mapEl} className="absolute inset-0" />
+
+      {/* vignette + scanlines */}
+      <div className="pointer-events-none absolute inset-0 z-[500] bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(4,8,16,0.5))]" />
+      <div
+        className="pointer-events-none absolute inset-0 z-[500] opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent, transparent 3px, #5adfff 3px, #5adfff 4px)",
+        }}
+      />
+
+      {/* top-center hint */}
+      <div className="pointer-events-none absolute left-1/2 top-3 z-[600] -translate-x-1/2 rounded bg-black/50 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-cyan-300 backdrop-blur">
+        Roam the map · center a marker &amp; zoom ≥ 12 to log it · F flies to next
+      </div>
+
+      {/* mission widget */}
+      <div className="absolute left-3 top-3 z-[600] w-52 rounded-md border border-brand/30 bg-black/70 p-3 backdrop-blur-md">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/70 to-transparent" />
+        <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-brand">
+          Leonida tour
+        </p>
+        <div className="mt-1 flex items-end gap-2">
+          <span className="font-display text-3xl leading-none text-white">
+            {pct}%
+          </span>
+          <span className="pb-0.5 font-mono text-[9px] text-slate-400">
+            {found.size}/16 locations · {landmarksFound.size}/8 landmarks ·{" "}
+            {stashesFound.size}/6 hidden
+          </span>
         </div>
-      )}
+        <div className="mt-2 h-1 overflow-hidden rounded bg-white/10">
+          <div
+            className="h-full rounded bg-gradient-to-r from-brand to-cyan-400 transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        {nextTarget && (
+          <button
+            onClick={flyToNext}
+            className="mt-2 flex w-full items-center justify-between rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-slate-300 transition-colors hover:border-brand/50 hover:text-brand"
+          >
+            <span>
+              ▸ Next: <span className="text-white">{nextTarget.name}</span>
+            </span>
+            <span className="text-slate-500">{nextTarget.km.toFixed(1)} km</span>
+          </button>
+        )}
+        <p className="mt-2 border-t border-white/10 pt-2 font-mono text-[8px] leading-relaxed text-slate-500">
+          Real South Florida — the world Leonida is based on.
+        </p>
+      </div>
 
-      {/* cinematic overlays */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 55%, rgba(2,6,12,0.55) 100%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          background:
-            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.6) 3px)",
-        }}
-      />
+      {/* top-right controls */}
+      <div className="absolute right-3 top-3 z-[600] flex gap-1.5">
+        <button
+          onClick={() => setShowList((s) => !s)}
+          className="flex items-center gap-1.5 rounded border border-white/15 bg-black/60 px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-widest text-slate-300 backdrop-blur transition-colors hover:border-brand/50 hover:text-brand"
+        >
+          <List className="size-3" /> Field log
+        </button>
+        <button
+          onClick={() => mapRef.current?.flyTo([ROAM_START.lat, ROAM_START.lng], ROAM_START.zoom)}
+          className="flex items-center gap-1.5 rounded border border-white/15 bg-black/60 px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-widest text-slate-300 backdrop-blur transition-colors hover:border-brand/50 hover:text-brand"
+        >
+          <RotateCcw className="size-3" /> Reset
+        </button>
+        <button
+          onClick={() => setPaused(true)}
+          className="flex items-center gap-1.5 rounded border border-white/15 bg-black/60 px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-widest text-slate-300 backdrop-blur transition-colors hover:border-brand/50 hover:text-brand"
+        >
+          ❚❚
+        </button>
+      </div>
 
-      {started && (
-        <>
-          {/* top-center compass */}
-          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-md border border-border/60 bg-black/50 px-2 backdrop-blur">
-            <CompassStrip posRef={posRef} />
-          </div>
-          <p className="pointer-events-none absolute left-1/2 top-14 -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.3em] text-slate-500">
-            {roamMode === "boat"
-              ? `${["Chase cam", "Wide cam", "Survey cam"][camMode]} · C`
-              : "Street roam · drag to look"}
-            {"  ·  V to switch"}
-          </p>
+      {/* coords readout */}
+      <div className="absolute bottom-3 left-3 z-[600] rounded-md border border-white/10 bg-black/70 px-3 py-2 font-mono text-[10px] text-slate-300 backdrop-blur">
+        <span className="text-slate-500">LAT</span> {coords.lat.toFixed(4)}°{" "}
+        <span className="text-slate-500">LNG</span> {coords.lng.toFixed(4)}°{" "}
+        <span className="text-slate-500">Z</span>{" "}
+        <span className={cn(coords.z >= DISCOVER_ZOOM ? "text-brand" : "text-amber-300")}>
+          {coords.z.toFixed(0)}
+          {coords.z < DISCOVER_ZOOM && " — zoom in"}
+        </span>
+      </div>
 
-          {/* top-left mission widget */}
-          <div className="pointer-events-none absolute left-4 top-4 space-y-2">
-            <div className="relative overflow-hidden rounded-md border border-lime-300/30 bg-black/55 px-4 py-3 backdrop-blur">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-300/70 to-transparent" />
-              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-lime-300/80">
-                Leonida Tour
-              </p>
-              <div className="mt-1.5 flex items-end gap-3">
-                <p className="font-display text-3xl leading-none tracking-wide text-brand">
-                  {totalPct}
-                  <span className="text-base text-muted-foreground">%</span>
-                </p>
-                <div className="pb-0.5 font-mono text-[10px] leading-tight text-muted-foreground">
-                  <p>
-                    <span className="text-foreground">{found.size}</span>/
-                    {explorePois.length} locations
-                  </p>
-                  <p>
-                    <span className="text-amber-300">{ringsFound.size}</span>/
-                    {exploreRings.length} rings ·{" "}
-                    <span className="text-cyan-300">{stashesFound.size}</span>/
-                    {exploreStashes.length} hidden
-                  </p>
-                </div>
-              </div>
-              <div className="mt-2 h-1 w-44 overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className="h-full bg-gradient-to-r from-brand to-cyan-400 transition-all duration-500"
-                  style={{ width: `${totalPct}%` }}
-                />
-              </div>
-              {nextTarget && (
-                <p className="mt-2 font-mono text-[9px] uppercase tracking-wider text-fuchsia-300/90">
-                  ▸ Next: {nextTarget.name} · {Math.round(nextTarget.dist)}m
-                </p>
-              )}
-            </div>
-            <p className="max-w-[240px] rounded bg-black/40 px-2 py-1 font-mono text-[9px] leading-relaxed text-slate-400 backdrop-blur">
-              Fan-made stylized diorama — not the official map.
-            </p>
-          </div>
-
-          {/* instruments bottom-left */}
-          <div className="pointer-events-none absolute bottom-4 left-4 rounded-md border border-border/60 bg-black/50 px-3 py-2 backdrop-blur">
-            <Instruments posRef={posRef} />
-            <div className="mt-1 hidden gap-3 font-mono text-[9px] text-slate-500 sm:flex">
-              <span>
-                <b className="text-slate-300">WASD</b> drive
-              </span>
-              <span>
-                <b className="text-slate-300">SPC</b> climb
-              </span>
-              <span>
-                <b className="text-slate-300">SHF</b> dive
-              </span>
-              <span>
-                <b className="text-slate-300">R</b> reset
-              </span>
-            </div>
-          </div>
-
-          {/* minimap bottom-right */}
-          <div className="pointer-events-none absolute bottom-4 right-4">
-            <Minimap posRef={posRef} found={found} ringsFound={ringsFound} />
-          </div>
-
-          {/* action buttons top-right */}
-          <div className="absolute right-4 top-4 flex gap-2">
-            <button
-              onClick={takePhoto}
-              aria-label="Save screenshot"
-              title="Save screenshot"
-              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
-            >
-              <Camera className="size-4" />
-            </button>
-            <button
-              onClick={() => setMuted((m) => !m)}
-              aria-label={muted ? "Unmute engine" : "Mute engine"}
-              title={muted ? "Unmute engine" : "Mute engine"}
-              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
-            >
-              {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-            </button>
-            <button
-              onClick={() => {
-                setPaused((v) => {
-                  pausedRef.current = !v;
-                  return !v;
-                });
-              }}
-              aria-label="Pause"
-              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
-            >
-              <Pause className="size-4" />
-            </button>
-            <button
-              onClick={() => setShowList((v) => !v)}
-              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
-            >
-              <List className="size-4" />
-              Field Log
-            </button>
-            <button
-              onClick={() => {
-                keysRef.current["KeyR"] = true;
-              }}
-              className="flex items-center gap-2 rounded-md border border-border/70 bg-black/55 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-slate-300 backdrop-blur transition-colors hover:border-lime-300/60 hover:text-brand"
-            >
-              <RotateCcw className="size-4" />
-              Reset
-            </button>
-          </div>
-
-          {roamMode === "walk" && (
-            <div className="pointer-events-none absolute left-1/2 top-20 -translate-x-1/2 rounded bg-black/50 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-cyan-300 backdrop-blur">
-              Street view — drag to look · WASD walk · Space fly
-            </div>
-          )}
-
-          {/* center reticle */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="size-1.5 rounded-full bg-white/50 shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
-          </div>
-        </>
-      )}
-
-      {/* GTA-style discovery splash */}
-      {splash && started && (
+      {/* center reticle */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-[600] -translate-x-1/2 -translate-y-1/2">
         <div
-          key={splash.name + splash.blurb}
-          className="pointer-events-none absolute bottom-24 left-6 sm:left-10"
+          className="rounded-full border border-dashed border-white/25"
+          style={{ width: DISCOVER_RADIUS_PX * 2, height: DISCOVER_RADIUS_PX * 2 }}
+        />
+        <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+      </div>
+
+      {/* discovery splash */}
+      {splash && (
+        <div
+          key={splash.t}
+          className="pointer-events-none absolute bottom-24 left-4 z-[700] animate-[fadeIn_0.4s_ease]"
         >
           <p
-            className={cn(
-              "font-mono text-[10px] uppercase tracking-[0.35em]",
-              splash.kind === "ring"
-                ? "text-amber-300"
-                : splash.kind === "stash"
-                  ? "text-cyan-300"
-                  : "text-brand"
-            )}
-            style={{ animation: "fadeIn 0.3s ease-out" }}
+            className="font-mono text-[10px] uppercase tracking-[0.4em]"
+            style={{ color: KIND_COLOR[splash.kind] }}
           >
-            {splash.kind === "ring"
-              ? "Ring collected"
-              : splash.kind === "stash"
-                ? "Secret stash found"
-                : "Location discovered"}
+            {splash.kind === "poi"
+              ? "Location discovered"
+              : splash.kind === "landmark"
+                ? "Landmark logged"
+                : "Hidden spot found"}
           </p>
-          <p
-            className="mt-1 font-display text-5xl tracking-wide text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
-            style={{ animation: "fadeIn 0.35s ease-out" }}
-          >
+          <h2 className="mt-1 font-display text-5xl leading-none tracking-wide text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl">
             {splash.name}
+          </h2>
+          <p className="mt-1 max-w-sm font-mono text-[10px] uppercase tracking-wider text-cyan-300">
+            ≈ {splash.analog}
           </p>
-          <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
+          <p className="mt-1 max-w-sm text-sm text-slate-300 drop-shadow">
             {splash.blurb}
           </p>
         </div>
       )}
 
-      {/* paused */}
-      {paused && started && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-64 rounded-lg border border-lime-300/30 bg-[#070d16]/95 p-6 text-center">
+      {/* completion */}
+      {complete && (
+        <div className="pointer-events-none absolute left-1/2 top-24 z-[700] -translate-x-1/2 animate-[fadeIn_0.6s_ease] rounded-md border border-brand/50 bg-black/80 px-6 py-3 text-center backdrop-blur">
+          <p className="font-display text-2xl tracking-widest text-brand">
+            LEONIDA EXPLORED
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-widest text-slate-400">
+            every confirmed location logged — now find the hidden spots
+          </p>
+        </div>
+      )}
+
+      {/* field log */}
+      {showList && (
+        <div className="absolute right-3 top-12 z-[700] max-h-[60vh] w-64 overflow-y-auto rounded-md border border-white/15 bg-black/80 backdrop-blur-md">
+          <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-brand">
+              Field log
+            </p>
+            <button onClick={() => setShowList(false)} className="text-slate-400 hover:text-white">
+              <X className="size-3.5" />
+            </button>
+          </div>
+          {(
+            [
+              ["Locations", roamPois, found, "poi"],
+              ["Landmarks", roamLandmarks, landmarksFound, "landmark"],
+              ["Hidden", roamStashes, stashesFound, "stash"],
+            ] as const
+          ).map(([label, list, set, kind]) => (
+            <div key={label}>
+              <p className="px-3 pt-2 font-mono text-[8px] uppercase tracking-widest text-slate-500">
+                {label}
+              </p>
+              <ul className="py-1">
+                {list.map((s) => {
+                  const got = set.has(s.slug);
+                  return (
+                    <li
+                      key={s.slug}
+                      className="flex items-center gap-2 px-3 py-1 text-xs"
+                    >
+                      <Check
+                        className={cn(
+                          "size-3",
+                          got ? "text-brand" : "text-slate-700"
+                        )}
+                      />
+                      <span className={got ? "text-white" : "text-slate-500"}>
+                        {kind === "stash" && !got ? "???" : s.name}
+                      </span>
+                      {got && (
+                        <span className="ml-auto truncate font-mono text-[8px] text-slate-500">
+                          {s.analog}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* pause menu */}
+      {paused && (
+        <div className="absolute inset-0 z-[800] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-72 rounded-md border border-white/15 bg-black/85 p-6 text-center">
             <p className="font-display text-3xl tracking-widest text-white">
               PAUSED
             </p>
-            <div className="mt-5 space-y-2">
+            <div className="mt-4 space-y-2">
               <button
-                onClick={() => {
-                  setPaused(false);
-                  pausedRef.current = false;
-                }}
-                className="w-full rounded-md bg-brand px-4 py-2.5 font-display text-base tracking-widest text-background hover:bg-brand/90"
+                onClick={() => setPaused(false)}
+                className="w-full rounded bg-brand px-4 py-2.5 font-display text-lg tracking-widest text-background hover:shadow-[0_0_25px_-5px_rgba(182,243,74,0.7)]"
               >
                 RESUME
               </button>
               <button
                 onClick={() => {
-                  keysRef.current["KeyR"] = true;
                   setPaused(false);
-                  pausedRef.current = false;
+                  mapRef.current?.flyTo(
+                    [ROAM_START.lat, ROAM_START.lng],
+                    ROAM_START.zoom
+                  );
                 }}
-                className="w-full rounded-md border border-border px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-slate-300 hover:border-lime-300/50 hover:text-brand"
+                className="w-full rounded border border-white/20 px-4 py-2 font-mono text-xs uppercase tracking-widest text-slate-300 hover:border-white/50"
               >
-                Restart position
+                Back to Miami
               </button>
             </div>
-            <p className="mt-4 font-mono text-[9px] uppercase tracking-widest text-slate-500">
+            <p className="mt-4 font-mono text-[8px] uppercase tracking-widest text-slate-600">
               ESC to resume
             </p>
           </div>
         </div>
       )}
 
-      {/* field log panel */}
-      {showList && started && (
-        <div className="absolute bottom-4 right-4 top-16 w-64 overflow-y-auto rounded-md border border-border/70 bg-black/70 p-3 backdrop-blur-md sm:right-auto sm:left-4 sm:w-72">
-          <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-lime-300/80">
-              Field Log
-            </p>
-            <button
-              onClick={() => setShowList(false)}
-              className="text-slate-400 hover:text-foreground"
-              aria-label="Close field log"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-          <ul className="space-y-0.5">
-            {explorePois.map((p, i) => {
-              const ok = found.has(p.slug);
-              return (
-                <li
-                  key={p.slug}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded px-2 py-1.5 text-xs",
-                    ok ? "text-brand" : "text-slate-400"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex size-4 shrink-0 items-center justify-center rounded-sm border",
-                      ok ? "border-brand bg-brand/20" : "border-slate-700"
-                    )}
-                  >
-                    {ok && <Check className="size-3" />}
-                  </span>
-                  <span className="font-mono text-[9px] text-slate-600">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  {p.name}
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-3 border-t border-border/60 pt-2 font-mono text-[9px] uppercase tracking-widest text-amber-300/80">
-            Golden rings — {ringsFound.size}/{exploreRings.length}
-          </p>
-        </div>
-      )}
-
-      {/* all discovered */}
-      {allFound && started && (
-        <div className="pointer-events-none absolute left-1/2 top-1/3 w-full max-w-md -translate-x-1/2 px-4">
-          <div className="rounded-lg border border-brand/60 bg-black/85 p-6 text-center shadow-[0_0_80px_-10px_rgba(182,243,74,0.6)] backdrop-blur">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-brand">
-              Mission complete
-            </p>
-            <p className="mt-2 font-display text-4xl tracking-wide text-white">
-              LEONIDA EXPLORED
-            </p>
-            <p className="mt-2 text-sm text-slate-300">
-              All {explorePois.length} locations discovered
-              {ringsFound.size === exploreRings.length
-                ? " — every golden ring too."
-                : ` — ${exploreRings.length - ringsFound.size} golden rings still out there.`}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* touch controls */}
-      {isTouch && started && (
-        <div className="absolute bottom-44 left-1/2 flex w-full max-w-sm -translate-x-1/2 items-end justify-between px-6">
-          <div className="flex gap-2">
-            {(
-              [
-                { code: "KeyA", icon: ChevronLeft, label: "Steer left" },
-                { code: "KeyD", icon: ChevronRight, label: "Steer right" },
-              ] as const
-            ).map((b) => (
-              <button
-                key={b.code}
-                aria-label={b.label}
-                className="flex size-14 items-center justify-center rounded-full border border-slate-500/60 bg-black/55 text-foreground backdrop-blur active:border-brand active:bg-brand/25"
-                onTouchStart={() => (keysRef.current[b.code] = true)}
-                onTouchEnd={() => (keysRef.current[b.code] = false)}
-                onTouchCancel={() => (keysRef.current[b.code] = false)}
-              >
-                <b.icon className="size-6" />
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {(
-              [
-                { code: "ShiftLeft", icon: ChevronDown, label: "Descend" },
-                { code: "Space", icon: Circle, label: "Climb" },
-                { code: "KeyW", icon: ChevronUp, label: "Throttle" },
-              ] as const
-            ).map((b) => (
-              <button
-                key={b.code}
-                aria-label={b.label}
-                className="flex size-14 items-center justify-center rounded-full border border-slate-500/60 bg-black/55 text-foreground backdrop-blur active:border-brand active:bg-brand/25"
-                onTouchStart={() => (keysRef.current[b.code] = true)}
-                onTouchEnd={() => (keysRef.current[b.code] = false)}
-                onTouchCancel={() => (keysRef.current[b.code] = false)}
-              >
-                <b.icon className="size-6" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* intro overlay */}
-      {!started && webglOk && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#04090f]/85 p-4 backdrop-blur-sm">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.06]"
-            style={{
-              background:
-                "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.8) 3px)",
-            }}
-          />
-          <div className="relative w-full max-w-xl">
-            <div className="pointer-events-none absolute -inset-px rounded-xl bg-gradient-to-b from-lime-300/40 via-transparent to-cyan-400/30" />
-            <div className="relative overflow-hidden rounded-xl border border-lime-300/30 bg-[#070d16]/95 p-6 sm:p-9">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-300/80 to-transparent" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-brand">
-                  <Compass className="size-4" />
-                  <p className="font-mono text-[10px] uppercase tracking-[0.4em]">
-                    Interactive toy
-                  </p>
-                </div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
-                  v1.0
-                </p>
-              </div>
-              <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-wide text-white drop-shadow-[0_0_25px_rgba(182,243,74,0.25)] sm:text-6xl">
-                LEONIDA
-                <br />
-                <span className="text-brand">3D EXPLORER</span>
-              </h1>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-300">
-                Pilot an Everglades fan boat across a stylized, fan-made diorama
-                of Leonida. Fly near each pink beacon to discover{" "}
-                {explorePois.length} real locations — and hunt{" "}
-                {exploreRings.length} golden rings while you’re at it.
-              </p>
-              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {[
-                  { n: explorePois.length, l: "locations" },
-                  { n: exploreRings.length, l: "golden rings" },
-                  { n: exploreStashes.length, l: "hidden stashes" },
-                  { n: "1", l: "fan boat" },
-                ].map((s) => (
-                  <div
-                    key={s.l}
-                    className="rounded-md border border-border/70 bg-slate-900/60 px-3 py-2.5 text-center"
-                  >
-                    <p className="font-display text-2xl leading-none text-brand">
-                      {s.n}
-                    </p>
-                    <p className="mt-1 font-mono text-[9px] uppercase tracking-widest text-slate-400">
-                      {s.l}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 grid gap-1.5 rounded-md border border-border/60 bg-slate-900/40 p-4 sm:grid-cols-2">
-                {KEY_ROWS.map((r) => (
-                  <div key={r.keys} className="flex items-center gap-3 text-xs">
-                    <kbd className="w-20 shrink-0 rounded border border-slate-600 bg-black/60 px-1.5 py-0.5 text-center font-mono text-[10px] text-lime-300 shadow-[0_2px_0_rgba(255,255,255,0.08)]">
-                      {r.keys}
-                    </kbd>
-                    <span className="text-slate-400">{r.action}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 grid gap-2 sm:grid-cols-2">
-                <button
-                  onClick={() => {
-                    setRoamMode("boat");
-                    setStarted(true);
-                  }}
-                  className="group flex items-center justify-center gap-3 rounded-md bg-brand px-4 py-3.5 font-display text-lg tracking-widest text-background transition-all hover:shadow-[0_0_35px_-5px_rgba(182,243,74,0.7)]"
-                >
-                  <Play className="size-5 fill-current" />
-                  FAN BOAT
-                </button>
-                <button
-                  onClick={() => {
-                    setRoamMode("walk");
-                    setStarted(true);
-                  }}
-                  className="group flex items-center justify-center gap-3 rounded-md border border-cyan-400/50 bg-cyan-400/10 px-4 py-3.5 font-display text-lg tracking-widest text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-400/20"
-                >
-                  <Compass className="size-5" />
-                  STREET ROAM
-                </button>
-              </div>
-              <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-widest text-slate-500">
-                Fan-made diorama — stylized, not to scale · progress saves
-                locally
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* touch fly-to */}
+      <button
+        onClick={flyToNext}
+        className="absolute bottom-3 right-3 z-[600] flex items-center gap-1.5 rounded border border-brand/40 bg-black/60 px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-widest text-brand backdrop-blur transition-colors hover:bg-brand/10"
+      >
+        <Crosshair className="size-3" /> Next
+      </button>
     </div>
   );
 }

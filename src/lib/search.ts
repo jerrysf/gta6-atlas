@@ -37,7 +37,7 @@ export function buildSearchDocs(input: {
 }): SearchDoc[] {
   const docs: SearchDoc[] = [
     { id: "page-map", title: "Interactive Map", description: "Explore the world of Leonida on the GTA6 Atlas interactive map.", href: "/map", type: "page" },
-    { id: "page-explore", title: "Leonida 3D Explorer", description: "Fly a fan boat across a fan-made 3D diorama of the GTA 6 map.", href: "/explore", type: "page" },
+    { id: "page-explore", title: "South Florida Roam", description: "Roam the real Miami/Everglades map that Leonida is based on — log all 16 GTA VI locations at their real-world inspirations.", href: "/explore", type: "page" },
     { id: "page-completion", title: "100% Completion Tracker", description: "Track your journey to 100% completion.", href: "/completion", type: "page" },
     { id: "page-walkthrough", title: "Walkthroughs", description: "Step-by-step mission walkthroughs.", href: "/walkthrough", type: "page" },
     { id: "page-guides", title: "Guides", description: "All GTA6 Atlas guides and tips.", href: "/guides", type: "page" },

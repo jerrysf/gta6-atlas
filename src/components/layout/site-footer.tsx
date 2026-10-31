@@ -19,7 +19,7 @@ const SOCIAL_ICONS = {
 
 const resourceLinks = [
   { label: "Interactive Map", href: "/map" },
-  { label: "3D Explorer", href: "/explore" },
+  { label: "FL Roam", href: "/explore" },
   { label: "Walkthroughs", href: "/walkthrough" },
   { label: "Completion Tracker", href: "/completion" },
   { label: "Official Videos", href: "/watch" },

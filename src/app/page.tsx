@@ -88,13 +88,13 @@ const tools = [
     objectPosition: "50% 50%",
   },
   {
-    title: "Leonida 3D Explorer",
+    title: "South Florida Roam",
     description:
-      "Pilot a fan boat across a stylized 3D diorama — discover 16 real locations from Vice City to the Keys.",
+      "Roam the real map Leonida is built on — Miami, the Everglades and the Keys, with every GTA VI location mapped to its real-world inspiration.",
     href: "/explore",
     icon: Gamepad2,
     image: "/explore-preview.png",
-    imageAlt: "Leonida 3D Explorer — fan boat over the Vice City diorama",
+    imageAlt: "South Florida Roam — the real-world map behind GTA 6",
     objectPosition: "50% 75%",
   },
 ];

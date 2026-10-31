@@ -45,7 +45,7 @@ const groups: {
     items: [
       { label: "Home", href: "/", icon: Home },
       { label: "Interactive Map", href: "/map", icon: Map },
-      { label: "3D Explorer", href: "/explore", icon: Gamepad2 },
+      { label: "FL Roam", href: "/explore", icon: Gamepad2 },
       { label: "Walkthroughs", href: "/walkthrough", icon: Scroll },
       { label: "Completion Tracker", href: "/completion", icon: CheckSquare },
       { label: "Launch Timeline", href: "/timeline", icon: Timer },

@@ -7,7 +7,7 @@ export default function Image() {
   return ogCard({
     kicker: "Interactive Mini-Game",
     kickerColor: "#5ADFFF",
-    title: "Leonida 3D Explorer",
-    subtitle: "Fly a fan boat across a fan-made GTA 6 map diorama",
+    title: "South Florida Roam",
+    subtitle: "Roam the real Miami & the Everglades behind GTA 6",
   });
 }
