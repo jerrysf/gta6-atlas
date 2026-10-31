@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EntityImage } from "@/data/entity-images";
@@ -26,13 +27,12 @@ export function EntityCover({
           className,
         )}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={image.url}
           alt={name}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="absolute inset-0 size-full object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          className="object-cover"
         />
       </div>
     );
