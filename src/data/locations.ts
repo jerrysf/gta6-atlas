@@ -43,7 +43,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 30, y: -18 },
+    coordinates: { x: 1200, y: 600 },
     mapCategory: "location",
   },
   {
@@ -56,7 +56,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 14, y: -38 },
+    coordinates: { x: -6740, y: -7041 },
     mapCategory: "location",
   },
   {
@@ -69,7 +69,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 4, y: -22 },
+    coordinates: { x: -3115, y: -5026 },
     mapCategory: "location",
   },
   {
@@ -82,7 +82,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -28, y: -4 },
+    coordinates: { x: -6235, y: 3951 },
     mapCategory: "location",
   },
   {
@@ -95,7 +95,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -6, y: 12 },
+    coordinates: { x: -3000, y: 2800 },
     mapCategory: "location",
   },
   {
@@ -108,7 +108,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [ROCKSTAR_GTA6],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -12, y: 42 },
+    coordinates: { x: -3500, y: 8300 },
     mapCategory: "location",
   },
 
@@ -123,7 +123,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 20, y: -6 },
+    coordinates: { x: -2727, y: -2731 },
     mapCategory: "poi",
   },
   {
@@ -136,7 +136,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 40, y: -16 },
+    coordinates: { x: 2600, y: 1400 },
     mapCategory: "poi",
   },
   {
@@ -149,7 +149,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 16, y: -40 },
+    coordinates: { x: -2350, y: -5550 },
     mapCategory: "poi",
   },
   {
@@ -162,7 +162,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -27, y: -3 },
+    coordinates: { x: -5345, y: 3495 },
     mapCategory: "poi",
   },
   {
@@ -175,7 +175,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 6, y: -10 },
+    coordinates: { x: -6182, y: 4514 },
     mapCategory: "poi",
   },
   {
@@ -188,7 +188,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 32, y: -14 },
+    coordinates: { x: -465, y: 1256 },
     mapCategory: "poi",
   },
   {
@@ -201,7 +201,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "community_reported",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 33, y: -19 },
+    coordinates: { x: -700, y: 1100 },
     mapCategory: "poi",
   },
   {
@@ -214,7 +214,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "community_reported",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 38, y: -15 },
+    coordinates: { x: 2021, y: 921 },
     mapCategory: "poi",
   },
   {
@@ -227,7 +227,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "community_reported",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 39, y: -14 },
+    coordinates: { x: 1964, y: 611 },
     mapCategory: "poi",
   },
   {
@@ -240,7 +240,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "officially_confirmed",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: -5, y: 13 },
+    coordinates: { x: -2800, y: 3100 },
     mapCategory: "poi",
   },
   {
@@ -253,7 +253,7 @@ export const locations: GameLocation[] = [
     verificationStatus: "community_reported",
     sourceReferences: [FOOTAGE],
     lastVerifiedAt: "2026-10-31",
-    coordinates: { x: 27, y: -12 },
+    coordinates: { x: 1531, y: -790 },
     mapCategory: "poi",
   },
 ];

@@ -27,10 +27,11 @@ export const MAP_CATEGORIES: { id: MapCategory; label: string; color: string }[]
 
 /**
  * Static MVP provider. GTA VI's real world map hasn't been published, so
- * marker coordinates are COMMUNITY ESTIMATES derived from trailer analysis
- * (Leonida's layout roughly mirrors Florida's geography). They exist to
- * make the map explorable pre-launch and will be replaced with verified
- * in-game coordinates after Nov 19, 2026. Providers must label estimates
+ * marker coordinates are COMMUNITY ESTIMATES in the YANIS community map's
+ * pixel coordinate space (map.stateofleonida.net — an unofficial fan
+ * projection built from trailer analysis). They exist to make the map
+ * explorable pre-launch and will be replaced with verified in-game
+ * coordinates after Nov 19, 2026. Providers must label estimates
  * honestly — never present them as official.
  */
 class StaticMapProvider implements MapDataProvider {
@@ -53,20 +54,3 @@ class StaticMapProvider implements MapDataProvider {
 }
 
 export const mapProvider: MapDataProvider = new StaticMapProvider();
-
-export function pointsToGeoJSON(points: MapPoint[]): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: points.map((p) => ({
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [p.coordinates.x, p.coordinates.y] },
-      properties: {
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        description: p.description ?? "",
-        href: p.href ?? "",
-      },
-    })),
-  };
-}

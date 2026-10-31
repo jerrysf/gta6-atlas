@@ -1,15 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Map as MlMap,
-  Marker,
-  NavigationControl,
-  Popup,
-  setWorkerUrl,
-  type StyleSpecification,
-} from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { MapPin, PanelLeft, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,158 +19,50 @@ interface CategoryMeta {
 }
 
 /**
- * Fictional-world canvas. GTA VI's map is a fictional game world — a real
- * street map would be wrong, so we render a neutral dark grid plane.
- * Verified in-game map imagery/GeoJSON can replace GRID_BOUNDS + the base
- * style later without touching UI logic.
+ * Base map: the YANIS community map by the State of Leonida mapping
+ * project (map.stateofleonida.net). Their tiles use a custom pixel CRS
+ * (Leaflet CRS.Simple), not Web Mercator — hence Leaflet rather than
+ * MapLibre. Coordinates below live in their lat/lng pixel space.
+ * Unofficial fan projection; the real world map arrives with the game.
  */
-const GRID_BOUNDS: [[number, number], [number, number]] = [
-  [-90, -55],
-  [90, 55],
-];
-
-function gridGeoJSON(): GeoJSON.FeatureCollection {
-  const features: GeoJSON.Feature[] = [];
-  for (let x = -90; x <= 90; x += 10) {
-    features.push({
-      type: "Feature",
-      geometry: { type: "LineString", coordinates: [[x, -55], [x, 55]] },
-      properties: {},
-    });
-  }
-  for (let y = -55; y <= 55; y += 10) {
-    features.push({
-      type: "Feature",
-      geometry: { type: "LineString", coordinates: [[-90, y], [90, y]] },
-      properties: {},
-    });
-  }
-  return { type: "FeatureCollection", features };
-}
+const TILE_URL =
+  "https://map.stateofleonida.net/tiles/YANIS/v17/normal/{z}/{x}/{y}.png";
+const MAP_BOUNDS = L.latLngBounds([
+  [-9000, -17000],
+  [11000, 4000],
+]);
 
 /**
- * Stylized Leonida geography — a fictional schematic world map with
- * terrain zones, a central lake, the Keys island chain and a road
- * network, drawn to echo the peninsula geography hinted at in official
- * media. Purely illustrative; not extracted from or resembling any
- * real or official cartography.
+ * The YANIS tiles are rendered in a custom pixel space where (0,0) is the
+ * top-left corner of the map bounds and the full map is originalSize px at
+ * maxNativeZoom. This custom CRS reproduces their Leaflet setup so tile
+ * indices resolve to their non-negative {z}/{x}/{y} paths.
  */
-type TerrainKind =
-  | "land"
-  | "park"
-  | "wetland"
-  | "farmland"
-  | "urban"
-  | "sand"
-  | "lake"
-  | "island";
+const ORIGINAL_SIZE = { width: 21000, height: 20000 };
+const MAX_NATIVE_ZOOM = 6;
 
-function terrainGeoJSON(): GeoJSON.FeatureCollection {
-  const poly = (
-    kind: TerrainKind,
-    ring: [number, number][],
-  ): GeoJSON.Feature => ({
-    type: "Feature",
-    geometry: { type: "Polygon", coordinates: [[...ring, ring[0]]] },
-    properties: { kind },
+const yanisCRS: L.CRS = (() => {
+  const south = -9000;
+  const west = -17000;
+  const north = 11000;
+  const east = 4000;
+  const pxPerUnitX =
+    ORIGINAL_SIZE.width / (east - west) / 2 ** MAX_NATIVE_ZOOM;
+  const pxPerUnitY =
+    ORIGINAL_SIZE.height / (north - south) / 2 ** MAX_NATIVE_ZOOM;
+  return L.extend({}, L.CRS.Simple, {
+    transformation: new L.Transformation(
+      pxPerUnitX,
+      -west * pxPerUnitX,
+      -pxPerUnitY,
+      north * pxPerUnitY,
+    ),
+    scale: (zoom: number) => 2 ** zoom,
+    zoom: (scale: number) => Math.log(scale) / Math.LN2,
   });
-  return {
-    type: "FeatureCollection",
-    features: [
-      // Mainland — irregular coast, panhandle north tapering south-east
-      poly("land", [
-        [-46, 36], [-44, 24], [-41, 14], [-37, 7], [-34, 1], [-30, -3],
-        [-26, -7], [-20, -9], [-14, -9], [-8, -11], [-2, -15], [2, -20],
-        [6, -26], [10, -31], [16, -34], [22, -34], [28, -32], [34, -30],
-        [39, -27], [43, -22], [46, -16], [47, -8], [48, 0], [47, 8],
-        [45, 16], [42, 24], [38, 32], [32, 38], [24, 42], [14, 45],
-        [4, 47], [-6, 47], [-16, 46], [-26, 45], [-34, 44], [-41, 42],
-      ]),
-      // Central lake
-      poly("lake", [
-        [6, 10], [10, 18], [14, 22], [18, 20], [20, 14], [16, 9], [10, 8],
-      ]),
-      // Mount Kalaga National Park — northern highlands
-      poly("park", [
-        [-34, 31], [-30, 37], [-25, 42], [-18, 45], [-10, 44], [-3, 41],
-        [1, 36], [-2, 32], [-8, 31], [-16, 29], [-25, 28], [-31, 28],
-      ]),
-      // Grassrivers — southern wetlands
-      poly("wetland", [
-        [-2, -14], [6, -16], [12, -20], [14, -26], [10, -30], [4, -28],
-        [0, -22],
-      ]),
-      // Ambrosia — central farmland belt
-      poly("farmland", [
-        [-16, 6], [-10, 16], [-4, 18], [2, 14], [0, 6], [-6, 4], [-12, 4],
-      ]),
-      // Vice City — eastern urban mass
-      poly("urban", [
-        [24, -8], [34, -8], [40, -11], [42, -16], [40, -21], [36, -23],
-        [30, -21], [25, -16],
-      ]),
-      // Port Gellhorn — west-coast urban pocket
-      poly("urban", [
-        [-31, -2], [-27, -1], [-26, -4], [-28, -7], [-31, -6],
-      ]),
-      // Vice Beach barrier islands
-      poly("sand", [
-        [45, -9], [49, -10], [51, -13], [50, -16], [46, -15], [44, -12],
-      ]),
-      poly("sand", [
-        [44, -21], [48, -21], [49, -24], [47, -26], [43, -24],
-      ]),
-      poly("sand", [[41, -28], [45, -29], [44, -32], [40, -30]]),
-      // Leonida Keys — island chain trailing south-west of the tip
-      poly("island", [
-        [6, -36], [12, -35], [16, -37], [14, -41], [9, -41], [5, -38],
-      ]),
-      poly("island", [
-        [18, -38], [23, -37], [25, -40], [20, -42], [16, -41],
-      ]),
-      // East offshore islet
-      poly("island", [[55, -14], [59, -16], [58, -20], [54, -18]]),
-    ],
-  };
-}
-
-function roadsGeoJSON(): GeoJSON.FeatureCollection {
-  const line = (coords: [number, number][]): GeoJSON.Feature => ({
-    type: "Feature",
-    geometry: { type: "LineString", coordinates: coords },
-    properties: {},
-  });
-  return {
-    type: "FeatureCollection",
-    features: [
-      // Coastal highway — Port Gellhorn to Vice City
-      line([
-        [-28, -4], [-18, -4], [-8, -8], [0, -10], [10, -12], [20, -12],
-        [28, -13], [36, -15], [43, -17],
-      ]),
-      // North–south highway toward Mount Kalaga
-      line([
-        [-2, -14], [4, -6], [8, 4], [10, 14], [8, 24], [2, 34], [-4, 40],
-      ]),
-      // Ambrosia spur
-      line([[-8, -8], [-10, -2], [-10, 8], [-8, 14]]),
-      // Keys causeway
-      line([[24, -32], [20, -35], [15, -39]]),
-    ],
-  };
-}
-
-/** Region labels rendered as non-interactive DOM markers. */
-const REGION_LABELS: { name: string; at: [number, number] }[] = [
-  { name: "Mt Kalaga N.P.", at: [-12, 44] },
-  { name: "Ambrosia", at: [-8, 17] },
-  { name: "Port Gellhorn", at: [-34, -6] },
-  { name: "Grassrivers", at: [4, -26] },
-  { name: "Leonida Penitentiary", at: [16, -4] },
-  { name: "Vice Beach", at: [43, -9] },
-  { name: "Vice City", at: [31, -25] },
-  { name: "Leonida Keys", at: [12, -46] },
-];
+})();
+const TILE_ATTRIBUTION =
+  'Map artwork © <a href="https://map.stateofleonida.net" target="_blank" rel="noopener noreferrer">YANIS — State of Leonida</a> (unofficial fan projection)';
 
 export default function MapCanvas({
   points,
@@ -187,9 +72,9 @@ export default function MapCanvas({
   categories: CategoryMeta[];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<MlMap | null>(null);
-  const markersRef = useRef<Map<string, Marker>>(new Map());
-  const popupRef = useRef<Popup | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const popupRef = useRef<L.Popup | null>(null);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
   const [enabled, setEnabled] = useState<Set<MapCategory>>(
@@ -216,119 +101,36 @@ export default function MapCanvas({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Turbopack can't resolve the worker via import.meta.url — serve the
-    // bundled worker from /public instead.
-    setWorkerUrl("/maplibre-gl-worker.mjs");
-
-    const style: StyleSpecification = {
-      version: 8,
-      sources: {
-        grid: { type: "geojson", data: gridGeoJSON() },
-        terrain: { type: "geojson", data: terrainGeoJSON() },
-        roads: { type: "geojson", data: roadsGeoJSON() },
-      },
-      layers: [
-        {
-          id: "water",
-          type: "background",
-          paint: { "background-color": "#0c1826" },
-        },
-        {
-          id: "shallow-glow",
-          type: "line",
-          source: "terrain",
-          filter: ["==", ["get", "kind"], "land"],
-          paint: {
-            "line-color": "#2a7a9a",
-            "line-width": 9,
-            "line-opacity": 0.22,
-            "line-blur": 7,
-          },
-        },
-        {
-          id: "terrain",
-          type: "fill",
-          source: "terrain",
-          paint: {
-            "fill-color": [
-              "match",
-              ["get", "kind"],
-              "land", "#1d3a2b",
-              "park", "#2a5c3d",
-              "wetland", "#1f5040",
-              "farmland", "#3d4a26",
-              "urban", "#3a4658",
-              "sand", "#54503a",
-              "island", "#27453a",
-              "lake", "#0c1826",
-              "#1d3a2b",
-            ],
-            "fill-outline-color": [
-              "match",
-              ["get", "kind"],
-              "lake", "#1e3a4a",
-              "land", "#0a141d",
-              "#11241c",
-            ],
-          },
-        },
-        {
-          id: "coast",
-          type: "line",
-          source: "terrain",
-          filter: ["in", ["get", "kind"], ["literal", ["land", "island", "sand"]]],
-          paint: {
-            "line-color": "#3fb0c4",
-            "line-width": 1.3,
-            "line-opacity": 0.5,
-          },
-        },
-        {
-          id: "roads",
-          type: "line",
-          source: "roads",
-          paint: {
-            "line-color": "#8b93a8",
-            "line-width": 1.4,
-            "line-opacity": 0.75,
-          },
-        },
-        {
-          id: "grid",
-          type: "line",
-          source: "grid",
-          paint: {
-            "line-color": "#1c2836",
-            "line-width": 1,
-            "line-opacity": 0.35,
-          },
-        },
-      ],
-    };
-
-    const map = new MlMap({
-      container: containerRef.current,
-      style,
-      center: [0, 0],
-      zoom: 1.4,
-      minZoom: 0.5,
-      maxZoom: 10,
-      attributionControl: false,
+    const map = L.map(containerRef.current, {
+      crs: yanisCRS,
+      minZoom: 0,
+      maxZoom: 8,
+      zoomControl: false,
+      attributionControl: true,
+      zoomSnap: 0.25,
+      zoomDelta: 0.5,
     });
-    map.addControl(new NavigationControl(), "top-right");
-    map.fitBounds(GRID_BOUNDS, { padding: 40, duration: 0 });
-    map.on("load", () => setReady(true));
 
-    for (const label of REGION_LABELS) {
-      const el = document.createElement("div");
-      el.className = "map-region-label";
-      el.textContent = label.name;
-      new Marker({ element: el, anchor: "center" })
-        .setLngLat(label.at)
-        .addTo(map);
-    }
-    map.on("zoom", () => trackEvent("map_interaction", { type: "zoom" }));
+    L.control.zoom({ position: "topright" }).addTo(map);
+
+    L.tileLayer(TILE_URL, {
+      tileSize: 256,
+      minZoom: 0,
+      maxZoom: 8,
+      maxNativeZoom: MAX_NATIVE_ZOOM,
+      noWrap: true,
+      bounds: MAP_BOUNDS,
+      attribution: TILE_ATTRIBUTION,
+    }).addTo(map);
+
+    map.setMaxBounds(MAP_BOUNDS.pad(0.12));
+    // Fit the land area rather than the full poster (the leftmost tiles
+    // contain the map's baked-in legend/credits panel).
+    map.fitBounds(L.latLngBounds([[-9000, -14500], [11000, 4000]]));
+    map.on("zoomend", () => trackEvent("map_interaction", { type: "zoom" }));
+
     mapRef.current = map;
+    setReady(true);
     const markers = markersRef.current;
 
     return () => {
@@ -348,34 +150,36 @@ export default function MapCanvas({
     markersRef.current.clear();
 
     for (const point of visible) {
-      const el = document.createElement("button");
-      el.type = "button";
-      el.className = "map-marker";
-      el.setAttribute("aria-label", point.name);
-      el.style.backgroundColor = colorByCategory[point.category] ?? "#b6f34a";
+      const color = colorByCategory[point.category] ?? "#b6f34a";
+      const icon = L.divIcon({
+        className: "atlas-marker",
+        html: `<button type="button" class="map-marker" aria-label="${point.name.replace(/"/g, "&quot;")}" style="background-color:${color}"></button>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+      const latLng: L.LatLngExpression = [
+        point.coordinates.y,
+        point.coordinates.x,
+      ];
 
-      const marker = new Marker({ element: el })
-        .setLngLat([point.coordinates.x, point.coordinates.y])
-        .addTo(map);
-
-      el.addEventListener("click", () => {
+      const marker = L.marker(latLng, { icon }).addTo(map);
+      marker.on("click", () => {
         trackEvent("map_interaction", { type: "marker_click", id: point.id });
         popupRef.current?.remove();
-        const popup = new Popup({
+        popupRef.current = L.popup({
           closeButton: true,
-          maxWidth: "280px",
+          maxWidth: 280,
           className: "atlas-popup",
         })
-          .setLngLat([point.coordinates.x, point.coordinates.y])
-          .setHTML(
+          .setLatLng(latLng)
+          .setContent(
             `<div class="p-1">
               <p class="font-semibold text-sm">${point.name}</p>
               ${point.description ? `<p class="mt-1 text-xs opacity-80">${point.description}</p>` : ""}
               ${point.href ? `<a class="mt-2 inline-block text-xs font-medium underline" href="${point.href}">View details →</a>` : ""}
             </div>`,
           )
-          .addTo(map);
-        popupRef.current = popup;
+          .openOn(map);
       });
 
       markersRef.current.set(point.id, marker);
@@ -383,11 +187,13 @@ export default function MapCanvas({
   }, [ready, visible, colorByCategory]);
 
   const focusPoint = (point: MapPoint) => {
-    mapRef.current?.flyTo({
-      center: [point.coordinates.x, point.coordinates.y],
-      zoom: Math.max(mapRef.current.getZoom(), 4),
-      duration: 800,
-    });
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo(
+      [point.coordinates.y, point.coordinates.x],
+      Math.max(map.getZoom(), 4),
+      { duration: 0.8 },
+    );
     trackEvent("map_interaction", { type: "focus", id: point.id });
   };
 
@@ -404,14 +210,14 @@ export default function MapCanvas({
     <div className="relative flex h-[calc(100dvh-3.5rem)] min-h-[480px] w-full overflow-hidden">
       <div
         ref={containerRef}
-        className="h-full w-full"
+        className="h-full w-full bg-[#16283d]"
         aria-label="Interactive map of Leonida"
       />
 
       {/* Control panel */}
       <aside
         className={cn(
-          "absolute left-0 top-0 z-10 flex h-full w-72 flex-col border-r border-border bg-card/95 backdrop-blur transition-transform duration-200",
+          "absolute left-0 top-0 z-[1000] flex h-full w-72 flex-col border-r border-border bg-card/95 backdrop-blur transition-transform duration-200",
           !panelOpen && "-translate-x-full",
         )}
       >
@@ -507,8 +313,9 @@ export default function MapCanvas({
         {points.length > 0 && (
           <div className="border-t border-border p-3">
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Marker positions are community estimates from trailer analysis on
-              a schematic canvas — not the official in-game map.
+              Base map by the YANIS community mapping project (unofficial fan
+              projection). Marker positions are community estimates — not the
+              official in-game map.
             </p>
           </div>
         )}
@@ -518,7 +325,7 @@ export default function MapCanvas({
         <Button
           variant="secondary"
           size="icon"
-          className="absolute left-3 top-3 z-10"
+          className="absolute left-3 top-3 z-[1000]"
           onClick={() => setPanelOpen(true)}
           aria-label="Show map panel"
         >
@@ -526,30 +333,14 @@ export default function MapCanvas({
         </Button>
       )}
 
-      {/* Schematic-canvas disclaimer */}
+      {/* Disclaimer */}
       {points.length > 0 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[1000] flex justify-center px-4">
           <div className="pointer-events-auto rounded-md border border-border bg-card/90 px-3 py-1.5 text-center backdrop-blur">
             <p className="text-[11px] text-muted-foreground">
-              Schematic map — community-estimated positions. Official world map
-              arrives with the game on Nov 19, 2026.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Honest empty-state overlay for the fictional world */}
-      {points.length === 0 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex justify-center px-4">
-          <div className="pointer-events-auto max-w-lg rounded-lg border border-brand-cyan/30 bg-card/95 p-4 text-center shadow-lg backdrop-blur">
-            <p className="text-sm font-semibold">
-              Leonida map data pending verification
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              GTA VI launches November 19, 2026. Once the game is out, we&apos;ll
-              chart the real world of Leonida — locations, missions,
-              collectibles and hidden secrets — as it&apos;s verified. This
-              canvas is a functional placeholder, not the in-game map.
+              Community-made speculative map (YANIS / State of Leonida) — not
+              the official in-game map. Official world map arrives Nov 19,
+              2026.
             </p>
           </div>
         </div>
