@@ -5,6 +5,7 @@ import { BackToTop } from "@/components/back-to-top";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Analytics } from "@/components/analytics";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import JsonLd from "@/components/json-ld";
 import { siteConfig } from "@/lib/site";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <BackToTop />
         </TooltipProvider>
         <Analytics />
+        <VercelAnalytics />
       </body>
     </html>
   );
