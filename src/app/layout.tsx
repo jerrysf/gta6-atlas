@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     locale: "en_US",
   },
   twitter: { card: "summary_large_image" },
+  verification: {
+    google: "62EMnCnGeg0513YYSKuTH85CH-kiT8z2AEKBT0--iyE",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
